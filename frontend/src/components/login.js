@@ -24,6 +24,7 @@ function UserLogin() {
     .then(result => {
       if(result.data.status === "Success"){
         localStorage.setItem("isAuthenticated", "true");
+        localStorage.setItem("userId", result.data.id);
         switch (result.data.role) {
           case 'student':
             navigate('/student-dashboard');

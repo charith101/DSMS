@@ -10,6 +10,7 @@ router.post('/login', (req, res) => {
       if (user.password === password){
         res.json({
           status: "Success",
+          id: user._id,
           role: user.role,
         });
       } 
