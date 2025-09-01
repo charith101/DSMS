@@ -14,7 +14,7 @@ function StudentNav() {
   return (
     <div>
         <nav className="navbar navbar-expand-lg navbar-light shadow-sm fixed-top" style={{
-            backgroundColor: 'rgba(255, 255, 255, 0.7)',
+            backgroundColor: 'rgba(255, 255, 255, 0.6)',
             backdropFilter: 'saturate(180%) blur(20px)',
             WebkitBackdropFilter: 'saturate(180%) blur(10px)',
             boxShadow: '0 0.125rem 0.25rem rgb(0 0 0 / 0.075)'
@@ -32,13 +32,16 @@ function StudentNav() {
               <Link to="/student-dashboard" className="fw-medium nav-link active m-2">
                 Home
               </Link>
-              <Link to="/login" className="fw-medium nav-link active m-2">
+              <Link to="/Time-Slot" className="fw-medium nav-link active m-2">
                 Pick Time Slot
               </Link>
-              <Link to="/register" className="fw-medium nav-link active m-2">
+              <Link to="/Mock-Exam" className="fw-medium nav-link active m-2">
                 Mock Exam
               </Link>
-              <Link to="/register" className="fw-medium nav-link active m-2">
+              <Link to="/student-feedback" className="fw-medium nav-link active m-2">
+                Feedback
+              </Link>
+              <Link to="/Student-Profile" className="fw-medium nav-link active m-2">
                 Profile 
               </Link>
               <button className="fw-medium btn btn-dark " onClick={() => {handleLogout(); navigate("/login");}}>Logout <ArrowRight size={16} className="ms-1" /></button>
