@@ -16,7 +16,7 @@ function AdminNav() {
       <nav
         className="navbar navbar-expand-lg navbar-light shadow-sm fixed-top"
         style={{
-          backgroundColor: 'rgba(255, 255, 255, 0.7)',
+          backgroundColor: 'rgba(255, 255, 255, 0.6)',
           backdropFilter: 'saturate(180%) blur(20px)',
           WebkitBackdropFilter: 'saturate(180%) blur(10px)',
           boxShadow: '0 0.125rem 0.25rem rgb(0 0 0 / 0.075)',
@@ -44,19 +44,19 @@ function AdminNav() {
               <Link to="/admin-dashboard" className="fw-medium nav-link active m-2">
                 Dashboard
               </Link>
-              <Link to="/admin-dashboard/students" className="fw-medium nav-link active m-2">
+              <Link to="/students" className="fw-medium nav-link active m-2">
                 Students
               </Link>
-              <Link to="/admin-dashboard/employees" className="fw-medium nav-link active m-2">
+              <Link to="/employees" className="fw-medium nav-link active m-2">
                 Employees
               </Link>
-              <Link to="/admin-dashboard/finance" className="fw-medium nav-link active m-2">
+              <Link to="/finance" className="fw-medium nav-link active m-2">
                 Finance
               </Link>
-              <Link to="/admin-dashboard/vehicles" className="fw-medium nav-link active m-2">
+              <Link to="/vehicles" className="fw-medium nav-link active m-2">
                 Vehicles
               </Link>
-              <Link to="/admin-dashboard/feedback" className="fw-medium nav-link active m-2">
+              <Link to="/feedback" className="fw-medium nav-link active m-2">
                 Feedback
               </Link>
               <button

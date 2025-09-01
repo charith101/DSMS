@@ -9,6 +9,10 @@ import AddUser from './components/student/AddUser';
 import UpdateUser from './components/student/UpdateUser';
 import Login from './components/login';
 import UserRegister from './components/student/UserRegister';
+import StudentFeedback from './components/student/StudentFeedback';
+import TimeSlot from './components/student/TimeSlot';
+import MockExam from './components/student/MockExam';
+import StudentProfile from './components/student/StudentProfile';
 
 // Other dashboards
 import LandingPage from './components/landingPage';
@@ -22,6 +26,7 @@ import Feedback from './components/admin/feedback';
 import FinanceManagement from './components/admin/financeManagement';
 import StudentManagement from './components/admin/studentManagement';
 import VehicleManagement from './components/admin/vehicleManagement';
+
 
 function App() {
   return (
@@ -49,6 +54,10 @@ function App() {
           {/* User management */}
           <Route path='/create' element={<AddUser />} />
           <Route path='/update/:id' element={<UpdateUser />} />
+          <Route path='/student-feedback' element={<StudentFeedback />} />
+          <Route path='/Time-Slot' element={<TimeSlot />} />
+          <Route path='/Mock-Exam' element={<MockExam />} />
+          <Route path='/Student-Profile' element={<StudentProfile />} />
         </Routes>
       </BrowserRouter>
     </div>
