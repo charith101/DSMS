@@ -1,0 +1,79 @@
+import React from 'react';
+import { Link, useNavigate } from "react-router-dom";
+import { Car, ArrowRight, User2 } from 'lucide-react';
+
+function AdminNav() {
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    localStorage.removeItem("isAuthenticated");
+    localStorage.clear();
+    navigate("/login");
+  };
+
+  return (
+    <div>
+      <nav
+        className="navbar navbar-expand-lg navbar-light shadow-sm fixed-top"
+        style={{
+          backgroundColor: 'rgba(255, 255, 255, 0.7)',
+          backdropFilter: 'saturate(180%) blur(20px)',
+          WebkitBackdropFilter: 'saturate(180%) blur(10px)',
+          boxShadow: '0 0.125rem 0.25rem rgb(0 0 0 / 0.075)',
+          zIndex: 1000,
+        }}
+      >
+        <div className="container-fluid">
+          <Link className="navbar-brand fw-bold fs-3 text-primary d-flex align-items-center" to="/admin-dashboard">
+            <Car className="me-2" size={32} />
+            DrivePro Admin
+          </Link>
+          <button
+            className="navbar-toggler"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#navbarNav"
+            aria-controls="navbarNav"
+            aria-expanded="false"
+            aria-label="Toggle navigation"
+          >
+            <span className="navbar-toggler-icon"></span>
+          </button>
+          <div className="collapse navbar-collapse" id="navbarNav">
+            <div className="ms-auto d-flex gap-2 mt-3 mt-lg-0">
+              <Link to="/admin-dashboard" className="fw-medium nav-link active m-2">
+                Dashboard
+              </Link>
+              <Link to="/admin-dashboard/students" className="fw-medium nav-link active m-2">
+                Students
+              </Link>
+              <Link to="/admin-dashboard/employees" className="fw-medium nav-link active m-2">
+                Employees
+              </Link>
+              <Link to="/admin-dashboard/finance" className="fw-medium nav-link active m-2">
+                Finance
+              </Link>
+              <Link to="/admin-dashboard/vehicles" className="fw-medium nav-link active m-2">
+                Vehicles
+              </Link>
+              <Link to="/admin-dashboard/feedback" className="fw-medium nav-link active m-2">
+                Feedback
+              </Link>
+              <button
+                className="fw-medium btn btn-dark"
+                onClick={() => {
+                  handleLogout();
+                  navigate("/login");
+                }}
+              >
+                Logout <ArrowRight size={16} className="ms-1" />
+              </button>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </div>
+  );
+}
+
+export default AdminNav;
