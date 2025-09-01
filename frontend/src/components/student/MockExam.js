@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import StudentNav from "./StudentNav";
-import { ChevronLeft, ChevronRight, CheckCircle } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 function MockExam() {
   const [currentQuestion, setCurrentQuestion] = useState(0);
@@ -60,7 +60,7 @@ function MockExam() {
 
   return (
     <div>
-      <StudentNav />
+      <StudentNav page="mockexam"/>
       <section
         className="text-white pb-5"
         style={{
@@ -100,7 +100,7 @@ function MockExam() {
                         className={`btn text-start p-3 d-flex align-items-center ${
                           selectedAnswer === index
                             ? "btn-primary text-white"
-                            : "btn-outline-primary"
+                            : "btn btn-outline-primary"
                         }`}
                         style={{
                           borderRadius: "10px",
@@ -110,15 +110,24 @@ function MockExam() {
                         }}
                         onClick={() => handleAnswerSelect(index)}
                       >
-                        <CheckCircle
-                          size={20}
-                          className={`me-3 ${selectedAnswer === index ? "text-white" : "text-primary"}`}
-                          style={{ opacity: selectedAnswer === index ? 1 : 0.5 }}
-                        />
+                        <span
+                          className={`me-3 fw-bold ${
+                            selectedAnswer === index ? "text-white" : "text-primary"
+                          }`}
+                          style={{ opacity: selectedAnswer === index ? 1 : 0.5, minWidth: "24px" }}
+                        >
+                          {index + 1}
+                        </span>
                         <span>{option}</span>
                       </button>
                     ))}
                   </div>
+                  <style jsx>{`
+                    button.btn-outline-primary:hover {
+                      color: black !important;
+                      background: #e9ecef !important;
+                    }
+                  `}</style>
                   <div className="d-flex justify-content-between mt-5">
                     <button
                       className="btn btn-outline-secondary d-flex align-items-center px-4 py-2"
