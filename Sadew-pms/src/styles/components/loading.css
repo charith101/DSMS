@@ -1,0 +1,207 @@
+/* Loading States CSS */
+
+/* Spinner Animation */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+/* Pulse Animation for Skeleton Loading */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Button Loading States */
+.btn-loading {
+  position: relative;
+  color: transparent;
+  pointer-events: none;
+}
+
+.btn-loading::after {
+  content: '';
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  top: 50%;
+  left: 50%;
+  margin-left: -8px;
+  margin-top: -8px;
+  border: 2px solid transparent;
+  border-top-color: currentColor;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+/* Loading Overlay */
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(2px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.loading-overlay-content {
+  text-align: center;
+  padding: var(--spacing-6);
+  background: white;
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-lg);
+  max-width: 300px;
+}
+
+/* Fade in animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* Skeleton Loader Styles */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    #f0f0f0 25%,
+    #e0e0e0 50%,
+    #f0f0f0 75%
+  );
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+  border-radius: var(--border-radius-sm);
+}
+
+@keyframes loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Loading state for tables */
+.table-loading {
+  position: relative;
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.table-loading::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Error states */
+.error-boundary {
+  padding: var(--spacing-8);
+  text-align: center;
+}
+
+.error-state {
+  padding: var(--spacing-6);
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: var(--border-radius-lg);
+  text-align: center;
+}
+
+.error-state h3 {
+  color: var(--error-color);
+  margin-bottom: var(--spacing-2);
+}
+
+.error-state p {
+  color: #dc2626;
+  margin-bottom: var(--spacing-4);
+}
+
+/* Empty states */
+.empty-state {
+  padding: var(--spacing-8);
+  text-align: center;
+  color: var(--text-secondary);
+}
+
+.empty-state svg {
+  margin: 0 auto var(--spacing-4);
+  color: var(--gray-400);
+}
+
+/* Loading dots animation */
+@keyframes loading-dots {
+  0%, 20% {
+    color: transparent;
+    text-shadow: 0.25em 0 0 transparent,
+                 0.5em 0 0 transparent;
+  }
+  40% {
+    color: var(--primary-color);
+    text-shadow: 0.25em 0 0 transparent,
+                 0.5em 0 0 transparent;
+  }
+  60% {
+    text-shadow: 0.25em 0 0 var(--primary-color),
+                 0.5em 0 0 transparent;
+  }
+  80%, 100% {
+    text-shadow: 0.25em 0 0 var(--primary-color),
+                 0.5em 0 0 var(--primary-color);
+  }
+}
+
+.loading-dots::after {
+  content: '•••';
+  animation: loading-dots 1.4s infinite;
+  font-size: 1.2em;
+  letter-spacing: 0.2em;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .loading-overlay-content {
+    margin: var(--spacing-4);
+    max-width: calc(100% - var(--spacing-8));
+  }
+  
+  .skeleton {
+    height: auto;
+    min-height: 1rem;
+  }
+}

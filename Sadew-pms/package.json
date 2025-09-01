@@ -1,0 +1,55 @@
+{
+  "name": "payment-management-system",
+  "version": "1.0.0",
+  "description": "Payment Management Subsystem Frontend for Driving School Management System",
+  "private": true,
+  "dependencies": {
+    "axios": "^1.11.0",
+    "date-fns": "^2.30.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-icons": "^5.5.0",
+    "react-router-dom": "^6.30.1",
+    "react-scripts": "^5.0.1",
+    "recharts": "^2.15.4"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "build:analyze": "node scripts/build-analyze.js",
+    "test": "react-scripts test",
+    "test:coverage": "react-scripts test --coverage --watchAll=false",
+    "test:ci": "react-scripts test --coverage --watchAll=false --ci",
+    "eject": "react-scripts eject",
+    "lint": "eslint src/**/*.{js,jsx}",
+    "lint:fix": "eslint src/**/*.{js,jsx} --fix",
+    "precommit": "npm run lint && npm run test:ci"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "^5.16.4",
+    "@testing-library/react": "^13.3.0",
+    "@testing-library/user-event": "^13.5.0",
+    "compression-webpack-plugin": "^10.0.0",
+    "eslint": "^8.50.0",
+    "jest-axe": "^8.0.0",
+    "webpack-bundle-analyzer": "^4.9.0"
+  }
+}

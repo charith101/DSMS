@@ -1,0 +1,64 @@
+/* App component specific styles */
+
+.App {
+  text-align: left;
+}
+
+.App-header {
+  background-color: var(--bg-primary);
+  padding: var(--spacing-4);
+  box-shadow: var(--shadow-sm);
+}
+
+.App-logo {
+  height: 2rem;
+  pointer-events: none;
+}
+
+.App-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.App-content {
+  flex: 1;
+  padding: var(--spacing-6);
+  background-color: var(--bg-secondary);
+}
+
+/* App loading state */
+.App-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: var(--bg-primary);
+}
+
+.App-loading-spinner {
+  width: 3rem;
+  height: 3rem;
+  border: 3px solid var(--gray-200);
+  border-top: 3px solid var(--primary-color);
+  border-radius: 50%;
+  animation: app-spin 1s linear infinite;
+}
+
+@keyframes app-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.App-loading-text {
+  margin-top: var(--spacing-4);
+  color: var(--text-secondary);
+  font-size: var(--font-size-lg);
+}
+
+/* Responsive app layout */
+@media (max-width: 768px) {
+  .App-content {
+    padding: var(--spacing-4);
+  }
+}

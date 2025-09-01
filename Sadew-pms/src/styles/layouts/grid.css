@@ -1,0 +1,589 @@
+/* Grid and layout utilities */
+
+/* Container */
+.container {
+  width: 100%;
+  max-width: var(--container-max-width);
+  margin: 0 auto;
+  padding: 0 var(--spacing-4);
+}
+
+.container-fluid {
+  width: 100%;
+  padding: 0 var(--spacing-4);
+}
+
+.container-sm {
+  max-width: 640px;
+}
+
+.container-md {
+  max-width: 768px;
+}
+
+.container-lg {
+  max-width: 1024px;
+}
+
+.container-xl {
+  max-width: 1280px;
+}
+
+/* Grid system */
+.grid {
+  display: grid;
+  gap: var(--spacing-4);
+}
+
+.grid-cols-1 {
+  grid-template-columns: repeat(1, 1fr);
+}
+
+.grid-cols-2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.grid-cols-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.grid-cols-4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.grid-cols-5 {
+  grid-template-columns: repeat(5, 1fr);
+}
+
+.grid-cols-6 {
+  grid-template-columns: repeat(6, 1fr);
+}
+
+.grid-cols-12 {
+  grid-template-columns: repeat(12, 1fr);
+}
+
+/* Grid auto-fit */
+.grid-auto-fit {
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+}
+
+.grid-auto-fill {
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+}
+
+/* Grid gaps */
+.gap-0 {
+  gap: 0;
+}
+
+.gap-1 {
+  gap: var(--spacing-1);
+}
+
+.gap-2 {
+  gap: var(--spacing-2);
+}
+
+.gap-3 {
+  gap: var(--spacing-3);
+}
+
+.gap-4 {
+  gap: var(--spacing-4);
+}
+
+.gap-5 {
+  gap: var(--spacing-5);
+}
+
+.gap-6 {
+  gap: var(--spacing-6);
+}
+
+.gap-8 {
+  gap: var(--spacing-8);
+}
+
+/* Column span */
+.col-span-1 {
+  grid-column: span 1;
+}
+
+.col-span-2 {
+  grid-column: span 2;
+}
+
+.col-span-3 {
+  grid-column: span 3;
+}
+
+.col-span-4 {
+  grid-column: span 4;
+}
+
+.col-span-5 {
+  grid-column: span 5;
+}
+
+.col-span-6 {
+  grid-column: span 6;
+}
+
+.col-span-full {
+  grid-column: 1 / -1;
+}
+
+/* Row span */
+.row-span-1 {
+  grid-row: span 1;
+}
+
+.row-span-2 {
+  grid-row: span 2;
+}
+
+.row-span-3 {
+  grid-row: span 3;
+}
+
+.row-span-4 {
+  grid-row: span 4;
+}
+
+.row-span-full {
+  grid-row: 1 / -1;
+}
+
+/* Flexbox utilities */
+.flex {
+  display: flex;
+}
+
+.inline-flex {
+  display: inline-flex;
+}
+
+.flex-row {
+  flex-direction: row;
+}
+
+.flex-col {
+  flex-direction: column;
+}
+
+.flex-row-reverse {
+  flex-direction: row-reverse;
+}
+
+.flex-col-reverse {
+  flex-direction: column-reverse;
+}
+
+.flex-wrap {
+  flex-wrap: wrap;
+}
+
+.flex-nowrap {
+  flex-wrap: nowrap;
+}
+
+.flex-wrap-reverse {
+  flex-wrap: wrap-reverse;
+}
+
+/* Flex grow and shrink */
+.flex-1 {
+  flex: 1 1 0%;
+}
+
+.flex-auto {
+  flex: 1 1 auto;
+}
+
+.flex-initial {
+  flex: 0 1 auto;
+}
+
+.flex-none {
+  flex: none;
+}
+
+.flex-grow {
+  flex-grow: 1;
+}
+
+.flex-grow-0 {
+  flex-grow: 0;
+}
+
+.flex-shrink {
+  flex-shrink: 1;
+}
+
+.flex-shrink-0 {
+  flex-shrink: 0;
+}
+
+/* Justify content */
+.justify-start {
+  justify-content: flex-start;
+}
+
+.justify-end {
+  justify-content: flex-end;
+}
+
+.justify-center {
+  justify-content: center;
+}
+
+.justify-between {
+  justify-content: space-between;
+}
+
+.justify-around {
+  justify-content: space-around;
+}
+
+.justify-evenly {
+  justify-content: space-evenly;
+}
+
+/* Align items */
+.items-start {
+  align-items: flex-start;
+}
+
+.items-end {
+  align-items: flex-end;
+}
+
+.items-center {
+  align-items: center;
+}
+
+.items-baseline {
+  align-items: baseline;
+}
+
+.items-stretch {
+  align-items: stretch;
+}
+
+/* Align content */
+.content-start {
+  align-content: flex-start;
+}
+
+.content-end {
+  align-content: flex-end;
+}
+
+.content-center {
+  align-content: center;
+}
+
+.content-between {
+  align-content: space-between;
+}
+
+.content-around {
+  align-content: space-around;
+}
+
+.content-evenly {
+  align-content: space-evenly;
+}
+
+/* Align self */
+.self-auto {
+  align-self: auto;
+}
+
+.self-start {
+  align-self: flex-start;
+}
+
+.self-end {
+  align-self: flex-end;
+}
+
+.self-center {
+  align-self: center;
+}
+
+.self-stretch {
+  align-self: stretch;
+}
+
+.self-baseline {
+  align-self: baseline;
+}
+
+/* Page layouts */
+.layout-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.layout-header {
+  flex-shrink: 0;
+  height: var(--header-height);
+  background-color: var(--bg-primary);
+  border-bottom: 1px solid var(--border-primary);
+  box-shadow: var(--shadow-sm);
+  z-index: var(--z-index-sticky);
+}
+
+.layout-main {
+  flex: 1;
+  display: flex;
+}
+
+.layout-sidebar {
+  width: var(--sidebar-width);
+  flex-shrink: 0;
+  background-color: var(--bg-secondary);
+  border-right: 1px solid var(--border-primary);
+  overflow-y: auto;
+}
+
+.layout-sidebar.collapsed {
+  width: var(--sidebar-width-collapsed);
+}
+
+.layout-content {
+  flex: 1;
+  padding: var(--spacing-6);
+  overflow-y: auto;
+  background-color: var(--bg-secondary);
+}
+
+.layout-footer {
+  flex-shrink: 0;
+  padding: var(--spacing-4) var(--spacing-6);
+  background-color: var(--bg-primary);
+  border-top: 1px solid var(--border-primary);
+  text-align: center;
+  color: var(--text-secondary);
+}
+
+/* Content layouts */
+.content-wrapper {
+  max-width: var(--content-max-width);
+  margin: 0 auto;
+}
+
+.content-section {
+  margin-bottom: var(--spacing-8);
+}
+
+.content-section:last-child {
+  margin-bottom: 0;
+}
+
+.content-header {
+  margin-bottom: var(--spacing-6);
+  padding-bottom: var(--spacing-4);
+  border-bottom: 1px solid var(--border-primary);
+}
+
+.content-title {
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-2);
+}
+
+.content-subtitle {
+  font-size: var(--font-size-lg);
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.content-description {
+  font-size: var(--font-size-base);
+  color: var(--text-secondary);
+  margin-top: var(--spacing-2);
+}
+
+/* Two column layout */
+.two-column {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: var(--spacing-8);
+}
+
+.two-column-reverse {
+  grid-template-columns: 300px 1fr;
+}
+
+.two-column-main {
+  min-width: 0;
+}
+
+.two-column-sidebar {
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-6);
+  height: fit-content;
+  position: sticky;
+  top: var(--spacing-6);
+}
+
+/* Three column layout */
+.three-column {
+  display: grid;
+  grid-template-columns: 250px 1fr 300px;
+  gap: var(--spacing-6);
+}
+
+/* Responsive layouts */
+@media (max-width: 1024px) {
+  .layout-sidebar {
+    position: fixed;
+    left: -100%;
+    top: var(--header-height);
+    height: calc(100vh - var(--header-height));
+    z-index: var(--z-index-overlay);
+    transition: left var(--transition-duration-300) var(--transition-timing-ease-in-out);
+  }
+  
+  .layout-sidebar.open {
+    left: 0;
+  }
+  
+  .layout-content {
+    width: 100%;
+  }
+  
+  .two-column,
+  .two-column-reverse,
+  .three-column {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-6);
+  }
+  
+  .two-column-sidebar {
+    position: static;
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 0 var(--spacing-3);
+  }
+  
+  .layout-content {
+    padding: var(--spacing-4);
+  }
+  
+  .content-title {
+    font-size: var(--font-size-2xl);
+  }
+  
+  .content-subtitle {
+    font-size: var(--font-size-base);
+  }
+  
+  .grid-cols-2,
+  .grid-cols-3,
+  .grid-cols-4,
+  .grid-cols-5,
+  .grid-cols-6 {
+    grid-template-columns: 1fr;
+  }
+  
+  .flex-col-mobile {
+    flex-direction: column;
+  }
+  
+  .flex-row-mobile {
+    flex-direction: row;
+  }
+}
+
+@media (max-width: 640px) {
+  .grid-cols-12 {
+    grid-template-columns: 1fr;
+  }
+  
+  .col-span-1,
+  .col-span-2,
+  .col-span-3,
+  .col-span-4,
+  .col-span-5,
+  .col-span-6 {
+    grid-column: span 1;
+  }
+}
+
+/* Aspect ratios */
+.aspect-square {
+  aspect-ratio: 1 / 1;
+}
+
+.aspect-video {
+  aspect-ratio: 16 / 9;
+}
+
+.aspect-photo {
+  aspect-ratio: 4 / 3;
+}
+
+.aspect-portrait {
+  aspect-ratio: 3 / 4;
+}
+
+/* Position utilities */
+.relative {
+  position: relative;
+}
+
+.absolute {
+  position: absolute;
+}
+
+.fixed {
+  position: fixed;
+}
+
+.sticky {
+  position: sticky;
+}
+
+.static {
+  position: static;
+}
+
+/* Z-index utilities */
+.z-auto {
+  z-index: auto;
+}
+
+.z-0 {
+  z-index: 0;
+}
+
+.z-10 {
+  z-index: var(--z-index-docked);
+}
+
+.z-20 {
+  z-index: var(--z-index-dropdown);
+}
+
+.z-30 {
+  z-index: var(--z-index-sticky);
+}
+
+.z-40 {
+  z-index: var(--z-index-overlay);
+}
+
+.z-50 {
+  z-index: var(--z-index-modal);
+}

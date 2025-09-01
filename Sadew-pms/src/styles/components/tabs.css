@@ -1,0 +1,144 @@
+/* Tabs Component Styles */
+
+/* Tabs Container */
+.tabs-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+/* Tabs Header */
+.tabs-header {
+  display: flex;
+  border-bottom: 1px solid var(--border-primary);
+  margin-bottom: var(--spacing-4);
+  overflow-x: auto;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+.tabs-header::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+/* Tab Button */
+.tab {
+  padding: var(--spacing-3) var(--spacing-4);
+  border: none;
+  background: transparent;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-duration-150) var(--transition-timing-ease-in-out);
+  position: relative;
+  white-space: nowrap;
+}
+
+.tab:hover {
+  color: var(--text-primary);
+}
+
+.tab:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--primary-color-light);
+  border-radius: var(--radius-sm);
+}
+
+.tab-active {
+  color: var(--primary-color);
+  font-weight: var(--font-weight-semibold);
+}
+
+.tab-active::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: var(--primary-color);
+}
+
+/* Tab Content */
+.tabs-content {
+  flex: 1;
+}
+
+.tab-panel {
+  animation: fadeIn var(--transition-duration-200) var(--transition-timing-ease-in-out);
+}
+
+.tab-panel:focus {
+  outline: none;
+}
+
+/* Tab Panel Content */
+.tab-panel-content {
+  height: 100%;
+}
+
+/* Tab Variants */
+
+/* Pills Variant */
+.tabs-pills .tabs-header {
+  border-bottom: none;
+  gap: var(--spacing-2);
+}
+
+.tabs-pills .tab {
+  border-radius: var(--radius-full);
+  padding: var(--spacing-2) var(--spacing-4);
+}
+
+.tabs-pills .tab-active {
+  background-color: var(--primary-color);
+  color: var(--text-inverse);
+}
+
+.tabs-pills .tab-active::after {
+  display: none;
+}
+
+/* Underline Variant */
+.tabs-underline .tab {
+  border-bottom: 2px solid transparent;
+}
+
+.tabs-underline .tab-active {
+  border-bottom-color: var(--primary-color);
+}
+
+.tabs-underline .tab-active::after {
+  display: none;
+}
+
+/* Tab Sizes */
+.tabs-sm .tab {
+  padding: var(--spacing-2) var(--spacing-3);
+  font-size: var(--font-size-xs);
+}
+
+.tabs-lg .tab {
+  padding: var(--spacing-4) var(--spacing-6);
+  font-size: var(--font-size-base);
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Responsive Styles */
+@media (max-width: 640px) {
+  .tabs-header {
+    flex-wrap: nowrap;
+    margin-bottom: var(--spacing-3);
+  }
+  
+  .tab {
+    padding: var(--spacing-2) var(--spacing-3);
+    font-size: var(--font-size-xs);
+  }
+}
