@@ -4,6 +4,7 @@ const cors = require("cors");
 const UserModel = require("./model/Users");
 const studentRouter = require('./controllers/student/studentAPI');
 const authRouter = require('./controllers/auth/authAPI');
+const receptionistRouter = require('./controllers/receptionist/receptionistAPI');
 
 const app = express();
 app.use(cors());
@@ -26,6 +27,7 @@ mongoose
 
 app.use('/student', studentRouter);
 app.use('/auth', authRouter);
+app.use('/receptionist', receptionistRouter);
 
 app.listen(3005, () => {
   console.log('Server started on port 3005');
