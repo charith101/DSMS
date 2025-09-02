@@ -33,7 +33,7 @@ function StudentDashboard() {
 
   return (
     <div>
-      <StudentNav />
+      <StudentNav page="home"/>
       <section
         className="text-white pb-5"
         style={{background: "linear-gradient(135deg, #0d51fdff 0%, #0a84caff 100%)", marginTop: "76px",}}>

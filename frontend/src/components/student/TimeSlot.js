@@ -5,7 +5,7 @@ import { Clock, Calendar, Car } from "lucide-react";
 function TimeSlot() {
   return (
     <div>
-      <StudentNav />
+      <StudentNav page="timeslot"/>
       <section
         className="text-white pb-5"
         style={{
