@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import QrReader from 'react-qr-reader';
+// import QrReader from 'react-qr-reader';
 import axios from 'axios';
 
 
@@ -24,11 +24,11 @@ export default function QRScanner() {
       <div className="card shadow p-4">
         <h3 className="mb-4 text-center">Scan Student QR Code</h3>
         <div className="d-flex justify-content-center mb-3">
-          <QrReader
+          {/* <QrReader
             onScan={handleScan}
             onError={(err) => console.error(err)}
             style={{ width: '300px' }}
-          />
+          /> */}
         </div>
         <p className="text-center text-success fw-bold">{result}</p>
       </div>

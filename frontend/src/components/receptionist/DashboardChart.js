@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Bar } from 'react-chartjs-2';
+// import { Bar } from 'react-chartjs-2';
 import axios from 'axios';
 
 
@@ -32,7 +32,7 @@ export default function DashboardChart() {
         <div className="card-body">
           <h3 className="card-title text-center mb-4">Attendance Overview</h3>
           <div className="chart-container" style={{ position: 'relative', height: '50vh' }}>
-            <Bar data={data} />
+            {/* <Bar data={data} /> */}
           </div>
         </div>
       </div>

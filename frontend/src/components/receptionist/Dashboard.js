@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import Navbar from './Navbar';
+// import Navbar from './Navbar';
 import ThemeToggle from './ThemeToggle';
 import AnnouncementBanner from './AnnouncementBanner';
 import ChatBot from './ChatBot';
 import ClassTimetable from './ClassTimetable';
-import Appointments from './Appointments';
+// import Appointments from './Appointments';
 import RescheduleClass from './RescheduleClass';
 import Attendance from './Attendance';
 import QRScanner from './QRScanner';
@@ -19,7 +19,7 @@ export default function Dashboard({ theme, toggleTheme }) {
 
   const renderComponent = () => {
     switch (view) {
-      case 'appointments': return <Appointments />;
+      // case 'appointments': return <Appointments />;
       case 'reschedule': return <RescheduleClass />;
       case 'attendance': return <Attendance />;
       case 'scanner': return <QRScanner />;
@@ -59,7 +59,7 @@ export default function Dashboard({ theme, toggleTheme }) {
   return (
     <>
       <AnnouncementBanner />
-      <Navbar />
+      {/* <Navbar /> */}
       <div className="d-flex justify-content-end p-2">
         <ThemeToggle theme={theme} toggleTheme={toggleTheme} />
       </div>

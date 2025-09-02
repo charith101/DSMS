@@ -27,7 +27,7 @@ mongoose
 
 app.use('/student', studentRouter);
 app.use('/auth', authRouter);
-app.use('/receptionist', receptionistRouter);
+// app.use('/receptionist', receptionistRouter);
 
 app.listen(3005, () => {
   console.log('Server started on port 3005');

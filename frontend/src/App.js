@@ -16,7 +16,7 @@ import StudentProfile from './components/student/StudentProfile';
 
 // Other dashboards
 import LandingPage from './components/landingPage';
-import ReceptionistDashboard from './components/receptionist/receptionistDashboard';
+import ReceptionistDashboard from './components/receptionist/Dashboard';
 import InstructorDashboard from './components/instructor/instructorDashboard';
 
 // Admin components 
