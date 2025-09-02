@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import FullCalendar from '@fullcalendar/react';
-import dayGridPlugin from '@fullcalendar/daygrid';
-import interactionPlugin from "@fullcalendar/interaction";
+// import FullCalendar from '@fullcalendar/react';
+// import dayGridPlugin from '@fullcalendar/daygrid';
+// import interactionPlugin from "@fullcalendar/interaction";
 import axios from 'axios';
 
 
@@ -31,13 +31,13 @@ export default function CalendarScheduler() {
       <div className="card shadow">
         <div className="card-body">
           <h3 className="card-title mb-4">Class Schedule</h3>
-          <FullCalendar
+          {/* <FullCalendar
             plugins={[dayGridPlugin, interactionPlugin]}
             initialView="dayGridMonth"
             events={events}
             editable={true}
             eventDrop={handleDateChange}
-          />
+          /> */}
         </div>
       </div>
     </div>
