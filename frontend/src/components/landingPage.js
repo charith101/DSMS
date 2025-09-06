@@ -34,7 +34,11 @@ function LandingPage() {
       </nav>
 
       {/* Hero Section */}
-      <section className="bg-gradient-primary text-white pb-5" style={{background: 'linear-gradient(135deg, #0d51fdff 0%, #0a84caff 100%)',marginTop: '76px'}}>
+      <section className="bg-gradient-primary text-white pb-5" style={{
+        backgroundImage: `linear-gradient(90deg, rgba(13,81,253,1) 20%, rgba(10,132,202,0.6) 100%), url("https://img.freepik.com/premium-vector/set-yellow-road-signs-american-road-signs_924514-534.jpg")`,
+        backgroundSize: 'cover',
+        marginTop: '76px'
+      }}>
         <div className="container-fluid py-5 px-5">
           <div className="row align-items-center">
             <div className="col-lg-7 mb-4 mb-lg-0">
@@ -63,9 +67,9 @@ function LandingPage() {
                 <ArrowRight size={20} className="ms-2" />
               </Link>
             </div>
-            <div className="mx-auto col-lg-4 text-center d-flex justify-content-center align-items-center">
+            <div className="mx-auto col-lg-5 text-center d-flex justify-content-center align-items-center">
               <img
-                src="/27267.jpg"
+                src="https://www.protectiveagency.com/blog/wp-content/uploads/2018/06/shutterstock_213307594.jpg"
                 alt="Driving School Dashboard"
                 className="img-fluid rounded-4 shadow-lg"
               />
@@ -86,10 +90,15 @@ function LandingPage() {
           <div className="row g-4">
             <div className="col-lg-4 col-md-6">
               <div className="card border-2 shadow h-100 hover-card">
+                {/* Image at top */}
+                <img 
+                  src="https://images.unsplash.com/photo-1515847049296-a281d6401047?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" 
+                  alt="Smart Scheduling" 
+                  className="card-img-top" 
+                  style={{ height: "180px", objectFit: "cover" }} 
+                />
+
                 <div className="card-body p-4 text-center">
-                  <div className="bg-danger bg-opacity-10 rounded-circle p-4 d-inline-flex mb-3">
-                    <Calendar size={80} className="text-danger" />
-                  </div>
                   <h5 className="fw-bold mb-3">Smart Scheduling</h5>
                   <p className="text-muted mb-4">
                     Intelligent booking system with automated reminders, conflict detection, and easy rescheduling.
@@ -113,10 +122,15 @@ function LandingPage() {
             </div>
             <div className="col-lg-4 col-md-6">
               <div className="card border-2 shadow h-100 hover-card">
+                {/* Image at top */}
+                <img 
+                  src="https://images.unsplash.com/photo-1593182440959-9d5165b29b59?q=80&w=2071&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" 
+                  alt="Payment Management" 
+                  className="card-img-top" 
+                  style={{ height: "180px", objectFit: "cover" }} 
+                />
+
                 <div className="card-body p-4 text-center">
-                  <div className="bg-success bg-opacity-10 rounded-circle p-4 d-inline-flex mb-3">
-                    <CreditCard size={80} className="text-success" />
-                  </div>
                   <h5 className="fw-bold mb-3">Payment Management</h5>
                   <p className="text-muted mb-4">
                     Secure payment processing with automated invoicing and comprehensive financial reporting.
@@ -140,10 +154,15 @@ function LandingPage() {
             </div>
             <div className="col-lg-4 col-md-6">
               <div className="card border-2 shadow h-100 hover-card">
+                {/* Image at top */}
+                <img 
+                  src="https://images.unsplash.com/photo-1630406144797-821be1f35d75?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" 
+                  alt="Vehicle Management" 
+                  className="card-img-top" 
+                  style={{ height: "180px", objectFit: "cover" }} 
+                />
+
                 <div className="card-body p-4 text-center">
-                  <div className="bg-primary bg-opacity-10 rounded-circle p-4 d-inline-flex mb-3">
-                    <Car size={80} className="text-primary" />
-                  </div>
                   <h5 className="fw-bold mb-3">Vehicle Management</h5>
                   <p className="text-muted mb-4">
                     Complete vehicle tracking with maintenance schedules, fuel monitoring, and insurance management.
@@ -179,8 +198,8 @@ function LandingPage() {
           <div className="row g-4">
             <div className="col-lg-3 col-md-6">
               <div className="text-center p-4 bg-white rounded-3 shadow h-100">
-                <div className="bg-info bg-opacity-10 rounded-circle p-4 d-inline-flex mb-3">
-                  <Users size={64} className="text-info" />
+                <div className="bg-warning rounded-circle p-4 d-inline-flex mb-3 border border-5 border-dark">
+                  <Users size={64} className="text-black" />
                 </div>
                 <h6 className="fw-bold mb-2">Staff Management</h6>
                 <p className="text-muted small mb-0">Attendance tracking and payroll management</p>
@@ -188,8 +207,8 @@ function LandingPage() {
             </div>
             <div className="col-lg-3 col-md-6">
               <div className="text-center p-4 bg-white rounded-3 shadow h-100">
-                <div className="bg-primary bg-opacity-10 rounded-circle p-4 d-inline-flex mb-3">
-                  <BarChart3 size={64} className="text-primary" />
+                <div className="bg-warning rounded-circle p-4 d-inline-flex mb-3 border border-5 border-dark">
+                  <BarChart3 size={64} className="text-black" />
                 </div>
                 <h6 className="fw-bold mb-2">Analytics & Reports</h6>
                 <p className="text-muted small mb-0">Detailed performance and revenue insights</p>
@@ -197,8 +216,8 @@ function LandingPage() {
             </div>
             <div className="col-lg-3 col-md-6">
               <div className="text-center p-4 bg-white rounded-3 shadow h-100">
-                <div className="bg-danger bg-opacity-10 rounded-circle p-4 d-inline-flex mb-3">
-                  <Wrench size={64} className="text-danger" />
+                <div className="bg-warning rounded-circle p-4 d-inline-flex mb-3 border border-5 border-dark">
+                  <Wrench size={64} className="text-black" />
                 </div>
                 <h6 className="fw-bold mb-2">Maintenance Alerts</h6>
                 <p className="text-muted small mb-0">Automated reminders for vehicle servicing</p>
@@ -206,8 +225,8 @@ function LandingPage() {
             </div>
             <div className="col-lg-3 col-md-6">
               <div className="text-center p-4 bg-white rounded-3 shadow h-100">
-                <div className="bg-success bg-opacity-10 rounded-circle p-4 d-inline-flex mb-3">
-                  <Clock size={64} className="text-success" />
+                <div className="bg-warning rounded-circle p-4 d-inline-flex mb-3 border border-5 border-dark">
+                  <Clock size={64} className="text-black" />
                 </div>
                 <h6 className="fw-bold mb-2">Real-Time Updates</h6>
                 <p className="text-muted small mb-0">Live availability and booking status</p>
@@ -242,8 +261,13 @@ function LandingPage() {
                   </div>
                   <p className="mb-4">"Customer support is exceptional. The platform is intuitive and the booking system is great."</p>
                   <div className="d-flex align-items-center">
-                    <div className="bg-primary bg-opacity-10 rounded-circle p-2 me-3">
-                      <User size={20} className="text-primary mb-1" />
+                    <div className="me-2">
+                      <img 
+                        src="https://images.unsplash.com/photo-1515073838964-4d4d56a58b21?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" 
+                        alt="Sarah Mitchell" 
+                        className="rounded-circle" 
+                        style={{width: '50px', height: '50px', objectFit: 'cover'}} 
+                      />
                     </div>
                     <div>
                       <h6 className="mb-0">Sarah Mitchell</h6>
@@ -261,10 +285,15 @@ function LandingPage() {
                       <Star key={star} size={16} className="text-warning me-1" fill="currentColor" />
                     ))}
                   </div>
-                  <p className="mb-4">"The automated scheduling and payment system has made our operations so much smoother. Highly recommend!"</p>
+                  <p className="mb-4">"The scheduling and payment system has made my tasks so much smoother. Highly recommend!"</p>
                   <div className="d-flex align-items-center">
-                    <div className="bg-success bg-opacity-10 rounded-circle p-2 me-3">
-                      <User size={20} className="text-success mb-1" />
+                    <div className="me-2">
+                      <img 
+                        src="https://images.unsplash.com/photo-1544576960-2faac32c5dd1?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MjZ8fHN0dWRlbnQlMjBwcm9maWxlJTIwcGljdHVyZXxlbnwwfDB8MHx8fDI%3D" 
+                        alt="Mark Johnson" 
+                        className="rounded-circle" 
+                        style={{width: '50px', height: '50px', objectFit: 'cover'}} 
+                      />
                     </div>
                     <div>
                       <h6 className="mb-0">Mark Johnson</h6>
@@ -282,10 +311,15 @@ function LandingPage() {
                       <Star key={star} size={16} className="text-warning me-1" fill="currentColor" />
                     ))}
                   </div>
-                  <p className="mb-4">"The dashboard was easy to navigate.."</p>
+                  <p className="mb-4">"The dashboard was easy to navigate and also the time slot selection is perfect."</p>
                   <div className="d-flex align-items-center">
-                    <div className="bg-info bg-opacity-10 rounded-circle p-2 me-3">
-                      <User size={20} className="text-info mb-1" />
+                    <div className="me-2">
+                      <img 
+                        src="https://images.unsplash.com/photo-1727450395991-d76222e6c985?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MzV8fHN0dWRlbnQlMjBwcm9maWxlJTIwcGljdHVyZXxlbnwwfDB8MHx8fDI%3D" 
+                        alt="Lisa Chen" 
+                        className="rounded-circle" 
+                        style={{width: '50px', height: '50px', objectFit: 'cover'}} 
+                      />
                     </div>
                     <div>
                       <h6 className="mb-0">Lisa Chen</h6>
@@ -338,7 +372,7 @@ function LandingPage() {
         }
         .fixed-top {
           backdrop-filter: blur(10px);
-        }
+        }  
       `}</style>
     </div>
   );

@@ -61,7 +61,7 @@ function UserLogin() {
     <div className="container my-4 px-sm-0 px-5" style={{ maxWidth: "400px" }}>
       <div className="card p-4 rounded-4 shadow">
         <div className="text-center">
-          <div className="bg-primary bg-opacity-10 rounded-circle p-3 d-inline-flex mb-3 text-center">
+          <div className="bg-primary bg-opacity-10 rounded-circle p-3 d-inline-flex mb-2 text-center">
             <User2 size={50} className="text-primary text-center"/>
           </div>
         </div>                

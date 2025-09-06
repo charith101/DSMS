@@ -54,8 +54,11 @@ function StudentProfile() {
       <section
         className="text-white pb-5"
         style={{
-          background: "linear-gradient(135deg, #0d51fdff 0%, #0a84caff 100%)",
+          background: `linear-gradient(90deg, rgba(13,81,253,1) 20%, rgba(10,132,202,0.3) 100%), url('https://images.unsplash.com/photo-1496185106368-308ed96f204b?q=80&w=2121&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D') center/cover no-repeat`,
           marginTop: "76px",
+          minHeight: "50vh",
+          display: "flex",
+          alignItems: "center",
         }}
       >
         <div className="container py-5">
