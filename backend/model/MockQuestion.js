@@ -16,7 +16,12 @@ const MockQuestionSchema = new mongoose.Schema({
   correctAnswer: {
     type: String,
     required: [true, "Correct answer is required"]
-  }
+  },
+  level: {
+    type: String,
+    enum: ['Beginner', 'Intermediate', 'Expert'],
+    required: [true, "Level is required"],
+  },
 });
 
 module.exports = mongoose.model('MockQuestion', MockQuestionSchema);
