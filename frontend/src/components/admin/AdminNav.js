@@ -1,8 +1,8 @@
 import React from 'react';
 import { Link, useNavigate } from "react-router-dom";
-import { Car, ArrowRight, User2 } from 'lucide-react';
+import { Car, ArrowRight } from 'lucide-react';
 
-function AdminNav() {
+function AdminNav({ page }) {
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -11,12 +11,22 @@ function AdminNav() {
     navigate("/login");
   };
 
+  // Map page prop to nav item text for comparison
+  const pageMap = {
+    home: "Dashboard",
+    students: "Students",
+    employees: "Employees",
+    finance: "Finance",
+    vehicles: "Vehicles",
+    feedback: "Feedback"
+  };
+
   return (
     <div>
       <nav
         className="navbar navbar-expand-lg navbar-light shadow-sm fixed-top"
         style={{
-          backgroundColor: 'rgba(255, 255, 255, 0.6)',
+          backgroundColor: 'rgba(255, 255, 255, 0.65)',
           backdropFilter: 'saturate(180%) blur(20px)',
           WebkitBackdropFilter: 'saturate(180%) blur(10px)',
           boxShadow: '0 0.125rem 0.25rem rgb(0 0 0 / 0.075)',
@@ -40,31 +50,46 @@ function AdminNav() {
             <span className="navbar-toggler-icon"></span>
           </button>
           <div className="collapse navbar-collapse" id="navbarNav">
-            <div className="ms-auto d-flex gap-2 mt-3 mt-lg-0">
-              <Link to="/admin-dashboard" className="fw-medium nav-link active m-2">
+            <div className="ms-auto d-flex flex-column flex-lg-row gap-2 mt-3 mt-lg-0">
+              <Link
+                to="/admin-dashboard"
+                className={`fw-medium text-black mx-2 my-auto relative ${page === 'home' ? 'border-b-2 border-primary' : 'nav-link active'}`}
+              >
                 Dashboard
               </Link>
-              <Link to="/students" className="fw-medium nav-link active m-2">
+              <Link
+                to="/students"
+                className={`fw-medium text-black mx-2 my-auto relative ${page === 'students' ? 'border-b-2 border-primary' : 'nav-link active'}`}
+              >
                 Students
               </Link>
-              <Link to="/employees" className="fw-medium nav-link active m-2">
+              <Link
+                to="/admin-dashboard/employees"
+                className={`fw-medium text-black mx-2 my-auto relative ${page === 'employees' ? 'border-b-2 border-primary' : 'nav-link active'}`}
+              >
                 Employees
               </Link>
-              <Link to="/finance" className="fw-medium nav-link active m-2">
+              <Link
+                to="/admin-dashboard/finance"
+                className={`fw-medium text-black mx-2 my-auto relative ${page === 'finance' ? 'border-b-2 border-primary' : 'nav-link active'}`}
+              >
                 Finance
               </Link>
-              <Link to="/vehicles" className="fw-medium nav-link active m-2">
+              <Link
+                to="/admin-dashboard/vehicles"
+                className={`fw-medium text-black mx-2 my-auto relative ${page === 'vehicles' ? 'border-b-2 border-primary' : 'nav-link active'}`}
+              >
                 Vehicles
               </Link>
-              <Link to="/feedback" className="fw-medium nav-link active m-2">
+              <Link
+                to="/admin-dashboard/feedback"
+                className={`fw-medium text-black mx-2 my-auto relative ${page === 'feedback' ? 'border-b-2 border-primary' : 'nav-link active'}`}
+              >
                 Feedback
               </Link>
               <button
-                className="fw-medium btn btn-dark"
-                onClick={() => {
-                  handleLogout();
-                  navigate("/login");
-                }}
+                className="fw-medium btn btn-dark m-2"
+                onClick={handleLogout}
               >
                 Logout <ArrowRight size={16} className="ms-1" />
               </button>
