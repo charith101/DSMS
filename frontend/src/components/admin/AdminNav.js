@@ -13,7 +13,7 @@ function AdminNav({ page }) {
 
   // Map page prop to nav item text for comparison
   const pageMap = {
-    home: "Dashboard",
+    home: "Home",
     students: "Students",
     employees: "Employees",
     finance: "Finance",
@@ -64,25 +64,25 @@ function AdminNav({ page }) {
                 Students
               </Link>
               <Link
-                to="/admin-dashboard/employees"
+                to="/employees"
                 className={`fw-medium text-black mx-2 my-auto relative ${page === 'employees' ? 'border-b-2 border-primary' : 'nav-link active'}`}
               >
                 Employees
               </Link>
               <Link
-                to="/admin-dashboard/finance"
+                to="/finance"
                 className={`fw-medium text-black mx-2 my-auto relative ${page === 'finance' ? 'border-b-2 border-primary' : 'nav-link active'}`}
               >
                 Finance
               </Link>
               <Link
-                to="/admin-dashboard/vehicles"
+                to="vehicles"
                 className={`fw-medium text-black mx-2 my-auto relative ${page === 'vehicles' ? 'border-b-2 border-primary' : 'nav-link active'}`}
               >
                 Vehicles
               </Link>
               <Link
-                to="/admin-dashboard/feedback"
+                to="feedback"
                 className={`fw-medium text-black mx-2 my-auto relative ${page === 'feedback' ? 'border-b-2 border-primary' : 'nav-link active'}`}
               >
                 Feedback

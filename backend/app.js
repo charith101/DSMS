@@ -4,6 +4,7 @@ const cors = require("cors");
 const UserModel = require("./model/Users");
 const studentRouter = require('./controllers/student/studentAPI');
 const authRouter = require('./controllers/auth/authAPI');
+const employeeRouter = require('./controllers/Employee/employeeAPI');
 const receptionistRouter = require('./controllers/receptionist/receptionistAPI');
 
 const app = express();
@@ -24,9 +25,9 @@ mongoose
   })
   .catch((err) => console.log(err));
 
-
 app.use('/student', studentRouter);
 app.use('/auth', authRouter);
+app.use('/employee', employeeRouter);
 // app.use('/receptionist', receptionistRouter);
 
 app.listen(3005, () => {
