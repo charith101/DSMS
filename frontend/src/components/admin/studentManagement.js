@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Trash2, Plus, Users, Edit } from 'lucide-react';
+import { Trash2, Plus, Users, Edit, Calendar } from 'lucide-react';
 import AdminNav from './AdminNav';
 import ErrorHandle from "../errorHandle";
 
@@ -30,8 +30,14 @@ const StudentManagement = () => {
   });
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
   const [deleteStudentId, setDeleteStudentId] = useState(null);
+  const [currentUser, setCurrentUser] = useState({ role: '' }); // Placeholder for current user role
+  const [showTimetableModal, setShowTimetableModal] = useState(false);
+  const [selectedStudentId, setSelectedStudentId] = useState(null);
+  const [timetables, setTimetables] = useState([]);
 
   useEffect(() => {
+    // Simulate fetching current user role (replace with actual auth logic)
+    setCurrentUser({ role: 'instructor' }); // Example: Set to 'instructor' or 'receptionist'
     axios
       .get('http://localhost:3001/student')
       .then((result) => setStudents(result.data))
@@ -67,6 +73,10 @@ const StudentManagement = () => {
   };
 
   const handleEditStudent = (id) => {
+    if (currentUser.role !== 'instructor') {
+      setErrorMsg("Only instructors can edit student records.");
+      return;
+    }
     const student = students.find((s) => s._id === id);
     setEditStudent({
       name: student.name,
@@ -82,6 +92,10 @@ const StudentManagement = () => {
   };
 
   const handleSaveEdit = () => {
+    if (currentUser.role !== 'instructor') {
+      setErrorMsg("Only instructors can edit student records.");
+      return;
+    }
     axios
       .put(`http://localhost:3001/student/updateUser/${editStudentId}`, editStudent)
       .then((result) => {
@@ -153,6 +167,24 @@ const StudentManagement = () => {
     setErrorMsg("");
   };
 
+  const handleViewTimetables = (studentId) => {
+    setSelectedStudentId(studentId);
+    axios
+      .get(`http://localhost:3001/student/getStudentTimeSlots/${studentId}`)
+      .then((result) => {
+        console.log('Timetable Data:', result.data); // Debug log
+        setTimetables(result.data);
+      })
+      .catch((err) => console.log(err));
+    setShowTimetableModal(true);
+  };
+
+  const handleCloseTimetableModal = () => {
+    setShowTimetableModal(false);
+    setSelectedStudentId(null);
+    setTimetables([]);
+  };
+
   return (
     <div>
       {/* Navbar */}
@@ -172,7 +204,7 @@ const StudentManagement = () => {
         <div className="container py-5 mt-5">
           <h1 className="fw-bold display-5 mb-3 mx-1">Student Management</h1>
           <h6 className="fs-6 lead opacity-90">
-            Add, view, and manage student records for the driving school.
+            Manage student records for the driving school.
           </h6>
         </div>
       </section>
@@ -196,10 +228,11 @@ const StudentManagement = () => {
                       </div>
                     </div>
                     <button
-                      className="btn btn-primary w-100 text-start p-3 fs-5"
+                      className="btn btn-primary"
+                      style={{ padding: '6px 12px', fontSize: '16px', maxWidth: '200px' }}
                       onClick={() => setShowModal(true)}
                     >
-                      <Plus className="me-2" size={24} /> Add Student
+                      <Plus className="me-2" size={20} /> Add Student
                     </button>
                   </div>
                 </div>
@@ -244,14 +277,21 @@ const StudentManagement = () => {
                                 <button
                                   className="btn btn-sm btn-warning me-2"
                                   onClick={() => handleEditStudent(student._id)}
+                                  disabled={currentUser.role !== 'instructor'}
                                 >
                                   <Edit size={18} />
                                 </button>
                                 <button
-                                  className="btn btn-sm btn-danger"
+                                  className="btn btn-sm btn-danger me-2"
                                   onClick={() => handleDeleteStudent(student._id)}
                                 >
                                   <Trash2 size={18} />
+                                </button>
+                                <button
+                                  className="btn btn-sm btn-info"
+                                  onClick={() => handleViewTimetables(student._id)}
+                                >
+                                  <Calendar size={18} />
                                 </button>
                               </td>
                             </tr>
@@ -410,6 +450,45 @@ const StudentManagement = () => {
               <div className="modal-footer">
                 <button type="button" className="btn btn-secondary" onClick={cancelDelete}>Cancel</button>
                 <button type="button" className="btn btn-danger" onClick={confirmDelete}>Delete</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Timetable Modal */}
+        <div className={`modal fade ${showTimetableModal ? 'show d-block' : ''}`} tabIndex="-1" style={{ backgroundColor: showTimetableModal ? 'rgba(0,0,0,0.5)' : 'transparent' }}>
+          <div className="modal-dialog modal-dialog-centered">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">Student Timetables</h5>
+                <button type="button" className="btn-close" onClick={handleCloseTimetableModal}></button>
+              </div>
+              <div className="modal-body">
+                <div className="table-responsive">
+                  <table className="table table-striped">
+                    <thead>
+                      <tr>
+                        <th scope="col">Start Time</th>
+                        <th scope="col">End Time</th>
+                        <th scope="col">Instructor</th>
+                        <th scope="col">Vehicle Type</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {timetables.map((timetable, index) => (
+                        <tr key={index}>
+                          <td>{new Date(timetable.startTime).toLocaleString('en-US', { timeZone: 'Asia/Kolkata' })}</td>
+                          <td>{new Date(timetable.endTime).toLocaleString('en-US', { timeZone: 'Asia/Kolkata' })}</td>
+                          <td>{timetable.instructorId?.name || 'N/A'}</td>
+                          <td>{timetable.vehicleId?.type || 'N/A'}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              <div className="modal-footer">
+                <button type="button" className="btn btn-secondary" onClick={handleCloseTimetableModal}>Close</button>
               </div>
             </div>
           </div>
