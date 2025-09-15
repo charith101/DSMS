@@ -477,8 +477,8 @@ const StudentManagement = () => {
                     <tbody>
                       {timetables.map((timetable, index) => (
                         <tr key={index}>
-                          <td>{new Date(timetable.startTime).toLocaleString('en-US', { timeZone: 'Asia/Kolkata' })}</td>
-                          <td>{new Date(timetable.endTime).toLocaleString('en-US', { timeZone: 'Asia/Kolkata' })}</td>
+                          <td>{timetable.startTime}</td>
+                          <td>{timetable.endTime}</td>
                           <td>{timetable.instructorId?.name || 'N/A'}</td>
                           <td>{timetable.vehicleId?.type || 'N/A'}</td>
                         </tr>

@@ -110,7 +110,7 @@ router.get('/getAvailableTimeSlots/:studentId', async (req, res) => {
       return res.status(404).json({ error: 'Student not found' });
     }
     const timeSlots = await TimeSlotModel.aggregate([
-      {$match: {bookedStudents: { $not: { $in: [new mongoose.Types.ObjectId(studentId)] } },date: { $gte: new Date() }}},
+      {$match: {bookedStudents: { $not: { $in: [new mongoose.Types.ObjectId(studentId)] } },date: { $gte: new Date() },status: { $ne: "disabled" }}},
       {$addFields: {bookedCount: { $size: '$bookedStudents' }}},
       {$match: {$expr: { $gt: ['$maxCapacity', '$bookedCount'] }}},
       {$lookup: {from: 'vehicles',localField: 'vehicleId',foreignField: '_id',pipeline: [{ $match: { type: { $in: user.licenseType } } },{ $project: { type: 1, model: 1 } }],as: 'vehicleId'}},

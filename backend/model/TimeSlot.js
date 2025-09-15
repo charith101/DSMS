@@ -13,6 +13,11 @@ const TimeSlotSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  status: {
+    type: String,
+    enum: ["active", "disabled"],
+    required: true
+  },
   instructorId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
