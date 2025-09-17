@@ -6,6 +6,7 @@ import ErrorHandle from "../errorHandle";
 
 const EmployeeManagement = () => {
   const [employees, setEmployees] = useState([]);
+  const [leaveRequests, setLeaveRequests] = useState([]);
   const [errorMsg, setErrorMsg] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [newEmployee, setNewEmployee] = useState({
@@ -14,7 +15,7 @@ const EmployeeManagement = () => {
     age: '',
     nic: '',
     password: '',
-    role: 'receptionist', // Default role, can be changed to 'instructor'
+    role: 'receptionist',
   });
   const [editMode, setEditMode] = useState(false);
   const [editEmployeeId, setEditEmployeeId] = useState(null);
@@ -23,6 +24,7 @@ const EmployeeManagement = () => {
     email: '',
     age: '',
     nic: '',
+    role: 'receptionist',
   });
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
   const [deleteEmployeeId, setDeleteEmployeeId] = useState(null);
@@ -31,6 +33,11 @@ const EmployeeManagement = () => {
     axios
       .get('http://localhost:3001/employee')
       .then((result) => setEmployees(result.data))
+      .catch((err) => console.log(err));
+
+    axios
+      .get('http://localhost:3001/employee/getLeave')
+      .then((result) => setLeaveRequests(result.data))
       .catch((err) => console.log(err));
   }, []);
 
@@ -67,6 +74,7 @@ const EmployeeManagement = () => {
       email: employee.email,
       age: employee.age,
       nic: employee.nic,
+      role: employee.role,
     });
     setEditEmployeeId(id);
     setEditMode(true);
@@ -85,6 +93,7 @@ const EmployeeManagement = () => {
           email: '',
           age: '',
           nic: '',
+          role: 'receptionist',
         });
         setShowModal(false);
         setErrorMsg("");
@@ -135,8 +144,21 @@ const EmployeeManagement = () => {
       email: '',
       age: '',
       nic: '',
+      role: 'receptionist',
     });
     setErrorMsg("");
+  };
+
+  const handleUpdateLeaveStatus = (id, status) => {
+    axios
+      .put(`http://localhost:3001/employee/updateLeave/${id}`, { status })
+      .then((result) => {
+        setLeaveRequests(leaveRequests.map((lr) => (lr._id === id ? result.data : lr)));
+      })
+      .catch((err) => {
+        console.error('Error updating leave status:', err);
+        alert('Failed to update leave status');
+      });
   };
 
   return (
@@ -247,6 +269,74 @@ const EmployeeManagement = () => {
                   </div>
                 </div>
               </div>
+
+              {/* Leave Requests Table Card */}
+              <div className="col-12">
+                <div className="card border-2 shadow-sm p-3">
+                  <div className="card-body p-4">
+                    <div className="d-flex align-items-center mb-3">
+                      <div className="bg-warning bg-opacity-10 rounded-circle p-3 me-3">
+                        <Users size={64} className="text-warning" />
+                      </div>
+                      <div>
+                        <h3 className="mb-1 fw-bold">Leave Requests</h3>
+                        <small className="text-muted">Manage employee leave requests</small>
+                      </div>
+                    </div>
+                    <div className="table-responsive">
+                      <table className="table table-striped">
+                        <thead>
+                          <tr>
+                            <th scope="col">Staff Name</th>
+                            <th scope="col">Start Date</th>
+                            <th scope="col">End Date</th>
+                            <th scope="col">Reason</th>
+                            <th scope="col">Status</th>
+                            <th scope="col">Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {leaveRequests.map((request) => (
+                            <tr key={request._id}>
+                              <td>{request.staffId?.name || 'N/A'}</td>
+                              <td>{new Date(request.startDate).toLocaleDateString()}</td>
+                              <td>{new Date(request.endDate).toLocaleDateString()}</td>
+                              <td>{request.reason || 'N/A'}</td>
+                              <td>{request.status}</td>
+                              <td>
+                                <button
+                                  className="btn btn-sm me-2"
+                                  style={{ backgroundColor: 'yellow', color: 'black' }}
+                                  onClick={() => handleUpdateLeaveStatus(request._id, 'Pending')}
+                                  disabled={request.status === 'Pending'}
+                                >
+                                  Pending
+                                </button>
+                                <button
+                                  className="btn btn-sm me-2"
+                                  style={{ backgroundColor: 'green', color: 'white' }}
+                                  onClick={() => handleUpdateLeaveStatus(request._id, 'Approved')}
+                                  disabled={request.status === 'Approved'}
+                                >
+                                  Approved
+                                </button>
+                                <button
+                                  className="btn btn-sm"
+                                  style={{ backgroundColor: 'red', color: 'white' }}
+                                  onClick={() => handleUpdateLeaveStatus(request._id, 'Rejected')}
+                                  disabled={request.status === 'Rejected'}
+                                >
+                                  Rejected
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -314,9 +404,8 @@ const EmployeeManagement = () => {
                   <ErrorHandle for="password" error={errorMsg}/>
                   <select
                     className="form-control mb-2"
-                    value={newEmployee.role}
-                    onChange={(e) => setNewEmployee({ ...newEmployee, role: e.target.value })}
-                    disabled={editMode} // Disable role change during edit
+                    value={editMode ? editEmployee.role : newEmployee.role}
+                    onChange={(e) => editMode ? setEditEmployee({ ...editEmployee, role: e.target.value }) : setNewEmployee({ ...newEmployee, role: e.target.value })}
                   >
                     <option value="receptionist">Receptionist</option>
                     <option value="instructor">Instructor</option>
