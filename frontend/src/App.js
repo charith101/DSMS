@@ -16,7 +16,7 @@ import StudentProfile from './components/student/StudentProfile';
 
 // Other dashboards
 import LandingPage from './components/landingPage';
-import ReceptionistDashboard from './components/receptionist/Dashboard';
+import ReceptionistDashboard from './components/receptionist/ReceptionistDashboard';
 import InstructorDashboard from './components/instructor/instructorDashboard';
 
 // Admin components 
@@ -26,6 +26,13 @@ import Feedback from './components/admin/feedback';
 import FinanceManagement from './components/admin/financeManagement';
 import StudentManagement from './components/admin/studentManagement';
 import VehicleManagement from './components/admin/vehicleManagement';
+
+//Receptionist components
+import ReceptionistAppointments from './components/receptionist/ReceptionistAppointments';
+import ReceptionistClasses from './components/receptionist/ReceptionistClasses';
+import ReceptionistStudents from './components/receptionist/ReceptionistStudents';
+import ReceptionistLateStudents from './components/receptionist/ReceptionistLateStudents';
+import ReceptionistFeedback from './components/receptionist/ReceptionistFeedback';
 
 
 function App() {
@@ -58,6 +65,13 @@ function App() {
           <Route path='/Time-Slot' element={<TimeSlot />} />
           <Route path='/Mock-Exam' element={<MockExam />} />
           <Route path='/Student-Profile' element={<StudentProfile />} />
+
+          {/*Receptionist management*/}
+          <Route path='/receptionist-appointments' element={<ReceptionistAppointments />} />
+          <Route path='/receptionist-classes' element={<ReceptionistClasses />} />
+          <Route path='/receptionist-students' element={<ReceptionistStudents />} />
+          <Route path='/receptionist-late-students' element={<ReceptionistLateStudents />} />
+          <Route path='/receptionist-feedback' element={<ReceptionistFeedback />} />
         </Routes>
       </BrowserRouter>
     </div>
