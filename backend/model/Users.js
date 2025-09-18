@@ -17,10 +17,9 @@ const UserSchema = new mongoose.Schema({
     match: [/^[^\s@]+@[^\s@]+\.[^\s@]+$/, "Invalid email format"],
   },
   age: {
-    type: Number,
-    required: [true, "Age is required"],
-    min: [10, "Minimum age is 10"],
-    max: [120, "Maximum age is 120"],
+  type: String,
+  required: [true, "Age is required"],
+  match: [/^\d+$/, "Age must be a number"],
   },
   nic: {
     type: String,
