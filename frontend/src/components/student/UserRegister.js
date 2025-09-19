@@ -19,10 +19,10 @@ function UserRegister() {
     e.preventDefault();
     setErrorMsg("");
     setLoading(true);
-    axios.post("http://localhost:3001/student/registerUser", { name, email, age, nic,  password, role: "student", level: 1 })
+    axios.post("http://localhost:3001/student/registerUser", { name, email, age, nic,  password, role: "student", licenseType, level: 1 })
       .then((result) => {
         localStorage.setItem("isAuthenticated", "true");
-        localStorage.setItem("userId", result.data.id);
+        localStorage.setItem("userId", result.data._id);
         setLoading(false);
         navigate("/student-dashboard");
       })
