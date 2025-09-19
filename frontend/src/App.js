@@ -28,7 +28,7 @@ import InstructorPayments from './components/instructor/instructorPayments';
 // Admin components 
 import AdminDashboard from './components/admin/adminDashboard';
 import EmployeeManagement from './components/admin/employeeManagement';
-import Profile from './components/admin/profile';
+import Profile from './components/admin/adminProfile';
 import FinanceManagement from './components/admin/financeManagement';
 import StudentManagement from './components/admin/studentManagement';
 import VehicleManagement from './components/admin/vehicleManagement';
