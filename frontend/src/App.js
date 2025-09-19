@@ -19,14 +19,19 @@ import LandingPage from './components/landingPage';
 import ReceptionistDashboard from './components/receptionist/Dashboard';
 import InstructorDashboard from './components/instructor/instructorDashboard';
 
+// New Instructor components
+import InstructorSchedule from './components/instructor/instructorSchedule';
+import InstructorProfile from './components/instructor/instructorProfile';
+import InstructorLeave from './components/instructor/instructorLeave';
+import InstructorPayments from './components/instructor/instructorPayments';
+
 // Admin components 
 import AdminDashboard from './components/admin/adminDashboard';
 import EmployeeManagement from './components/admin/employeeManagement';
-import Feedback from './components/admin/feedback';
+import Profile from './components/admin/profile';
 import FinanceManagement from './components/admin/financeManagement';
 import StudentManagement from './components/admin/studentManagement';
 import VehicleManagement from './components/admin/vehicleManagement';
-
 
 function App() {
   return (
@@ -49,7 +54,7 @@ function App() {
           <Route path='/employees' element={<EmployeeManagement />} />
           <Route path='/finance' element={<FinanceManagement />} />
           <Route path='/vehicles' element={<VehicleManagement />} />
-          <Route path='/feedback' element={<Feedback />} />
+          <Route path='/profile' element={<Profile />} />
 
           {/* User management */}
           <Route path='/create' element={<AddUser />} />
@@ -58,6 +63,12 @@ function App() {
           <Route path='/Time-Slot' element={<TimeSlot />} />
           <Route path='/Mock-Exam' element={<MockExam />} />
           <Route path='/Student-Profile' element={<StudentProfile />} />
+
+          {/* Instructor management routes */}
+          <Route path='/instructor-schedule' element={<InstructorSchedule />} />
+          <Route path='/instructor-profile' element={<InstructorProfile />} />
+          <Route path='/instructor-leave' element={<InstructorLeave />} />
+          <Route path='/instructor-payments' element={<InstructorPayments />} />
         </Routes>
       </BrowserRouter>
     </div>

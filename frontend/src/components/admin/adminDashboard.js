@@ -21,7 +21,6 @@ function AdminDashboard() {
         <div className="container py-5 mt-5">
           <h1 className="fw-bold display-5 mb-3 mx-1">Welcome back, Admin</h1>
           <h6 className="fs-6 lead opacity-90">
-            Manage students, employees, finances, vehicles, and feedback all from your dashboard.
           </h6>
         </div>
       </section>

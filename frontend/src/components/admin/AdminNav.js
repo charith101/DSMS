@@ -18,7 +18,7 @@ function AdminNav({ page }) {
     employees: "Employees",
     finance: "Finance",
     vehicles: "Vehicles",
-    feedback: "Feedback"
+    profile: "Profile"
   };
 
   return (
@@ -55,7 +55,7 @@ function AdminNav({ page }) {
                 to="/admin-dashboard"
                 className={`fw-medium text-black mx-2 my-auto relative ${page === 'home' ? 'border-b-2 border-primary' : 'nav-link active'}`}
               >
-                Dashboard
+                Home
               </Link>
               <Link
                 to="/students"
@@ -76,16 +76,16 @@ function AdminNav({ page }) {
                 Finance
               </Link>
               <Link
-                to="vehicles"
+                to="/vehicles"
                 className={`fw-medium text-black mx-2 my-auto relative ${page === 'vehicles' ? 'border-b-2 border-primary' : 'nav-link active'}`}
               >
                 Vehicles
               </Link>
               <Link
-                to="feedback"
-                className={`fw-medium text-black mx-2 my-auto relative ${page === 'feedback' ? 'border-b-2 border-primary' : 'nav-link active'}`}
+                to="/profile"
+                className={`fw-medium text-black mx-2 my-auto relative ${page === 'profile' ? 'border-b-2 border-primary' : 'nav-link active'}`}
               >
-                Feedback
+                Profile
               </Link>
               <button
                 className="fw-medium btn btn-dark m-2"
