@@ -82,7 +82,7 @@ function AdminNav({ page }) {
                 Vehicles
               </Link>
               <Link
-                to="/profile"
+                to="/admin-Profile"
                 className={`fw-medium text-black mx-2 my-auto relative ${page === 'profile' ? 'border-b-2 border-primary' : 'nav-link active'}`}
               >
                 Profile

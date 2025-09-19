@@ -2,14 +2,14 @@ import React, { useState } from 'react';
 import AdminNav from "./AdminNav";
 import { User } from "lucide-react";
 
-function Profile() {
- 
+function AdminProfile() {
+  // Sample admin data
   const [user, setUser] = useState({
     name: "Admin",
     email: "admin@gmail.com",
     phone: "+1 (555) 987-6543",
-    joinedDate: "2024-06-01",
-    profilePic: "https://via.placeholder.com/150", 
+    joinedDate: "2023-03-10",
+    profilePic: "https://via.placeholder.com/150", // Placeholder image
   });
 
   const [showModal, setShowModal] = useState(false);
@@ -62,9 +62,9 @@ function Profile() {
         }}
       >
         <div className="container py-5">
-          <h1 className="fw-bold display-5 mb-3 mx-1">Admin Profile</h1>
+          <h1 className="fw-bold display-5 mb-3 mx-1">Your Profile</h1>
           <h6 className="fs-6 lead opacity-90">
-            Manage your administrative account details.
+            View and manage your personal information.
           </h6>
         </div>
       </section>
@@ -112,7 +112,7 @@ function Profile() {
           <div className="modal-dialog modal-dialog-centered" role="document">
             <div className="modal-content" style={{ borderRadius: "12px", border: "none" }}>
               <div className="modal-header border-0">
-                <h5 className="modal-title fw-bold text-primary">Edit Admin Profile</h5>
+                <h5 className="modal-title fw-bold text-primary">Edit Profile</h5>
                 <button
                   type="button"
                   className="btn-close"
@@ -198,4 +198,4 @@ function Profile() {
   );
 }
 
-export default Profile;
+export default AdminProfile;

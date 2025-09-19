@@ -28,7 +28,7 @@ import InstructorPayments from './components/instructor/instructorPayments';
 // Admin components 
 import AdminDashboard from './components/admin/adminDashboard';
 import EmployeeManagement from './components/admin/employeeManagement';
-import Profile from './components/admin/adminProfile';
+import AdminProfile from './components/admin/adminProfile';
 import FinanceManagement from './components/admin/financeManagement';
 import StudentManagement from './components/admin/studentManagement';
 import VehicleManagement from './components/admin/vehicleManagement';
@@ -54,7 +54,7 @@ function App() {
           <Route path='/employees' element={<EmployeeManagement />} />
           <Route path='/finance' element={<FinanceManagement />} />
           <Route path='/vehicles' element={<VehicleManagement />} />
-          <Route path='/profile' element={<Profile />} />
+          <Route path='/admin-Profile' element={<AdminProfile />} />
 
           {/* User management */}
           <Route path='/create' element={<AddUser />} />
