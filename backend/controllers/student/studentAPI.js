@@ -13,7 +13,7 @@ router.post('/registerUser', (req, res) => {
     .then(user => res.status(201).json(user))
     .catch(err => {
       if (err.code === 11000 && err.keyPattern?.email) {
-        return res.status(400).json({ error: "Email already registered" });
+        return res.status(400).json({ error: "ear:Email already registered" });
       } else if (err.name === 'ValidationError') {
         res.status(400).json({ error: err.message });
       } else {
