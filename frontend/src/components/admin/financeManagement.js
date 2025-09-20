@@ -771,14 +771,14 @@ function FinanceManagement() {
                                       height: `${(month.income / 150000) * 100}%`,
                                       marginBottom: "2px",
                                       borderRadius: "2px 2px 0 0",
-                                      backgroundColor: "#4361ee"
+                                      backgroundColor: "#188752"
                                     }}
                                   ></div>
                                   <div 
                                     style={{ 
                                       height: `${(month.expenses / 150000) * 100}%`,
                                       borderRadius: "0 0 2px 2px",
-                                      backgroundColor: "#ff6b6b"
+                                      backgroundColor: "#D93744"
                                     }}
                                   ></div>
                                 </div>
@@ -788,11 +788,11 @@ function FinanceManagement() {
                           </div>
                           <div className="position-absolute top-0 end-0">
                             <div className="d-flex align-items-center me-3">
-                              <div className="rounded-circle me-2" style={{ width: "10px", height: "10px", backgroundColor: "#4361ee" }}></div>
+                              <div className="rounded-circle me-2" style={{ width: "10px", height: "10px", backgroundColor: "#188752" }}></div>
                               <small className="text-muted">Income</small>
                             </div>
                             <div className="d-flex align-items-center">
-                              <div className="rounded-circle me-2" style={{ width: "10px", height: "10px", backgroundColor: "#ff6b6b" }}></div>
+                              <div className="rounded-circle me-2" style={{ width: "10px", height: "10px", backgroundColor: "#D93744" }}></div>
                               <small className="text-muted">Expenses</small>
                             </div>
                           </div>
