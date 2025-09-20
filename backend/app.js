@@ -29,6 +29,8 @@ app.use('/student', studentRouter);
 app.use('/auth', authRouter);
 app.use('/employee', employeeRouter);
 // app.use('/receptionist', receptionistRouter);
+app.use('/finance', require('./controllers/payment/financeAPI'));
+app.use('/api/finance/transactions', require('./controllers/payment/transactionRoutes'));
 
 app.listen(3005, () => {
   console.log('Server started on port 3005');

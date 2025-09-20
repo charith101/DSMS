@@ -19,10 +19,10 @@ function UserRegister() {
     e.preventDefault();
     setErrorMsg("");
     setLoading(true);
-    axios.post("http://localhost:3001/student/registerUser", { name, email, age, nic,  password, role: "student", level: 1 })
+    axios.post("http://localhost:3001/student/registerUser", { name, email, age, nic,  password, role: "student", licenseType, level: 1 })
       .then((result) => {
         localStorage.setItem("isAuthenticated", "true");
-        localStorage.setItem("userId", result.data.id);
+        localStorage.setItem("userId", result.data._id);
         setLoading(false);
         navigate("/student-dashboard");
       })
@@ -56,6 +56,7 @@ function UserRegister() {
           <ErrorHandle for="name" error={errorMsg}/>
           <input className="form-control mb-2" placeholder="Email" onChange={(e) => setEmail(e.target.value)} />
           <ErrorHandle for="email" error={errorMsg}/>
+          <ErrorHandle for="ear" error={errorMsg}/>
           <input className="form-control mb-2" placeholder="Age" onChange={(e) => setAge(e.target.value)} />
           <ErrorHandle for="age" error={errorMsg}/>
           <input className="form-control mb-2" placeholder="NIC" onChange={(e) => setNic(e.target.value)} />
