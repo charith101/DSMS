@@ -56,6 +56,7 @@ function UserRegister() {
           <ErrorHandle for="name" error={errorMsg}/>
           <input className="form-control mb-2" placeholder="Email" onChange={(e) => setEmail(e.target.value)} />
           <ErrorHandle for="email" error={errorMsg}/>
+          <ErrorHandle for="ear" error={errorMsg}/>
           <input className="form-control mb-2" placeholder="Age" onChange={(e) => setAge(e.target.value)} />
           <ErrorHandle for="age" error={errorMsg}/>
           <input className="form-control mb-2" placeholder="NIC" onChange={(e) => setNic(e.target.value)} />
