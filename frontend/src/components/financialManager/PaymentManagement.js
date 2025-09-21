@@ -183,7 +183,7 @@ const PaymentManagement = () => {
                           <td>{payment._id.substring(0, 8)}</td>
                           <td>{payment.studentId}</td>
                           <td>{new Date(payment.date).toLocaleDateString()}</td>
-                          <td>Rs. {payment.amount.toLocaleString()}</td>
+                          <td>LKR {payment.amount.toLocaleString()}</td>
                           <td>{payment.paymentMethod}</td>
                           <td>{payment.description}</td>
                           <td>

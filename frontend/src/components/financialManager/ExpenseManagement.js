@@ -216,7 +216,7 @@ const ExpenseManagement = () => {
                           <td>{expense._id.substring(0, 8)}</td>
                           <td>{expense.category}</td>
                           <td>{new Date(expense.date).toLocaleDateString()}</td>
-                          <td>Rs. {expense.amount.toLocaleString()}</td>
+                          <td>LKR {expense.amount.toLocaleString()}</td>
                           <td>{expense.description}</td>
                           <td>{expense.paymentMethod}</td>
                           <td>
@@ -268,7 +268,7 @@ const ExpenseManagement = () => {
                 </Form.Select>
               </Form.Group>
               <Form.Group className="mb-3">
-                <Form.Label>Amount (Rs.)</Form.Label>
+                <Form.Label>Amount (LKR)</Form.Label>
                 <Form.Control
                   type="number"
                   name="amount"
