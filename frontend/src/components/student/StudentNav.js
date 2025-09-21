@@ -37,19 +37,19 @@ function StudentNav({ page }) {
           </button>
           <div className="collapse navbar-collapse" id="navbarNav">
             <div className="ms-auto d-flex flex-column flex-lg-row gap-2 mt-3 mt-lg-0">
-              <Link to="/student-dashboard" className={`fw-medium text-black mx-2 my-auto relative ${page === 'home' ? 'border-b-2 border-primary ' : 'nav-link active'}`}>
+              <Link to="/student-dashboard" className={`fw-medium mx-2 my-auto relative text-black ${page === 'home' ? 'border-b border-black' : ''}`}>
                 Home
               </Link>
-              <Link to="/Time-Slot" className={`fw-medium text-black mx-2 my-auto relative ${page === 'timeslot' ? 'border-b-2 border-primary' : 'nav-link active'}`}>
+              <Link to="/Time-Slot" className={`fw-medium mx-2 my-auto relative text-black ${page === 'timeslot' ? 'border-b border-black' : ''}`}>
                 Pick Time Slot
               </Link>
-              <Link to="/Mock-Exam" className={`fw-medium text-black mx-2 my-auto relative ${page === 'mockexam' ? 'border-b-2 border-primary' : 'nav-link active'}`}>
+              <Link to="/Mock-Exam" className={`fw-medium mx-2 my-auto relative text-black ${page === 'mockexam' ? 'border-b border-black' : ''}`}>
                 Mock Exam
               </Link>
-              <Link to="/student-feedback" className={`fw-medium text-black mx-2 my-auto relative ${page === 'feedback' ? 'border-b-2 border-primary' : 'nav-link active'}`}>
+              <Link to="/student-feedback" className={`fw-medium mx-2 my-auto relative text-black ${page === 'feedback' ? 'border-b border-black' : ''}`}>
                 Feedback
               </Link>
-              <Link to="/Student-Profile" className={`fw-medium text-black mx-2 my-auto relative ${page === 'profile' ? 'border-b-2 border-primary' : 'nav-link active'}`}>
+              <Link to="/Student-Profile" className={`fw-medium mx-2 my-auto relative text-black ${page === 'profile' ? 'border-b border-black' : ''}`}>
                 Profile
               </Link>
               <button 

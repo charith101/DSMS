@@ -1,55 +1,63 @@
 const mongoose = require('mongoose');
 
-const VehicleSchema = new mongoose.Schema({
-  type: {
-    type: String,
-    enum: ["Car", "Van", "Bike", "Truck"],
-    required: true
+const VehicleSchema = mongoose.Schema(
+  {
+    vehicleNumber: {
+      type: String,
+      required: true,
+      unique: true,
+      trim: true,
+    },
+    make: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    model: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    year: {
+      type: Number,
+      required: true,
+      min: 1900,
+      max: new Date().getFullYear() + 1,
+    },
+    transmissionType: {
+      type: String,
+      enum: ['Manual', 'Auto'],
+      required: true,
+    },
+    engineCapacity: {
+      type: Number, // in CC
+      required: true,
+      min: 50,
+    },
+    registrationDate: {
+      type: Date,
+      required: true,
+    },
+    vehiclePhoto: {
+      type: String, // Storing the path to the photo
+      default: null,
+    },
+    // Other potential fields like status, current mileage, etc.
+    status: {
+      type: String,
+      enum: ['Active', 'In Maintenance', 'Sold'],
+      default: 'Active',
+    },
+    currentMileage: {
+      type: Number,
+      default: 0,
+    },
   },
-  model: {
-    type: String,
-    required: true,
-    trim: true
-  },
-  licensePlate: {
-    type: String,
-    required: true,
-    unique: true,
-    match: [/^[A-Z0-9-]+$/, "Invalid license plate format"]
-  },
-  capacity: {
-    type: Number,
-    min: 1,
-    required: true
-  },
-  purchaseDate: {
-    type: Date,
-    required: true
-  },
-  licenseExpiry: {
-    type: Date,
-    required: true
-  },
-  availabilityStatus: {
-    type: String,
-    enum: ["Available", "In Maintenance", "Unavailable"],
-    default: "Available"
-  },
-  maintenanceHistory: [{
-    serviceDate: { type: Date, required: true },
-    description: { type: String, trim: true },
-    nextServiceDue: { type: Date }
-  }],
-  fuelLogs: [{
-    date: { type: Date, required: true },
-    liters: { type: Number, required: true, min: 0 },
-    cost: { type: Number, required: true, min: 0 }
-  }],
-  insurance: {
-    provider: { type: String, trim: true },
-    policyNumber: { type: String, trim: true },
-    expiryDate: { type: Date }
+  {
+    timestamps: true, // Adds createdAt and updatedAt fields
   }
-});
+);
 
-module.exports = mongoose.model('Vehicle', VehicleSchema);
+const Vehicle = mongoose.model('Vehicle', VehicleSchema);
+
+module.exports = Vehicle;
