@@ -22,7 +22,14 @@ import {
   Card,
   CardContent,
   IconButton,
-  Tooltip
+  Tooltip,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  Alert,
+  AlertTitle
 } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
@@ -33,11 +40,15 @@ import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import PrintIcon from '@mui/icons-material/Print';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import FilterListIcon from '@mui/icons-material/FilterList';
+import AddIcon from '@mui/icons-material/Add';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+import FinancialManagerNav from './FinancialManagerNav';
 
 // Import visualization components
 import {
-  BarChart, Bar, LineChart, Line, PieChart, Pie, XAxis, YAxis,
-  CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer, Cell
+  BarChart, Bar, XAxis, YAxis,
+  CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer
 } from 'recharts';
 
 // Import export libraries
@@ -45,17 +56,27 @@ import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
 import * as XLSX from 'xlsx';
 
+
+// ======================================================================================
+// API Configuration
+// ======================================================================================
+// Remove the CORS proxy as it's causing issues and may not be necessary
+// if the backend is properly configured with CORS headers
+const API_BASE_URL = 'http://localhost:3001';
+// ======================================================================================
+
+
 const FinancialReports = () => {
   // State variables
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
   const [reportType, setReportType] = useState('revenue');
   const [timeFrame, setTimeFrame] = useState('monthly');
-  const [startDate, setStartDate] = useState(startOfMonth(subMonths(new Date(), 6)));
+  const [startDate, setStartDate] = useState(startOfMonth(subMonths(new Date(), 5)));
   const [endDate, setEndDate] = useState(endOfMonth(new Date()));
   const [financialData, setFinancialData] = useState({
     revenue: [],
     expenses: [],
-    profits: [],
     transactions: []
   });
   const [summary, setSummary] = useState({
@@ -64,597 +85,680 @@ const FinancialReports = () => {
     netProfit: 0,
     transactionCount: 0
   });
-  const [showFilters, setShowFilters] = useState(false);
-  
-  // Colors for charts
-  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d'];
-  
-  // Fetch financial data
-  useEffect(() => {
-    fetchFinancialData();
-  }, [reportType, timeFrame, startDate, endDate]);
-  
+  const [openTransactionModal, setOpenTransactionModal] = useState(false);
+  const [currentTransaction, setCurrentTransaction] = useState(null);
+  const [transactionForm, setTransactionForm] = useState({
+    id: '',
+    date: new Date(),
+    description: '',
+    amount: '',
+    type: 'income'
+  });
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+
   const fetchFinancialData = async () => {
     setLoading(true);
+    setError(null);
     try {
-      // Format dates for API request
       const formattedStartDate = format(startDate, 'yyyy-MM-dd');
       const formattedEndDate = format(endDate, 'yyyy-MM-dd');
       
-      // API calls for different data types
-      // In a real application, these would be actual API endpoints
-      // For now, we'll use mock data
+      const response = await axios.get(`${API_BASE_URL}/api/finance/reports`, {
+        params: { startDate: formattedStartDate, endDate: formattedEndDate }
+      });
       
-      // Use mock data for development/demo purposes
-      generateMockData();
-    } catch (error) {
-      console.error('Error fetching financial data:', error);
-      // Use mock data as fallback
-      generateMockData();
+      if (response.data && response.data.transactions) {
+        processApiData(response.data);
+      } else {
+        setError('The server responded, but the data format is incorrect.');
+      }
+    } catch (err) {
+      console.error('Error fetching financial data:', err);
+      setError(err.response?.data?.message || 'Failed to connect to the server. Ensure the backend is running on port 3001.');
     } finally {
       setLoading(false);
     }
   };
   
-  // Generate mock data for development/demo purposes
-  const generateMockData = () => {
-    const mockRevenue = [];
-    const mockExpenses = [];
-    const mockTransactions = [];
-    
-    // Generate data for the last 6 months
-    for (let i = 0; i < 6; i++) {
-      const date = format(subMonths(new Date(), i), 'yyyy-MM-dd');
-      const monthName = format(subMonths(new Date(), i), 'MMM yyyy');
-      
-      // Revenue by category
-      const tuitionFees = Math.floor(Math.random() * 50000) + 100000;
-      const registrationFees = Math.floor(Math.random() * 10000) + 20000;
-      const examFees = Math.floor(Math.random() * 15000) + 30000;
-      
-      mockRevenue.push(
-        { date, monthName, amount: tuitionFees, category: 'Tuition Fees' },
-        { date, monthName, amount: registrationFees, category: 'Registration Fees' },
-        { date, monthName, amount: examFees, category: 'Exam Fees' }
-      );
-      
-      // Expenses by category
-      const salaries = Math.floor(Math.random() * 40000) + 80000;
-      const utilities = Math.floor(Math.random() * 5000) + 10000;
-      const maintenance = Math.floor(Math.random() * 8000) + 15000;
-      
-      mockExpenses.push(
-        { date, monthName, amount: salaries, category: 'Salaries' },
-        { date, monthName, amount: utilities, category: 'Utilities' },
-        { date, monthName, amount: maintenance, category: 'Maintenance' }
-      );
-      
-      // Generate some transactions
-      for (let j = 0; j < 5; j++) {
-        mockTransactions.push({
-          id: `TR-${i}-${j}`,
-          date,
-          description: ['Tuition Payment', 'Registration Fee', 'Exam Fee', 'Salary Payment', 'Utility Bill'][j % 5],
-          amount: Math.floor(Math.random() * 10000) + 1000,
-          type: j < 3 ? 'income' : 'expense'
-        });
-      }
-    }
-    
-    // Calculate profits
-    const profits = mockRevenue.reduce((acc, rev) => {
-      const existingProfit = acc.find(p => p.monthName === rev.monthName);
-      if (existingProfit) {
-        existingProfit.amount += rev.amount;
-      } else {
-        acc.push({
-          date: rev.date,
-          monthName: rev.monthName,
-          amount: rev.amount,
-          category: 'Gross Revenue'
-        });
-      }
-      return acc;
-    }, []).map(profit => {
-      const monthExpenses = mockExpenses
-        .filter(exp => exp.monthName === profit.monthName)
-        .reduce((sum, exp) => sum + exp.amount, 0);
-      return {
-        ...profit,
-        amount: profit.amount - monthExpenses,
-        category: 'Net Profit'
-      };
-    });
-    
-    // Calculate summary metrics
-    const totalRevenue = mockRevenue.reduce((sum, item) => sum + item.amount, 0);
-    const totalExpenses = mockExpenses.reduce((sum, item) => sum + item.amount, 0);
-    
+  // (useEffect and processApiData remain the same)
+  useEffect(() => {
+    fetchFinancialData();
+  }, [reportType, timeFrame, startDate, endDate]);
+
+  const processApiData = (data) => {
+    // Process transactions data
+    const transactions = data.transactions.map(transaction => ({
+      ...transaction,
+      date: transaction.date ? parseISO(transaction.date) : new Date(),
+      formattedDate: transaction.date ? format(parseISO(transaction.date), 'MMM dd, yyyy') : 'N/A',
+      formattedAmount: `$${Number(transaction.amount).toFixed(2)}`
+    }));
+
+    // Separate revenue and expenses
+    const revenue = transactions.filter(t => t.type === 'income');
+    const expenses = transactions.filter(t => t.type === 'expense');
+
+    // Calculate summary
+    const totalRevenue = revenue.reduce((sum, item) => sum + Number(item.amount), 0);
+    const totalExpenses = expenses.reduce((sum, item) => sum + Number(item.amount), 0);
+    const netProfit = totalRevenue - totalExpenses;
+
+    // Update state
     setFinancialData({
-      revenue: mockRevenue,
-      expenses: mockExpenses,
-      profits,
-      transactions: mockTransactions
+      revenue,
+      expenses,
+      transactions
     });
-    
+
     setSummary({
       totalRevenue,
       totalExpenses,
-      netProfit: totalRevenue - totalExpenses,
-      transactionCount: mockTransactions.length
+      netProfit,
+      transactionCount: transactions.length
     });
   };
-  
-  // Helper function to prepare chart data based on report type
-  const getChartData = () => {
-    switch (reportType) {
-      case 'revenue':
-        return prepareChartData(financialData.revenue);
-      case 'expenses':
-        return prepareChartData(financialData.expenses);
-      case 'profits':
-        return prepareChartData(financialData.profits);
-      default:
-        return [];
+
+
+  const handleSaveTransaction = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const transactionData = {
+        ...transactionForm,
+        date: format(transactionForm.date, 'yyyy-MM-dd'),
+        amount: Number(transactionForm.amount)
+      };
+
+      if (currentTransaction) {
+        await axios.put(`${API_BASE_URL}/api/finance/transactions/${transactionForm.id}`, transactionData);
+      } else {
+        await axios.post(`${API_BASE_URL}/api/finance/transactions`, transactionData);
+      }
+      fetchFinancialData();
+      handleCloseTransactionModal();
+    } catch (err) {
+      console.error('Error saving transaction:', err);
+      setError(err.response?.data?.message || 'Failed to save the transaction.');
+    } finally {
+      setLoading(false);
     }
   };
-  
-  // Prepare chart data by aggregating by month/category
-  const prepareChartData = (data) => {
-    if (!data || data.length === 0) return [];
-    
-    // Group by month
-    const groupedByMonth = data.reduce((acc, item) => {
-      const monthName = item.monthName || format(parseISO(item.date), 'MMM yyyy');
-      
-      if (!acc[monthName]) {
-        acc[monthName] = {};
-      }
-      
-      if (!acc[monthName][item.category]) {
-        acc[monthName][item.category] = 0;
-      }
-      
-      acc[monthName][item.category] += item.amount;
-      return acc;
-    }, {});
-    
-    // Convert to chart format
-    return Object.keys(groupedByMonth).map(month => {
-      return {
-        name: month,
-        ...groupedByMonth[month]
-      };
+
+  const handleDeleteTransaction = async (id) => {
+    setLoading(true);
+    setError(null);
+    try {
+      await axios.delete(`${API_BASE_URL}/api/finance/transactions/${id}`);
+      fetchFinancialData();
+    } catch (err) {
+      console.error('Error deleting transaction:', err);
+      setError(err.response?.data?.message || 'Failed to delete the transaction.');
+    } finally {
+      setLoading(false);
+      setDeleteConfirmOpen(false);
+    }
+  };
+
+  // Handle opening transaction modal for adding new transaction
+  const handleAddTransaction = () => {
+    setCurrentTransaction(null);
+    setTransactionForm({
+      id: '',
+      date: new Date(),
+      description: '',
+      amount: '',
+      type: 'income'
+    });
+    setOpenTransactionModal(true);
+  };
+
+  // Handle opening transaction modal for editing existing transaction
+  const handleEditTransaction = (transaction) => {
+    setCurrentTransaction(transaction);
+    setTransactionForm({
+      id: transaction.id,
+      date: transaction.date,
+      description: transaction.description,
+      amount: transaction.amount.toString(),
+      type: transaction.type
+    });
+    setOpenTransactionModal(true);
+  };
+
+  // Handle closing transaction modal
+  const handleCloseTransactionModal = () => {
+    setOpenTransactionModal(false);
+    setCurrentTransaction(null);
+  };
+
+  // Handle opening delete confirmation dialog
+  const handleOpenDeleteConfirm = (transaction) => {
+    setCurrentTransaction(transaction);
+    setDeleteConfirmOpen(true);
+  };
+
+  // Handle closing delete confirmation dialog
+  const handleCloseDeleteConfirm = () => {
+    setDeleteConfirmOpen(false);
+    setCurrentTransaction(null);
+  };
+
+  // Handle form field changes
+  const handleFormChange = (field, value) => {
+    setTransactionForm({
+      ...transactionForm,
+      [field]: value
     });
   };
-  
-  // Get categories for the selected report type
-  const getCategories = () => {
-    const data = financialData[reportType] || [];
-    return [...new Set(data.map(item => item.category))];
+
+  // Get chart data based on report type and time frame
+  const getChartData = () => {
+    const { revenue, expenses } = financialData;
+    let data = [];
+
+    if (timeFrame === 'monthly') {
+      // Group by month
+      const months = {};
+      
+      // Process revenue
+      revenue.forEach(item => {
+        const monthKey = format(item.date, 'yyyy-MM');
+        const monthLabel = format(item.date, 'MMM yyyy');
+        
+        if (!months[monthKey]) {
+          months[monthKey] = { name: monthLabel, revenue: 0, expenses: 0 };
+        }
+        months[monthKey].revenue += Number(item.amount);
+      });
+      
+      // Process expenses
+      expenses.forEach(item => {
+        const monthKey = format(item.date, 'yyyy-MM');
+        const monthLabel = format(item.date, 'MMM yyyy');
+        
+        if (!months[monthKey]) {
+          months[monthKey] = { name: monthLabel, revenue: 0, expenses: 0 };
+        }
+        months[monthKey].expenses += Number(item.amount);
+      });
+      
+      // Convert to array and sort by date
+      data = Object.values(months).sort((a, b) => 
+        new Date(a.name) - new Date(b.name)
+      );
+    } else {
+      // Daily view
+      const days = {};
+      
+      // Process revenue
+      revenue.forEach(item => {
+        const dayKey = format(item.date, 'yyyy-MM-dd');
+        const dayLabel = format(item.date, 'MMM dd');
+        
+        if (!days[dayKey]) {
+          days[dayKey] = { name: dayLabel, revenue: 0, expenses: 0 };
+        }
+        days[dayKey].revenue += Number(item.amount);
+      });
+      
+      // Process expenses
+      expenses.forEach(item => {
+        const dayKey = format(item.date, 'yyyy-MM-dd');
+        const dayLabel = format(item.date, 'MMM dd');
+        
+        if (!days[dayKey]) {
+          days[dayKey] = { name: dayLabel, revenue: 0, expenses: 0 };
+        }
+        days[dayKey].expenses += Number(item.amount);
+      });
+      
+      // Convert to array and sort by date
+      data = Object.values(days).sort((a, b) => 
+        new Date(a.name) - new Date(b.name)
+      );
+    }
+
+    return data;
   };
-  
-  // Export to Excel
+
+  // Export data to Excel
   const exportToExcel = () => {
-    const workbook = XLSX.utils.book_new();
+    const { transactions } = financialData;
     
-    // Add summary sheet
-    const summaryData = [
-      ['Financial Summary Report'],
-      ['Period', `${format(startDate, 'MMM dd, yyyy')} to ${format(endDate, 'MMM dd, yyyy')}`],
-      [''],
-      ['Metric', 'Amount (Rs)'],
-      ['Total Revenue', summary.totalRevenue.toLocaleString()],
-      ['Total Expenses', summary.totalExpenses.toLocaleString()],
-      ['Net Profit', summary.netProfit.toLocaleString()],
-      ['Transaction Count', summary.transactionCount]
-    ];
+    // Prepare data for export
+    const exportData = transactions.map(item => ({
+      'Transaction ID': item.id,
+      'Date': item.formattedDate,
+      'Description': item.description,
+      'Type': item.type === 'income' ? 'Income' : 'Expense',
+      'Amount': item.formattedAmount
+    }));
     
-    const summarySheet = XLSX.utils.aoa_to_sheet(summaryData);
-    XLSX.utils.book_append_sheet(workbook, summarySheet, 'Summary');
+    // Create worksheet
+    const ws = XLSX.utils.json_to_sheet(exportData);
     
-    // Add detailed data sheets
-    ['revenue', 'expenses', 'profits'].forEach(type => {
-      if (financialData[type] && financialData[type].length > 0) {
-        const sheetData = [
-          [`${type.charAt(0).toUpperCase() + type.slice(1)} Report`],
-          ['Date', 'Category', 'Amount (Rs)']
-        ];
-        
-        financialData[type].forEach(item => {
-          sheetData.push([
-            item.monthName || format(parseISO(item.date), 'MMM dd, yyyy'),
-            item.category,
-            item.amount.toLocaleString()
-          ]);
-        });
-        
-        const sheet = XLSX.utils.aoa_to_sheet(sheetData);
-        XLSX.utils.book_append_sheet(workbook, sheet, type.charAt(0).toUpperCase() + type.slice(1));
-      }
-    });
+    // Create workbook
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Transactions');
     
-    // Generate Excel file
-    XLSX.writeFile(workbook, `Financial_Report_${format(new Date(), 'yyyy-MM-dd')}.xlsx`);
+    // Generate filename with date range
+    const startDateStr = format(startDate, 'yyyy-MM-dd');
+    const endDateStr = format(endDate, 'yyyy-MM-dd');
+    const fileName = `Financial_Report_${startDateStr}_to_${endDateStr}.xlsx`;
+    
+    // Save file
+    XLSX.writeFile(wb, fileName);
   };
-  
-  // Export to PDF
+
+  // Export data to PDF
   const exportToPDF = () => {
-    const doc = new jsPDF('portrait', 'pt', 'a4');
-    const pageWidth = doc.internal.pageSize.getWidth();
-    const margin = 40;
-    let y = margin;
+    const { transactions } = financialData;
+    const startDateStr = format(startDate, 'MMM dd, yyyy');
+    const endDateStr = format(endDate, 'MMM dd, yyyy');
+    
+    // Create PDF document
+    const doc = new jsPDF();
     
     // Add title
     doc.setFontSize(18);
-    doc.text('Financial Report', pageWidth / 2, y, { align: 'center' });
-    y += 30;
+    doc.text('Financial Transaction Report', 14, 22);
     
-    // Add period
+    // Add date range
     doc.setFontSize(12);
-    doc.text(`Period: ${format(startDate, 'MMM dd, yyyy')} to ${format(endDate, 'MMM dd, yyyy')}`, pageWidth / 2, y, { align: 'center' });
-    y += 40;
+    doc.text(`Period: ${startDateStr} to ${endDateStr}`, 14, 32);
     
-    // Add summary table
-    doc.setFontSize(14);
-    doc.text('Financial Summary', margin, y);
-    y += 20;
+    // Add summary
+    doc.text(`Total Revenue: $${summary.totalRevenue.toFixed(2)}`, 14, 42);
+    doc.text(`Total Expenses: $${summary.totalExpenses.toFixed(2)}`, 14, 52);
+    doc.text(`Net Profit: $${summary.netProfit.toFixed(2)}`, 14, 62);
+    doc.text(`Total Transactions: ${summary.transactionCount}`, 14, 72);
     
-    const summaryData = [
-      ['Metric', 'Amount (Rs)'],
-      ['Total Revenue', summary.totalRevenue.toLocaleString()],
-      ['Total Expenses', summary.totalExpenses.toLocaleString()],
-      ['Net Profit', summary.netProfit.toLocaleString()],
-      ['Transaction Count', summary.transactionCount.toString()]
-    ];
+    // Prepare data for table
+    const tableData = transactions.map(item => [
+      item.id,
+      item.formattedDate,
+      item.description,
+      item.type === 'income' ? 'Income' : 'Expense',
+      item.formattedAmount
+    ]);
     
+    // Add table
     doc.autoTable({
-      startY: y,
-      head: [summaryData[0]],
-      body: summaryData.slice(1),
-      margin: { left: margin, right: margin },
-      theme: 'grid'
+      startY: 80,
+      head: [['ID', 'Date', 'Description', 'Type', 'Amount']],
+      body: tableData,
+      theme: 'striped',
+      headStyles: { fillColor: [66, 139, 202] }
     });
     
-    // Save the PDF
-    doc.save(`Financial_Report_${format(new Date(), 'yyyy-MM-dd')}.pdf`);
+    // Save PDF
+    doc.save(`Financial_Report_${format(startDate, 'yyyy-MM-dd')}_to_${format(endDate, 'yyyy-MM-dd')}.pdf`);
   };
-  
+
   // Print report
-  const printReport = () => {
-    const printWindow = window.open('', '_blank');
-    
-    printWindow.document.write(`
-      <html>
-        <head>
-          <title>Financial Report</title>
-          <style>
-            body { font-family: Arial, sans-serif; margin: 20px; }
-            h1, h2 { text-align: center; }
-            .summary { margin: 20px 0; }
-            table { width: 100%; border-collapse: collapse; margin: 20px 0; }
-            th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-            th { background-color: #f2f2f2; }
-            .footer { margin-top: 30px; text-align: center; font-size: 12px; }
-          </style>
-        </head>
-        <body>
-          <h1>Financial Report</h1>
-          <h2>Period: ${format(startDate, 'MMM dd, yyyy')} to ${format(endDate, 'MMM dd, yyyy')}</h2>
-          
-          <div class="summary">
-            <h3>Financial Summary</h3>
-            <table>
-              <tr><th>Metric</th><th>Amount (Rs)</th></tr>
-              <tr><td>Total Revenue</td><td>${summary.totalRevenue.toLocaleString()}</td></tr>
-              <tr><td>Total Expenses</td><td>${summary.totalExpenses.toLocaleString()}</td></tr>
-              <tr><td>Net Profit</td><td>${summary.netProfit.toLocaleString()}</td></tr>
-              <tr><td>Transaction Count</td><td>${summary.transactionCount}</td></tr>
-            </table>
-          </div>
-        </body>
-      </html>
-    `);
-    
-    printWindow.document.close();
-    printWindow.focus();
-    
-    // Print after content is loaded
-    setTimeout(() => {
-      printWindow.print();
-      printWindow.close();
-    }, 500);
+  const handlePrint = () => {
+    window.print();
   };
-  
+
   return (
-    <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-      <Paper sx={{ p: 3, mb: 4 }}>
-        <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
-          <Typography variant="h4" component="h1" gutterBottom>
-            Financial Reports
-          </Typography>
-          
-          <Box>
-            <Tooltip title="Refresh Data">
-              <IconButton onClick={fetchFinancialData} disabled={loading}>
-                <RefreshIcon />
-              </IconButton>
-            </Tooltip>
-            
-            <Tooltip title="Toggle Filters">
-              <IconButton onClick={() => setShowFilters(!showFilters)}>
-                <FilterListIcon />
-              </IconButton>
-            </Tooltip>
-            
-            <Tooltip title="Export to Excel">
-              <IconButton onClick={exportToExcel} disabled={loading}>
-                <FileDownloadIcon />
-              </IconButton>
-            </Tooltip>
-            
-            <Tooltip title="Export to PDF">
-              <IconButton onClick={exportToPDF} disabled={loading}>
-                <PictureAsPdfIcon />
-              </IconButton>
-            </Tooltip>
-            
-            <Tooltip title="Print Report">
-              <IconButton onClick={printReport} disabled={loading}>
-                <PrintIcon />
-              </IconButton>
-            </Tooltip>
-          </Box>
-        </Box>
-        
+    <>
+      <FinancialManagerNav />
+      <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+        {/* Error Alert */}
+        {error && (
+          <Alert severity="error" sx={{ mb: 2 }}>
+            <AlertTitle>Error</AlertTitle>
+            {error}
+          </Alert>
+        )}
+
+        {/* Header */}
+        <Grid container spacing={3} alignItems="center" sx={{ mb: 3 }}>
+          <Grid item xs={12} md={6}>
+            <Typography variant="h4" component="h1" gutterBottom>
+              Financial Reports
+            </Typography>
+          </Grid>
+          <Grid item xs={12} md={6} sx={{ textAlign: { xs: 'left', md: 'right' } }}>
+            <Button 
+              variant="contained" 
+              startIcon={<AddIcon />} 
+              onClick={handleAddTransaction}
+              sx={{ mr: 1 }}
+            >
+              Add Transaction
+            </Button>
+            <Button 
+              variant="outlined" 
+              startIcon={<RefreshIcon />} 
+              onClick={fetchFinancialData}
+              sx={{ mr: 1 }}
+            >
+              Refresh
+            </Button>
+          </Grid>
+        </Grid>
+
         {/* Filters */}
-        {showFilters && (
-          <Box mb={3} p={2} bgcolor="background.default" borderRadius={1}>
-            <Grid container spacing={3} alignItems="center">
-              <Grid item xs={12} sm={3}>
-                <FormControl fullWidth size="small">
-                  <InputLabel>Report Type</InputLabel>
-                  <Select
-                    value={reportType}
-                    label="Report Type"
-                    onChange={(e) => setReportType(e.target.value)}
-                  >
-                    <MenuItem value="revenue">Revenue</MenuItem>
-                    <MenuItem value="expenses">Expenses</MenuItem>
-                    <MenuItem value="profits">Profits</MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
-              
-              <Grid item xs={12} sm={3}>
-                <FormControl fullWidth size="small">
-                  <InputLabel>Time Frame</InputLabel>
-                  <Select
-                    value={timeFrame}
-                    label="Time Frame"
-                    onChange={(e) => setTimeFrame(e.target.value)}
-                  >
-                    <MenuItem value="daily">Daily</MenuItem>
-                    <MenuItem value="weekly">Weekly</MenuItem>
-                    <MenuItem value="monthly">Monthly</MenuItem>
-                    <MenuItem value="quarterly">Quarterly</MenuItem>
-                    <MenuItem value="yearly">Yearly</MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
-              
-              <Grid item xs={12} sm={3}>
-                <LocalizationProvider dateAdapter={AdapterDateFns}>
-                  <DatePicker
-                    label="Start Date"
-                    value={startDate}
-                    onChange={(newValue) => setStartDate(newValue)}
-                    slotProps={{ textField: { size: 'small', fullWidth: true } }}
-                  />
-                </LocalizationProvider>
-              </Grid>
-              
-              <Grid item xs={12} sm={3}>
-                <LocalizationProvider dateAdapter={AdapterDateFns}>
-                  <DatePicker
-                    label="End Date"
-                    value={endDate}
-                    onChange={(newValue) => setEndDate(newValue)}
-                    slotProps={{ textField: { size: 'small', fullWidth: true } }}
-                  />
-                </LocalizationProvider>
-              </Grid>
-            </Grid>
-          </Box>
-        )}
-        
-        {/* Loading indicator */}
-        {loading && (
-          <Box display="flex" justifyContent="center" my={4}>
-            <CircularProgress />
-          </Box>
-        )}
-        
-        {/* Summary Cards */}
-        {!loading && (
-          <Grid container spacing={3} mb={4}>
+        <Paper sx={{ p: 2, mb: 3 }}>
+          <Grid container spacing={2} alignItems="center">
             <Grid item xs={12} sm={6} md={3}>
-              <Card sx={{ bgcolor: '#e3f2fd', height: '100%' }}>
-                <CardContent>
-                  <Typography color="textSecondary" gutterBottom>
-                    Total Revenue
-                  </Typography>
-                  <Typography variant="h4" component="div">
-                    LKR {summary.totalRevenue.toLocaleString()}
-                  </Typography>
-                </CardContent>
-              </Card>
+              <FormControl fullWidth>
+                <InputLabel>Report Type</InputLabel>
+                <Select
+                  value={reportType}
+                  label="Report Type"
+                  onChange={(e) => setReportType(e.target.value)}
+                >
+                  <MenuItem value="revenue">Revenue</MenuItem>
+                  <MenuItem value="expenses">Expenses</MenuItem>
+                  <MenuItem value="profit">Profit/Loss</MenuItem>
+                  <MenuItem value="transactions">All Transactions</MenuItem>
+                </Select>
+              </FormControl>
             </Grid>
-            
             <Grid item xs={12} sm={6} md={3}>
-              <Card sx={{ bgcolor: '#fff8e1', height: '100%' }}>
-                <CardContent>
-                  <Typography color="textSecondary" gutterBottom>
-                    Total Expenses
-                  </Typography>
-                  <Typography variant="h4" component="div">
-                    LKR {summary.totalExpenses.toLocaleString()}
-                  </Typography>
-                </CardContent>
-              </Card>
+              <FormControl fullWidth>
+                <InputLabel>Time Frame</InputLabel>
+                <Select
+                  value={timeFrame}
+                  label="Time Frame"
+                  onChange={(e) => setTimeFrame(e.target.value)}
+                >
+                  <MenuItem value="daily">Daily</MenuItem>
+                  <MenuItem value="monthly">Monthly</MenuItem>
+                </Select>
+              </FormControl>
             </Grid>
-            
             <Grid item xs={12} sm={6} md={3}>
-              <Card sx={{ 
-                bgcolor: summary.netProfit >= 0 ? '#e8f5e9' : '#ffebee', 
-                height: '100%' 
-              }}>
-                <CardContent>
-                  <Typography color="textSecondary" gutterBottom>
-                    Net Profit
-                  </Typography>
-                  <Typography variant="h4" component="div">
-                    LKR {summary.netProfit.toLocaleString()}
-                  </Typography>
-                </CardContent>
-              </Card>
+              <LocalizationProvider dateAdapter={AdapterDateFns}>
+                <DatePicker
+                  label="Start Date"
+                  value={startDate}
+                  onChange={(newValue) => setStartDate(newValue)}
+                  renderInput={(params) => <TextField {...params} fullWidth />}
+                />
+              </LocalizationProvider>
             </Grid>
-            
             <Grid item xs={12} sm={6} md={3}>
-              <Card sx={{ bgcolor: '#f3e5f5', height: '100%' }}>
-                <CardContent>
-                  <Typography color="textSecondary" gutterBottom>
-                    Transactions
-                  </Typography>
-                  <Typography variant="h4" component="div">
-                    {summary.transactionCount}
-                  </Typography>
-                </CardContent>
-              </Card>
+              <LocalizationProvider dateAdapter={AdapterDateFns}>
+                <DatePicker
+                  label="End Date"
+                  value={endDate}
+                  onChange={(newValue) => setEndDate(newValue)}
+                  renderInput={(params) => <TextField {...params} fullWidth />}
+                />
+              </LocalizationProvider>
             </Grid>
           </Grid>
-        )}
-        
-        {/* Chart Section */}
-        <Box mb={4}>
-          <Typography variant="h6" gutterBottom>
-            {reportType.charAt(0).toUpperCase() + reportType.slice(1)} Trends
-          </Typography>
-          
-          <Paper sx={{ p: 2, height: 400 }}>
-            {!loading && financialData[reportType].length > 0 ? (
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart
-                  data={getChartData()}
-                  margin={{ top: 20, right: 30, left: 20, bottom: 70 }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis 
-                    dataKey="name" 
-                    angle={-45} 
-                    textAnchor="end"
-                    height={70}
-                  />
-                  <YAxis />
-                  <RechartsTooltip formatter={(value) => `LKR ${value.toLocaleString()}`} />
-                  <Legend />
-                  {getCategories().map((category, index) => (
-                    <Bar 
-                      key={category}
-                      dataKey={category} 
-                      fill={COLORS[index % COLORS.length]} 
-                      name={category}
-                    />
-                  ))}
-                </BarChart>
-              </ResponsiveContainer>
-            ) : (
-              <Box height="100%" display="flex" justifyContent="center" alignItems="center">
-                <Typography variant="body1" color="textSecondary">
-                  No data available for the selected period
-                </Typography>
-              </Box>
-            )}
-          </Paper>
-        </Box>
-        
+        </Paper>
 
-        
+        {/* Summary Cards */}
+        <Grid container spacing={3} sx={{ mb: 3 }}>
+          <Grid item xs={12} sm={6} md={3}>
+            <Card>
+              <CardContent>
+                <Typography color="textSecondary" gutterBottom>
+                  Total Revenue
+                </Typography>
+                <Typography variant="h5" component="div">
+                  ${summary.totalRevenue.toFixed(2)}
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+          <Grid item xs={12} sm={6} md={3}>
+            <Card>
+              <CardContent>
+                <Typography color="textSecondary" gutterBottom>
+                  Total Expenses
+                </Typography>
+                <Typography variant="h5" component="div">
+                  ${summary.totalExpenses.toFixed(2)}
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+          <Grid item xs={12} sm={6} md={3}>
+            <Card>
+              <CardContent>
+                <Typography color="textSecondary" gutterBottom>
+                  Net Profit
+                </Typography>
+                <Typography variant="h5" component="div" color={summary.netProfit >= 0 ? 'success.main' : 'error.main'}>
+                  ${summary.netProfit.toFixed(2)}
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+          <Grid item xs={12} sm={6} md={3}>
+            <Card>
+              <CardContent>
+                <Typography color="textSecondary" gutterBottom>
+                  Transactions
+                </Typography>
+                <Typography variant="h5" component="div">
+                  {summary.transactionCount}
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+        </Grid>
+
+        {/* Chart */}
+        {reportType !== 'transactions' && (
+          <Paper sx={{ p: 2, mb: 3 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
+              <Typography variant="h6" component="h2">
+                {reportType === 'revenue' ? 'Revenue' : reportType === 'expenses' ? 'Expenses' : 'Profit/Loss'} Chart
+              </Typography>
+              <Box>
+                <Tooltip title="Export to Excel">
+                  <IconButton onClick={exportToExcel}>
+                    <FileDownloadIcon />
+                  </IconButton>
+                </Tooltip>
+                <Tooltip title="Export to PDF">
+                  <IconButton onClick={exportToPDF}>
+                    <PictureAsPdfIcon />
+                  </IconButton>
+                </Tooltip>
+                <Tooltip title="Print">
+                  <IconButton onClick={handlePrint}>
+                    <PrintIcon />
+                  </IconButton>
+                </Tooltip>
+              </Box>
+            </Box>
+            <Box sx={{ height: 300 }}>
+              {loading ? (
+                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+                  <CircularProgress />
+                </Box>
+              ) : (
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={getChartData()}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" />
+                    <YAxis />
+                    <RechartsTooltip />
+                    <Legend />
+                    {(reportType === 'revenue' || reportType === 'profit') && (
+                      <Bar dataKey="revenue" name="Revenue" fill="#4caf50" />
+                    )}
+                    {(reportType === 'expenses' || reportType === 'profit') && (
+                      <Bar dataKey="expenses" name="Expenses" fill="#f44336" />
+                    )}
+                  </BarChart>
+                </ResponsiveContainer>
+              )}
+            </Box>
+          </Paper>
+        )}
+
         {/* Transactions Table */}
-        <Box mb={4}>
-          <Typography variant="h6" gutterBottom>
-            Recent Transactions
-          </Typography>
-          
-          <TableContainer component={Paper}>
-            <Table sx={{ minWidth: 650 }} size="small">
-              <TableHead>
-                <TableRow>
-                  <TableCell>ID</TableCell>
-                  <TableCell>Date</TableCell>
-                  <TableCell>Description</TableCell>
-                  <TableCell>Type</TableCell>
-                  <TableCell align="right">Amount (Rs)</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {financialData.transactions.slice(0, 10).map((transaction) => (
-                  <TableRow key={transaction.id}>
-                    <TableCell>{transaction.id}</TableCell>
-                    <TableCell>{format(parseISO(transaction.date), 'MMM dd, yyyy')}</TableCell>
-                    <TableCell>{transaction.description}</TableCell>
-                    <TableCell>
-                      <Box
-                        component="span"
-                        sx={{
-                          px: 1,
-                          py: 0.5,
-                          borderRadius: 1,
-                          bgcolor: transaction.type === 'income' ? '#e8f5e9' : '#ffebee',
-                          color: transaction.type === 'income' ? '#2e7d32' : '#c62828'
-                        }}
-                      >
-                        {transaction.type.charAt(0).toUpperCase() + transaction.type.slice(1)}
-                      </Box>
-                    </TableCell>
-                    <TableCell align="right">{transaction.amount.toLocaleString()}</TableCell>
+        <Paper sx={{ p: 2 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
+            <Typography variant="h6" component="h2">
+              Transactions
+            </Typography>
+            <Box>
+              <Tooltip title="Export to Excel">
+                <IconButton onClick={exportToExcel}>
+                  <FileDownloadIcon />
+                </IconButton>
+              </Tooltip>
+              <Tooltip title="Export to PDF">
+                <IconButton onClick={exportToPDF}>
+                  <PictureAsPdfIcon />
+                </IconButton>
+              </Tooltip>
+              <Tooltip title="Print">
+                <IconButton onClick={handlePrint}>
+                  <PrintIcon />
+                </IconButton>
+              </Tooltip>
+            </Box>
+          </Box>
+          {loading ? (
+            <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
+              <CircularProgress />
+            </Box>
+          ) : (
+            <TableContainer>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Date</TableCell>
+                    <TableCell>Description</TableCell>
+                    <TableCell>Type</TableCell>
+                    <TableCell align="right">Amount</TableCell>
+                    <TableCell align="center">Actions</TableCell>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        </Box>
-        
-        {/* Export Options */}
-        <Box display="flex" justifyContent="center" mt={4}>
-          <Button
-            variant="contained"
-            startIcon={<FileDownloadIcon />}
-            onClick={exportToExcel}
-            sx={{ mr: 2 }}
+                </TableHead>
+                <TableBody>
+                  {financialData.transactions.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={5} align="center">
+                        No transactions found for the selected period.
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    financialData.transactions.map((transaction) => (
+                      <TableRow key={transaction.id}>
+                        <TableCell>{transaction.formattedDate}</TableCell>
+                        <TableCell>{transaction.description}</TableCell>
+                        <TableCell>
+                          {transaction.type === 'income' ? 'Income' : 'Expense'}
+                        </TableCell>
+                        <TableCell align="right" sx={{ color: transaction.type === 'income' ? 'success.main' : 'error.main' }}>
+                          {transaction.formattedAmount}
+                        </TableCell>
+                        <TableCell align="center">
+                          <Tooltip title="Edit">
+                            <IconButton size="small" onClick={() => handleEditTransaction(transaction)}>
+                              <EditIcon fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                          <Tooltip title="Delete">
+                            <IconButton size="small" onClick={() => handleOpenDeleteConfirm(transaction)}>
+                              <DeleteIcon fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          )}
+        </Paper>
+      </Container>
+
+      {/* Transaction Form Modal */}
+      <Dialog open={openTransactionModal} onClose={handleCloseTransactionModal} maxWidth="sm" fullWidth>
+        <DialogTitle>
+          {currentTransaction ? 'Edit Transaction' : 'Add New Transaction'}
+        </DialogTitle>
+        <DialogContent>
+          <Grid container spacing={2} sx={{ mt: 1 }}>
+            <Grid item xs={12}>
+              <LocalizationProvider dateAdapter={AdapterDateFns}>
+                <DatePicker
+                  label="Date"
+                  value={transactionForm.date}
+                  onChange={(newValue) => handleFormChange('date', newValue)}
+                  renderInput={(params) => <TextField {...params} fullWidth />}
+                />
+              </LocalizationProvider>
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                label="Description"
+                value={transactionForm.description}
+                onChange={(e) => handleFormChange('description', e.target.value)}
+                fullWidth
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <FormControl fullWidth>
+                <InputLabel>Type</InputLabel>
+                <Select
+                  value={transactionForm.type}
+                  label="Type"
+                  onChange={(e) => handleFormChange('type', e.target.value)}
+                >
+                  <MenuItem value="income">Income</MenuItem>
+                  <MenuItem value="expense">Expense</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                label="Amount"
+                type="number"
+                value={transactionForm.amount}
+                onChange={(e) => handleFormChange('amount', e.target.value)}
+                InputProps={{
+                  startAdornment: <span>$</span>,
+                }}
+                fullWidth
+              />
+            </Grid>
+          </Grid>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseTransactionModal}>Cancel</Button>
+          <Button 
+            onClick={handleSaveTransaction} 
+            variant="contained" 
+            disabled={!transactionForm.description || !transactionForm.amount}
           >
-            Export to Excel
+            Save
           </Button>
-          
-          <Button
-            variant="contained"
-            startIcon={<PictureAsPdfIcon />}
-            onClick={exportToPDF}
-            sx={{ mr: 2 }}
+        </DialogActions>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={deleteConfirmOpen} onClose={handleCloseDeleteConfirm}>
+        <DialogTitle>Confirm Delete</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to delete this transaction? This action cannot be undone.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDeleteConfirm}>Cancel</Button>
+          <Button 
+            onClick={() => handleDeleteTransaction(currentTransaction?.id)} 
+            color="error"
           >
-            Export to PDF
+            Delete
           </Button>
-          
-          <Button
-            variant="contained"
-            startIcon={<PrintIcon />}
-            onClick={printReport}
-          >
-            Print Report
-          </Button>
-        </Box>
-      </Paper>
-    </Container>
+        </DialogActions>
+      </Dialog>
+    </>
   );
 };
 
