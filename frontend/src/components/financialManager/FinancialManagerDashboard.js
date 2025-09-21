@@ -398,7 +398,7 @@ const FinancialManagerDashboard = () => {
                       <div className="card bg-success bg-opacity-10 h-100">
                         <div className="card-body text-center">
                           <h6 className="text-muted mb-1">Total Income</h6>
-                          <h2 className="fw-bold text-success mb-0">${(financialData.totalIncome).toLocaleString(undefined, {maximumFractionDigits: 2})}</h2>
+                          <h2 className="fw-bold text-success mb-0">LKR {(financialData.totalIncome).toLocaleString(undefined, {maximumFractionDigits: 2})}</h2>
                         </div>
                       </div>
                     </div>
@@ -406,7 +406,7 @@ const FinancialManagerDashboard = () => {
                       <div className="card bg-danger bg-opacity-10 h-100">
                         <div className="card-body text-center">
                           <h6 className="text-muted mb-1">Total Expenses</h6>
-                          <h2 className="fw-bold text-danger mb-0">${(financialData.totalExpenses).toLocaleString(undefined, {maximumFractionDigits: 2})}</h2>
+                          <h2 className="fw-bold text-danger mb-0">LKR {(financialData.totalExpenses).toLocaleString(undefined, {maximumFractionDigits: 2})}</h2>
                         </div>
                       </div>
                     </div>
@@ -414,7 +414,7 @@ const FinancialManagerDashboard = () => {
                       <div className="card bg-primary bg-opacity-10 h-100">
                         <div className="card-body text-center">
                           <h6 className="text-muted mb-1">Net Profit</h6>
-                          <h2 className="fw-bold text-primary mb-0">${(financialData.netProfit).toLocaleString(undefined, {maximumFractionDigits: 2})}</h2>
+                          <h2 className="fw-bold text-primary mb-0">LKR {(financialData.netProfit).toLocaleString(undefined, {maximumFractionDigits: 2})}</h2>
                         </div>
                       </div>
                     </div>
@@ -495,7 +495,7 @@ const FinancialManagerDashboard = () => {
                                 <td>{transaction.description}</td>
                                 <td>{transaction.category}</td>
                                 <td className={transaction.type === 'income' ? 'text-success fw-bold' : 'text-danger fw-bold'}>
-                                  ${transaction.amount.toLocaleString()}
+                                  LKR {transaction.amount.toLocaleString()}
                                 </td>
                                 <td>
                                   <span className={`badge ${transaction.type === 'income' ? 'bg-success' : 'bg-danger'}`}>{transaction.type}</span>
