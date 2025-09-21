@@ -19,10 +19,16 @@ import LandingPage from './components/landingPage';
 import ReceptionistDashboard from './components/receptionist/ReceptionistDashboard';
 import InstructorDashboard from './components/instructor/instructorDashboard';
 
+// Instructor components
+import InstructorSchedule from './components/instructor/instructorSchedule';
+import InstructorProfile from './components/instructor/instructorProfile';
+import InstructorLeave from './components/instructor/instructorLeave';
+import InstructorPayments from './components/instructor/instructorPayments';
+
 // Admin components 
 import AdminDashboard from './components/admin/adminDashboard';
 import EmployeeManagement from './components/admin/employeeManagement';
-import Feedback from './components/admin/feedback';
+import AdminProfile from './components/admin/adminProfile';
 import FinanceManagement from './components/admin/financeManagement';
 import StudentManagement from './components/admin/studentManagement';
 import VehicleManagement from './components/admin/vehicleManagement';
@@ -41,7 +47,6 @@ import ReceptionistClasses from './components/receptionist/ReceptionistClasses';
 import ReceptionistStudents from './components/receptionist/ReceptionistStudents';
 import ReceptionistLateStudents from './components/receptionist/ReceptionistLateStudents';
 import ReceptionistFeedback from './components/receptionist/ReceptionistFeedback';
-
 
 function App() {
   return (
@@ -64,7 +69,7 @@ function App() {
           <Route path='/employees' element={<EmployeeManagement />} />
           <Route path='/finance' element={<FinanceManagement />} />
           <Route path='/vehicles' element={<VehicleManagement />} />
-          <Route path='/feedback' element={<Feedback />} />
+          <Route path='/admin-profile' element={<AdminProfile />} />
 
           {/* Financial Manager routes */}
           <Route path='/financial-manager-login' element={<FinancialManagerLogin />} />
@@ -82,7 +87,13 @@ function App() {
           <Route path='/Mock-Exam' element={<MockExam />} />
           <Route path='/Student-Profile' element={<StudentProfile />} />
 
-          {/*Receptionist management*/}
+          {/* Instructor management routes */}
+          <Route path='/instructor-schedule' element={<InstructorSchedule />} />
+          <Route path='/instructor-profile' element={<InstructorProfile />} />
+          <Route path='/instructor-leave' element={<InstructorLeave />} />
+          <Route path='/instructor-payments' element={<InstructorPayments />} />
+
+          {/* Receptionist management routes */}
           <Route path='/receptionist-appointments' element={<ReceptionistAppointments />} />
           <Route path='/receptionist-classes' element={<ReceptionistClasses />} />
           <Route path='/receptionist-students' element={<ReceptionistStudents />} />

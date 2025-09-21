@@ -2,7 +2,7 @@ import React from 'react';
 import { Link, useNavigate } from "react-router-dom";
 import { Car, ArrowRight } from 'lucide-react';
 
-function AdminNav({ page }) {
+function InstructorNav({ page }) {
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -14,10 +14,9 @@ function AdminNav({ page }) {
   // Map page prop to nav item text for comparison
   const pageMap = {
     home: "Home",
-    students: "Students",
-    employees: "Employees",
-    finance: "Finance",
-    vehicles: "Vehicles",
+    schedule: "Schedule",
+    payments: "Payments",
+    'leave-requests': "Leave Requests",
     profile: "Profile"
   };
 
@@ -34,9 +33,9 @@ function AdminNav({ page }) {
         }}
       >
         <div className="container-fluid">
-          <Link className="navbar-brand fw-bold fs-3 text-primary d-flex align-items-center" to="/admin-dashboard">
+          <Link className="navbar-brand fw-bold fs-3 text-primary d-flex align-items-center" to="/instructor-dashboard">
             <Car className="me-2" size={32} />
-            DrivePro Admin
+            DrivePro Instructor
           </Link>
           <button
             className="navbar-toggler"
@@ -52,37 +51,31 @@ function AdminNav({ page }) {
           <div className="collapse navbar-collapse" id="navbarNav">
             <div className="ms-auto d-flex flex-column flex-lg-row gap-2 mt-3 mt-lg-0">
               <Link
-                to="/admin-dashboard"
+                to="/instructor-dashboard"
                 className={`fw-medium text-black mx-2 my-auto relative ${page === 'home' ? 'border-b-2 border-primary' : 'nav-link active'}`}
               >
                 Home
               </Link>
               <Link
-                to="/students"
-                className={`fw-medium text-black mx-2 my-auto relative ${page === 'students' ? 'border-b-2 border-primary' : 'nav-link active'}`}
+                to="/instructor-schedule"
+                className={`fw-medium text-black mx-2 my-auto relative ${page === 'schedule' ? 'border-b-2 border-primary' : 'nav-link active'}`}
               >
-                Students
+                Schedule
               </Link>
               <Link
-                to="/employees"
-                className={`fw-medium text-black mx-2 my-auto relative ${page === 'employees' ? 'border-b-2 border-primary' : 'nav-link active'}`}
+                to="/instructor-payments"
+                className={`fw-medium text-black mx-2 my-auto relative ${page === 'payments' ? 'border-b-2 border-primary' : 'nav-link active'}`}
               >
-                Employees
+                Payments
               </Link>
               <Link
-                to="/finance"
-                className={`fw-medium text-black mx-2 my-auto relative ${page === 'finance' ? 'border-b-2 border-primary' : 'nav-link active'}`}
+                to="/instructor-leave"
+                className={`fw-medium text-black mx-2 my-auto relative ${page === 'leave-requests' ? 'border-b-2 border-primary' : 'nav-link active'}`}
               >
-                Finance
+                Leave Requests
               </Link>
               <Link
-                to="/vehicles"
-                className={`fw-medium text-black mx-2 my-auto relative ${page === 'vehicles' ? 'border-b-2 border-primary' : 'nav-link active'}`}
-              >
-                Vehicles
-              </Link>
-              <Link
-                to="/admin-Profile"
+                to="/instructor-profile"
                 className={`fw-medium text-black mx-2 my-auto relative ${page === 'profile' ? 'border-b-2 border-primary' : 'nav-link active'}`}
               >
                 Profile
@@ -101,4 +94,4 @@ function AdminNav({ page }) {
   );
 }
 
-export default AdminNav;
+export default InstructorNav;

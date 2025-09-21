@@ -14,8 +14,8 @@ const StudentManagement = () => {
     age: '',
     nic: '',
     password: '',
-    level: '', 
-    licenseType: ['', '', ''], 
+    level: '',
+    licenseType: [], // Changed to empty array
     role: 'student',
   });
   const [editMode, setEditMode] = useState(false);
@@ -26,18 +26,17 @@ const StudentManagement = () => {
     age: '',
     nic: '',
     level: '',
-    licenseType: ['', '', ''], 
+    licenseType: [], // Changed to empty array
   });
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
   const [deleteStudentId, setDeleteStudentId] = useState(null);
-  const [currentUser, setCurrentUser] = useState({ role: '' }); // Placeholder for current user role
+  const [currentUser, setCurrentUser] = useState({ role: '' });
   const [showTimetableModal, setShowTimetableModal] = useState(false);
   const [selectedStudentId, setSelectedStudentId] = useState(null);
   const [timetables, setTimetables] = useState([]);
 
   useEffect(() => {
-    // Simulate fetching current user role (replace with actual auth logic)
-    setCurrentUser({ role: 'instructor' }); // Example: Set to 'instructor' or 'receptionist'
+    setCurrentUser({ role: 'instructor' });
     axios
       .get('http://localhost:3001/student')
       .then((result) => setStudents(result.data))
@@ -45,8 +44,16 @@ const StudentManagement = () => {
   }, []);
 
   const handleAddStudent = () => {
+    const cleanedStudent = {
+      ...newStudent,
+      licenseType: newStudent.licenseType.filter(type => type && type.trim() !== ''),
+      role: 'student'
+    };
+
+    console.log('Sending student data:', cleanedStudent);
+
     axios
-      .post('http://localhost:3001/student/registerUser', newStudent)
+      .post('http://localhost:3001/student/registerUser', cleanedStudent)
       .then((result) => {
         setStudents([...students, result.data]);
         setNewStudent({
@@ -55,19 +62,22 @@ const StudentManagement = () => {
           age: '',
           nic: '',
           password: '',
-          level: '', 
-          licenseType: ['', '', ''], 
+          level: '',
+          licenseType: [],
           role: 'student',
         });
         setShowModal(false);
         setErrorMsg("");
       })
       .catch((err) => {
+        console.error('Add student error:', err.response);
         if (err.response && err.response.status === 400) {
-          setErrorMsg(err.response.data.error);
+          setErrorMsg(err.response.data.error || 'Validation error occurred');
+        } else if (err.response && err.response.status === 500) {
+          setErrorMsg('Server error - please try again');
         } else {
           console.error(err);
-          setErrorMsg("Something went wrong");
+          setErrorMsg("Something went wrong - check console for details");
         }
       });
   };
@@ -84,7 +94,7 @@ const StudentManagement = () => {
       age: student.age,
       nic: student.nic,
       level: student.level,
-      licenseType: student.licenseType.slice(0, 3) || ['', '', ''], 
+      licenseType: Array.isArray(student.licenseType) ? student.licenseType : [],
     });
     setEditStudentId(id);
     setEditMode(true);
@@ -96,8 +106,13 @@ const StudentManagement = () => {
       setErrorMsg("Only instructors can edit student records.");
       return;
     }
+    const cleanedStudent = {
+      ...editStudent,
+      licenseType: editStudent.licenseType.filter(type => type && type.trim() !== ''),
+    };
+
     axios
-      .put(`http://localhost:3001/student/updateUser/${editStudentId}`, editStudent)
+      .put(`http://localhost:3001/student/updateUser/${editStudentId}`, cleanedStudent)
       .then((result) => {
         setStudents(students.map((s) => (s._id === editStudentId ? result.data : s)));
         setEditMode(false);
@@ -108,14 +123,14 @@ const StudentManagement = () => {
           age: '',
           nic: '',
           level: '',
-          licenseType: ['', '', ''], 
+          licenseType: [],
         });
         setShowModal(false);
         setErrorMsg("");
       })
       .catch((err) => {
         if (err.response && err.response.status === 400) {
-          setErrorMsg(err.response.data.error);
+          setErrorMsg(err.response.data.error || 'Validation error occurred');
         } else {
           console.error(err);
           setErrorMsg("Something went wrong");
@@ -150,8 +165,8 @@ const StudentManagement = () => {
       age: '',
       nic: '',
       password: '',
-      level: '', 
-      licenseType: ['', '', ''],
+      level: '',
+      licenseType: [],
       role: 'student',
     });
     setEditMode(false);
@@ -162,17 +177,17 @@ const StudentManagement = () => {
       age: '',
       nic: '',
       level: '',
-      licenseType: ['', '', ''], 
+      licenseType: [],
     });
     setErrorMsg("");
   };
 
-  const handleViewTimetables = (studentId) => {
-    setSelectedStudentId(studentId);
+  const handleViewTimetables = (id) => {
+    setSelectedStudentId(id);
     axios
-      .get(`http://localhost:3001/student/getStudentTimeSlots/${studentId}`)
+      .get(`http://localhost:3001/student/getStudentTimeSlots/${id}`)
       .then((result) => {
-        console.log('Timetable Data:', result.data); // Debug log
+        console.log('Timetable Data:', result.data);
         setTimetables(result.data);
       })
       .catch((err) => console.log(err));
@@ -187,10 +202,7 @@ const StudentManagement = () => {
 
   return (
     <div>
-      {/* Navbar */}
       <AdminNav page="students" />
-
-      {/* Header Section */}
       <section
         className="text-white pb-5"
         style={{
@@ -208,13 +220,10 @@ const StudentManagement = () => {
           </h6>
         </div>
       </section>
-
-      {/* Main Content */}
       <div className="ms-auto" style={{ marginLeft: '250px', paddingTop: '40px' }}>
         <div className="py-5 bg-light">
           <div className="container">
             <div className="row g-4">
-              {/* Add New Student Button */}
               <div className="col-12">
                 <div className="card border-2 shadow-sm p-3">
                   <div className="card-body p-4">
@@ -237,8 +246,6 @@ const StudentManagement = () => {
                   </div>
                 </div>
               </div>
-
-              {/* Students Table Card */}
               <div className="col-12">
                 <div className="card border-2 shadow-sm p-3">
                   <div className="card-body p-4">
@@ -272,7 +279,7 @@ const StudentManagement = () => {
                               <td>{student.age}</td>
                               <td>{student.nic}</td>
                               <td>{student.level}</td>
-                              <td>{student.licenseType.join(', ')}</td>
+                              <td>{Array.isArray(student.licenseType) ? student.licenseType.join(', ') : ''}</td>
                               <td>
                                 <button
                                   className="btn btn-sm btn-warning me-2"
@@ -305,8 +312,6 @@ const StudentManagement = () => {
             </div>
           </div>
         </div>
-
-        {/* Add/Edit Student Modal */}
         <div className={`modal fade ${showModal ? 'show d-block' : ''}`} tabIndex="-1" style={{ backgroundColor: showModal ? 'rgba(0,0,0,0.5)' : 'transparent' }}>
           <div className="modal-dialog modal-dialog-centered">
             <div className="modal-content">
@@ -315,6 +320,11 @@ const StudentManagement = () => {
                 <button type="button" className="btn-close" onClick={handleCloseModal}></button>
               </div>
               <div className="modal-body">
+                {errorMsg && (
+                  <div className="alert alert-danger" role="alert">
+                    {errorMsg}
+                  </div>
+                )}
                 <div className="d-flex flex-column gap-2">
                   <input
                     type="text"
@@ -379,11 +389,17 @@ const StudentManagement = () => {
                   </select>
                   <select
                     className="form-control mb-2"
-                    value={editMode ? editStudent.licenseType[0] || '' : newStudent.licenseType[0] || ''}
+                    value={editMode ? (editStudent.licenseType[0] || '') : (newStudent.licenseType[0] || '')}
                     onChange={(e) => {
-                      const updatedLicenseType = [...(editMode ? editStudent.licenseType : newStudent.licenseType)];
-                      updatedLicenseType[0] = e.target.value;
-                      editMode ? setEditStudent({ ...editStudent, licenseType: updatedLicenseType }) : setNewStudent({ ...newStudent, licenseType: updatedLicenseType });
+                      const currentLicenseType = editMode ? editStudent.licenseType : newStudent.licenseType;
+                      const updatedLicenseType = [...(Array.isArray(currentLicenseType) ? currentLicenseType : [])];
+                      updatedLicenseType[0] = e.target.value || '';
+                      const cleanedLicenseType = updatedLicenseType.filter(type => type && type.trim() !== '');
+                      if (editMode) {
+                        setEditStudent({ ...editStudent, licenseType: cleanedLicenseType });
+                      } else {
+                        setNewStudent({ ...newStudent, licenseType: cleanedLicenseType });
+                      }
                     }}
                   >
                     <option value="">Select Vehicle 1</option>
@@ -394,11 +410,17 @@ const StudentManagement = () => {
                   </select>
                   <select
                     className="form-control mb-2"
-                    value={editMode ? editStudent.licenseType[1] || '' : newStudent.licenseType[1] || ''}
+                    value={editMode ? (editStudent.licenseType[1] || '') : (newStudent.licenseType[1] || '')}
                     onChange={(e) => {
-                      const updatedLicenseType = [...(editMode ? editStudent.licenseType : newStudent.licenseType)];
-                      updatedLicenseType[1] = e.target.value;
-                      editMode ? setEditStudent({ ...editStudent, licenseType: updatedLicenseType }) : setNewStudent({ ...newStudent, licenseType: updatedLicenseType });
+                      const currentLicenseType = editMode ? editStudent.licenseType : newStudent.licenseType;
+                      const updatedLicenseType = [...(Array.isArray(currentLicenseType) ? currentLicenseType : [])];
+                      updatedLicenseType[1] = e.target.value || '';
+                      const cleanedLicenseType = updatedLicenseType.filter(type => type && type.trim() !== '');
+                      if (editMode) {
+                        setEditStudent({ ...editStudent, licenseType: cleanedLicenseType });
+                      } else {
+                        setNewStudent({ ...newStudent, licenseType: cleanedLicenseType });
+                      }
                     }}
                   >
                     <option value="">Select Vehicle 2</option>
@@ -409,11 +431,17 @@ const StudentManagement = () => {
                   </select>
                   <select
                     className="form-control mb-2"
-                    value={editMode ? editStudent.licenseType[2] || '' : newStudent.licenseType[2] || ''}
+                    value={editMode ? (editStudent.licenseType[2] || '') : (newStudent.licenseType[2] || '')}
                     onChange={(e) => {
-                      const updatedLicenseType = [...(editMode ? editStudent.licenseType : newStudent.licenseType)];
-                      updatedLicenseType[2] = e.target.value;
-                      editMode ? setEditStudent({ ...editStudent, licenseType: updatedLicenseType }) : setNewStudent({ ...newStudent, licenseType: updatedLicenseType });
+                      const currentLicenseType = editMode ? editStudent.licenseType : newStudent.licenseType;
+                      const updatedLicenseType = [...(Array.isArray(currentLicenseType) ? currentLicenseType : [])];
+                      updatedLicenseType[2] = e.target.value || '';
+                      const cleanedLicenseType = updatedLicenseType.filter(type => type && type.trim() !== '');
+                      if (editMode) {
+                        setEditStudent({ ...editStudent, licenseType: cleanedLicenseType });
+                      } else {
+                        setNewStudent({ ...newStudent, licenseType: cleanedLicenseType });
+                      }
                     }}
                   >
                     <option value="">Select Vehicle 3</option>
@@ -435,8 +463,6 @@ const StudentManagement = () => {
             </div>
           </div>
         </div>
-
-        {/* Confirm Delete Modal */}
         <div className={`modal fade ${showConfirmDelete ? 'show d-block' : ''}`} tabIndex="-1" style={{ backgroundColor: showConfirmDelete ? 'rgba(0,0,0,0.5)' : 'transparent' }}>
           <div className="modal-dialog modal-dialog-centered">
             <div className="modal-content">
@@ -454,8 +480,6 @@ const StudentManagement = () => {
             </div>
           </div>
         </div>
-
-        {/* Timetable Modal */}
         <div className={`modal fade ${showTimetableModal ? 'show d-block' : ''}`} tabIndex="-1" style={{ backgroundColor: showTimetableModal ? 'rgba(0,0,0,0.5)' : 'transparent' }}>
           <div className="modal-dialog modal-dialog-centered">
             <div className="modal-content">
