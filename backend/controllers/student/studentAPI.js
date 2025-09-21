@@ -1,12 +1,12 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const router = express.Router();
-const UserModel = require('../../model/Users');
-const PaymentModel = require('../../model/Payment');
-const TimeSlotModel = require('../../model/TimeSlot');
-const AttendanceModel = require('../../model/AttendanceStudent');
-const VehicleModel = require('../../model/Vehicle');
-const MockQuestionModel = require('../../model/MockQuestion');
+const UserModel = require('../../models/Users');
+const PaymentModel = require('../../models/Payment');
+const TimeSlotModel = require('../../models/TimeSlot');
+const AttendanceModel = require('../../models/AttendanceStudent');
+const VehicleModel = require('../../models/Vehicle');
+const MockQuestionModel = require('../../models/MockQuestion');
 
 router.post('/registerUser', (req, res) => {
   UserModel.create(req.body)

@@ -1,8 +1,8 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const router = express.Router();
-const UserModel = require('../../model/Users');
-const LeaveRequestModel = require('../../model/LeaveRequest');
+const UserModel = require('../../models/Users');
+const LeaveRequestModel = require('../../models/LeaveRequest');
 
 router.post('/registerEmployee', (req, res) => {
   UserModel.create(req.body)

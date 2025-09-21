@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const Payment = require('../../model/Payment');
-const Payroll = require('../../model/Payroll');
+const Payment = require('../../models/Payment');
+const Payroll = require('../../models/Payroll');
 const mongoose = require('mongoose');
 
 // Get financial summary (total income, expenses, profit)
