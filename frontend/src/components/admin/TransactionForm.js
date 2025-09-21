@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const TransactionForm = ({ transaction = null, onSubmitSuccess, onCancel }) => {
   const [formData, setFormData] = useState({
@@ -12,6 +14,8 @@ const TransactionForm = ({ transaction = null, onSubmitSuccess, onCancel }) => {
   
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [validationErrors, setValidationErrors] = useState({});
+  const [authToken] = useState(localStorage.getItem('token'));
   
   // If transaction is provided, populate form (for edit mode)
   useEffect(() => {
@@ -28,14 +32,62 @@ const TransactionForm = ({ transaction = null, onSubmitSuccess, onCancel }) => {
   
   const handleChange = (e) => {
     const { name, value } = e.target;
+    
+    // Clear validation error when field is edited
+    if (validationErrors[name]) {
+      setValidationErrors(prev => {
+        const updated = { ...prev };
+        delete updated[name];
+        return updated;
+      });
+    }
+    
     setFormData(prev => ({
       ...prev,
       [name]: value
     }));
   };
   
+  // Validate form data
+  const validateForm = () => {
+    const errors = {};
+    
+    // Required fields
+    if (!formData.date) errors.date = "Date is required";
+    if (!formData.description) errors.description = "Description is required";
+    if (!formData.category) errors.category = "Category is required";
+    
+    // Amount validation
+    if (!formData.amount) {
+      errors.amount = "Amount is required";
+    } else if (isNaN(formData.amount) || parseFloat(formData.amount) <= 0) {
+      errors.amount = "Amount must be a positive number";
+    }
+    
+    // Description length
+    if (formData.description && formData.description.length > 200) {
+      errors.description = "Description must be less than 200 characters";
+    }
+    
+    // Date validation
+    if (formData.date && new Date(formData.date) > new Date()) {
+      errors.date = "Date cannot be in the future";
+    }
+    
+    setValidationErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Validate form before submission
+    if (!validateForm()) {
+      // Show validation errors toast
+      toast.error("Please correct the errors in the form");
+      return;
+    }
+    
     setLoading(true);
     setError(null);
     
@@ -49,17 +101,28 @@ const TransactionForm = ({ transaction = null, onSubmitSuccess, onCancel }) => {
         amount: parseFloat(formData.amount)
       };
       
+      // Configure axios with authentication
+      const axiosConfig = {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${authToken}`
+        }
+      };
+      
       if (transaction) {
         // Update existing transaction
-        response = await axios.put(`${apiUrl}/${transaction._id}`, apiData);
+        response = await axios.put(`${apiUrl}/${transaction._id}`, apiData, axiosConfig);
       } else {
         // Create new transaction
-        response = await axios.post(apiUrl, apiData);
+        response = await axios.post(apiUrl, apiData, axiosConfig);
       }
       
       setLoading(false);
       
       if (response.data.success) {
+        // Show success toast
+        toast.success(transaction ? "Transaction updated successfully" : "Transaction created successfully");
+        
         // Reset form if it's a new transaction
         if (!transaction) {
           setFormData({
@@ -76,7 +139,9 @@ const TransactionForm = ({ transaction = null, onSubmitSuccess, onCancel }) => {
       }
     } catch (err) {
       setLoading(false);
-      setError(err.response?.data?.error || 'An error occurred while saving the transaction');
+      const errorMessage = err.response?.data?.error || 'An error occurred while saving the transaction';
+      setError(errorMessage);
+      toast.error(Array.isArray(errorMessage) ? errorMessage.join(', ') : errorMessage);
       console.error('Transaction save error:', err);
     }
   };
