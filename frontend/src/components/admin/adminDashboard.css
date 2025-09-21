@@ -1,0 +1,56 @@
+/* Admin Dashboard CSS */
+.dashboard-container {
+  padding: 20px;
+}
+
+.summary-card {
+  margin-bottom: 20px;
+  transition: transform 0.3s;
+}
+
+.summary-card:hover {
+  transform: translateY(-5px);
+}
+
+.chart-container {
+  margin-bottom: 30px;
+}
+
+.transaction-table {
+  margin-top: 20px;
+}
+
+.filter-container {
+  margin-bottom: 20px;
+  padding: 15px;
+  background-color: #f8f9fa;
+  border-radius: 5px;
+}
+
+.action-buttons button {
+  margin-right: 5px;
+}
+
+.tab-content {
+  padding-top: 20px;
+}
+
+.form-container {
+  padding: 20px;
+}
+
+.modal-footer {
+  justify-content: space-between;
+}
+
+.dashboard-header {
+  margin-bottom: 25px;
+}
+
+.dashboard-title {
+  font-weight: 600;
+}
+
+.dashboard-subtitle {
+  color: #6c757d;
+}

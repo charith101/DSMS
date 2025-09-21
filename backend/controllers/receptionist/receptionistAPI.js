@@ -1,13 +1,13 @@
 const express = require('express');
 const router = express.Router();
-const TimeSlotModel = require('../../model/TimeSlot');
-const StudentModel = require('../../model/Users');
+const TimeSlotModel = require('../../models/TimeSlot');
+const StudentModel = require('../../models/Users');
 // const InstructorModel = require('../../model/Instructors');
 // const RescheduleModel = require('../../model/Reschedule');
 // const NotificationModel = require('../../model/Notifications');
-const AttendanceModel = require('../../model/AttendanceStudent');
-const FeedbackModel = require('../../model/StudentFeedback');
-const VehicleModel = require('../../model/Vehicle');
+const AttendanceModel = require('../../models/AttendanceStudent');
+const FeedbackModel = require('../../models/StudentFeedback');
+const VehicleModel = require('../../models/Vehicle');
 
 // 1. Get All Appointments (for conflict checker, dashboard, etc.)
 router.get('/appointments/all', (req, res) => {

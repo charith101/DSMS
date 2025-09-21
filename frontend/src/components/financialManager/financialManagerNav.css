@@ -1,0 +1,24 @@
+/* Financial Manager Navigation Styles */
+
+.navbar {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08) !important;
+}
+
+.navbar-brand {
+  font-size: 1.4rem;
+}
+
+.nav-link {
+  font-weight: 500;
+  color: #333 !important;
+  transition: color 0.2s ease;
+}
+
+.nav-link:hover {
+  color: #0d6efd !important;
+}
+
+.nav-link.active {
+  color: #0d6efd !important;
+  border-bottom: 2px solid #0d6efd;
+}

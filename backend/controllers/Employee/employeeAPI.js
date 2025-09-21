@@ -1,10 +1,9 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const router = express.Router();
-const UserModel = require('../../model/Users');
-const LeaveRequestModel = require('../../model/LeaveRequest');
+const UserModel = require('../../models/Users');
+const LeaveRequestModel = require('../../models/LeaveRequest');
 const TimeSlotModel = require('../../model/TimeSlot');
-
 
 // verify instructor access
 const verifyInstructor = async (req, res, next) => {

@@ -33,7 +33,15 @@ import FinanceManagement from './components/admin/financeManagement';
 import StudentManagement from './components/admin/studentManagement';
 import VehicleManagement from './components/admin/vehicleManagement';
 
-// Receptionist components
+// Financial Manager components
+import FinancialManagerDashboard from './components/financialManager/FinancialManagerDashboard';
+import PaymentManagement from './components/financialManager/PaymentManagement';
+import ExpenseManagement from './components/financialManager/ExpenseManagement';
+import FinancialReports from './components/financialManager/FinancialReports';
+import FinancialManagerLogin from './components/financialManager/FinancialManagerLogin';
+import FinancialManagerRegister from './components/financialManager/FinancialManagerRegister';
+
+//Receptionist components
 import ReceptionistAppointments from './components/receptionist/ReceptionistAppointments';
 import ReceptionistClasses from './components/receptionist/ReceptionistClasses';
 import ReceptionistStudents from './components/receptionist/ReceptionistStudents';
@@ -63,13 +71,21 @@ function App() {
           <Route path='/vehicles' element={<VehicleManagement />} />
           <Route path='/admin-profile' element={<AdminProfile />} />
 
+          {/* Financial Manager routes */}
+          <Route path='/financial-manager-login' element={<FinancialManagerLogin />} />
+          <Route path='/financial-manager-register' element={<FinancialManagerRegister />} />
+          <Route path='/financial-manager' element={<FinancialManagerDashboard />} />
+          <Route path='/financial-manager/payments' element={<PaymentManagement />} />
+          <Route path='/financial-manager/expenses' element={<ExpenseManagement />} />
+          <Route path='/financial-manager/reports' element={<FinancialReports />} />
+
           {/* User management */}
           <Route path='/create' element={<AddUser />} />
           <Route path='/update/:id' element={<UpdateUser />} />
           <Route path='/student-feedback' element={<StudentFeedback />} />
-          <Route path='/time-slot' element={<TimeSlot />} />
-          <Route path='/mock-exam' element={<MockExam />} />
-          <Route path='/student-profile' element={<StudentProfile />} />
+          <Route path='/Time-Slot' element={<TimeSlot />} />
+          <Route path='/Mock-Exam' element={<MockExam />} />
+          <Route path='/Student-Profile' element={<StudentProfile />} />
 
           {/* Instructor management routes */}
           <Route path='/instructor-schedule' element={<InstructorSchedule />} />
