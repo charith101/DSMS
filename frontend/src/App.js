@@ -27,6 +27,14 @@ import FinanceManagement from './components/admin/financeManagement';
 import StudentManagement from './components/admin/studentManagement';
 import VehicleManagement from './components/admin/vehicleManagement';
 
+// Financial Manager components
+import FinancialManagerDashboard from './components/financialManager/FinancialManagerDashboard';
+import PaymentManagement from './components/financialManager/PaymentManagement';
+import ExpenseManagement from './components/financialManager/ExpenseManagement';
+import FinancialReports from './components/financialManager/FinancialReports';
+import FinancialManagerLogin from './components/financialManager/FinancialManagerLogin';
+import FinancialManagerRegister from './components/financialManager/FinancialManagerRegister';
+
 //Receptionist components
 import ReceptionistAppointments from './components/receptionist/ReceptionistAppointments';
 import ReceptionistClasses from './components/receptionist/ReceptionistClasses';
@@ -57,6 +65,14 @@ function App() {
           <Route path='/finance' element={<FinanceManagement />} />
           <Route path='/vehicles' element={<VehicleManagement />} />
           <Route path='/feedback' element={<Feedback />} />
+
+          {/* Financial Manager routes */}
+          <Route path='/financial-manager-login' element={<FinancialManagerLogin />} />
+          <Route path='/financial-manager-register' element={<FinancialManagerRegister />} />
+          <Route path='/financial-manager' element={<FinancialManagerDashboard />} />
+          <Route path='/financial-manager/payments' element={<PaymentManagement />} />
+          <Route path='/financial-manager/expenses' element={<ExpenseManagement />} />
+          <Route path='/financial-manager/reports' element={<FinancialReports />} />
 
           {/* User management */}
           <Route path='/create' element={<AddUser />} />
