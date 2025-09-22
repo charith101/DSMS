@@ -1,109 +1,162 @@
 const express = require('express');
 const router = express.Router();
-const TimeSlotModel = require('../../models/TimeSlot');
-const StudentModel = require('../../models/Users');
-// const InstructorModel = require('../../model/Instructors');
-// const RescheduleModel = require('../../model/Reschedule');
-// const NotificationModel = require('../../model/Notifications');
-const AttendanceModel = require('../../models/AttendanceStudent');
-const FeedbackModel = require('../../models/StudentFeedback');
-const VehicleModel = require('../../models/Vehicle');
+const TimeSlot = require('../../models/TimeSlot');
+const User = require('../../models/Users');
+const Vehicle = require('../../models/Vehicle');
 
-// 1. Get All Appointments (for conflict checker, dashboard, etc.)
-router.get('/appointments/all', (req, res) => {
-  TimeSlotModel.find({})
-    .then(data => res.json(data))
-    .catch(err => res.status(500).json({ error: "Server error" }));
-});
-
-// 2. Get Student Timeline (registration, bookings, payments, etc.)
-router.get('/students/:id/timeline', async (req, res) => {
+// Get all time slots
+router.get('/timeslots', async (req, res) => {
   try {
-    const student = await StudentModel.findById(req.params.id);
-    if (!student) return res.status(404).json({ error: "Student not found" });
-
-    // Example timeline data — expand as needed
-    const appointments = await TimeSlotModel.find({ studentId: req.params.id });
-    const feedback = await FeedbackModel.find({ studentId: req.params.id });
-
-    res.json({ student, appointments, feedback });
-  } catch (err) {
-    res.status(500).json({ error: "Server error" });
+    const timeSlots = await TimeSlot.find()
+      .populate('instructorId', 'name')
+      .populate('vehicleId', 'vehicleNumber make model')
+      .populate('bookedStudents', 'name');
+    res.status(200).json(timeSlots);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching time slots', error: error.message });
   }
 });
 
-// 3. Get Instructor Availability
-// router.get('/instructors/availability', (req, res) => {
-//   InstructorModel.find({}, 'name availability')
-//     .then(data => res.json(data))
-//     .catch(err => res.status(500).json({ error: "Server error" }));
-// });
-
-// 4. Get Feedback Summary
-router.get('/feedback/all', (req, res) => {
-  FeedbackModel.find({})
-    .then(data => res.json(data))
-    .catch(err => res.status(500).json({ error: "Server error" }));
+// Get a specific time slot by ID
+router.get('/timeslots/:id', async (req, res) => {
+  try {
+    const timeSlot = await TimeSlot.findById(req.params.id)
+      .populate('instructorId', 'name')
+      .populate('vehicleId', 'vehicleNumber make model')
+      .populate('bookedStudents', 'name');
+    if (!timeSlot) {
+      return res.status(404).json({ message: 'Time slot not found' });
+    }
+    res.status(200).json(timeSlot);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching time slot', error: error.message });
+  }
 });
 
-// 5. Mark Attendance
-router.put('/attendance/update/:id', (req, res) => {
-  AttendanceModel.findByIdAndUpdate(req.params.id, { status: req.body.status }, { new: true })
-    .then(att => res.json(att))
-    .catch(err => res.status(500).json({ error: "Server error" }));
+// Create a new time slot
+router.post('/timeslots', async (req, res) => {
+  try {
+    const { date, startTime, endTime, status, instructorId, vehicleId, maxCapacity } = req.body;
+
+    // Validate required fields
+    if (!date || !startTime || !endTime || !status || !instructorId || !vehicleId || !maxCapacity) {
+      return res.status(400).json({ message: 'All required fields must be provided' });
+    }
+
+    // Validate status
+    if (!['active', 'disabled'].includes(status)) {
+      return res.status(400).json({ message: 'Invalid status value' });
+    }
+
+    // Validate instructorId exists and is an instructor
+    const instructor = await User.findById(instructorId);
+    if (!instructor || instructor.role !== 'instructor') {
+      return res.status(400).json({ message: 'Invalid or non-existent instructor ID' });
+    }
+
+    // Validate vehicleId exists
+    const vehicle = await Vehicle.findById(vehicleId);
+    if (!vehicle) {
+      return res.status(400).json({ message: 'Invalid or non-existent vehicle ID' });
+    }
+
+    // Validate maxCapacity
+    if (maxCapacity < 1) {
+      return res.status(400).json({ message: 'Max capacity must be at least 1' });
+    }
+
+    const timeSlot = new TimeSlot({
+      date,
+      startTime,
+      endTime,
+      status,
+      instructorId,
+      vehicleId,
+      maxCapacity,
+      bookedStudents: []
+    });
+
+    const savedTimeSlot = await timeSlot.save();
+    const populatedTimeSlot = await TimeSlot.findById(savedTimeSlot._id)
+      .populate('instructorId', 'name')
+      .populate('vehicleId', 'vehicleNumber make model');
+
+    res.status(201).json(populatedTimeSlot);
+  } catch (error) {
+    res.status(500).json({ message: 'Error creating time slot', error: error.message });
+  }
 });
 
-// 6. Get Reschedule Requests
-// router.get('/reschedule', (req, res) => {
-//   RescheduleModel.find({})
-//     .then(data => res.json(data))
-//     .catch(err => res.status(500).json({ error: "Server error" }));
-// });
+// Update a time slot
+router.put('/timeslots/:id', async (req, res) => {
+  try {
+    const { date, startTime, endTime, status, instructorId, vehicleId, maxCapacity } = req.body;
 
-// 7. Approve or Reject Reschedule Request
-// router.put('/reschedule/:id/approve', (req, res) => {
-//   RescheduleModel.findByIdAndUpdate(req.params.id, { approved: req.body.approved }, { new: true })
-//     .then(data => res.json(data))
-//     .catch(err => res.status(500).json({ error: "Server error" }));
-// });
+    // Validate status if provided
+    if (status && !['active', 'disabled'].includes(status)) {
+      return res.status(400).json({ message: 'Invalid status value' });
+    }
 
-// 8. Vehicle Usage Tracker
-router.get('/vehicles/status', (req, res) => {
-  VehicleModel.find({})
-    .then(data => res.json(data))
-    .catch(err => res.status(500).json({ error: "Server error" }));
+    // Validate instructorId if provided
+    if (instructorId) {
+      const instructor = await User.findById(instructorId);
+      if (!instructor || instructor.role !== 'instructor') {
+        return res.status(400).json({ message: 'Invalid or non-existent instructor ID' });
+      }
+    }
+
+    // Validate vehicleId if provided
+    if (vehicleId) {
+      const vehicle = await Vehicle.findById(vehicleId);
+      if (!vehicle) {
+        return res.status(400).json({ message: 'Invalid or non-existent vehicle ID' });
+      }
+    }
+
+    // Validate maxCapacity if provided
+    if (maxCapacity && maxCapacity < 1) {
+      return res.status(400).json({ message: 'Max capacity must be at least 1' });
+    }
+
+    const updateData = {};
+    if (date) updateData.date = date;
+    if (startTime) updateData.startTime = startTime;
+    if (endTime) updateData.endTime = endTime;
+    if (status) updateData.status = status;
+    if (instructorId) updateData.instructorId = instructorId;
+    if (vehicleId) updateData.vehicleId = vehicleId;
+    if (maxCapacity) updateData.maxCapacity = maxCapacity;
+
+    const timeSlot = await TimeSlot.findByIdAndUpdate(
+      req.params.id,
+      { $set: updateData },
+      { new: true, runValidators: true }
+    )
+      .populate('instructorId', 'name')
+      .populate('vehicleId', 'vehicleNumber make model')
+      .populate('bookedStudents', 'name');
+
+    if (!timeSlot) {
+      return res.status(404).json({ message: 'Time slot not found' });
+    }
+
+    res.status(200).json(timeSlot);
+  } catch (error) {
+    res.status(500).json({ message: 'Error updating time slot', error: error.message });
+  }
 });
 
-// 9. Notifications: Get All
-// router.get('/notifications', (req, res) => {
-//   NotificationModel.find({})
-//     .then(data => res.json(data))
-//     .catch(err => res.status(500).json({ error: "Server error" }));
-// });
-
-// 10. Notifications: Mark As Read
-// router.put('/notifications/:id/mark-read', (req, res) => {
-//   NotificationModel.findByIdAndUpdate(req.params.id, { read: true }, { new: true })
-//     .then(data => res.json(data))
-//     .catch(err => res.status(500).json({ error: "Server error" }));
-// });
-
-// 11. Smart Suggestions (optional hardcoded or AI-driven)
-router.get('/suggestions', (req, res) => {
-  const suggestions = [
-    "10:00 AM Monday is the most preferred slot.",
-    "Avoid scheduling on Friday evenings – high cancellation rate.",
-    "Angela White has best feedback – schedule peak hours with her."
-  ];
-  res.json(suggestions);
-});
-
-// 12. Search Students (by query param)
-router.get('/students/search', (req, res) => {
-  const q = req.query.q || "";
-  StudentModel.find({ role: 'student', name: { $regex: q, $options: "i" } })
-    .then(data => res.json(data))
-    .catch(err => res.status(500).json({ error: "Server error" }));
+// Delete a time slot
+router.delete('/timeslots/:id', async (req, res) => {
+  try {
+    const timeSlot = await TimeSlot.findByIdAndDelete(req.params.id);
+    if (!timeSlot) {
+      return res.status(404).json({ message: 'Time slot not found' });
+    }
+    res.status(200).json({ message: 'Time slot deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ message: 'Error deleting time slot', error: error.message });
+  }
 });
 
 module.exports = router;
