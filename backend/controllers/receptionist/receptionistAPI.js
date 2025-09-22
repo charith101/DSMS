@@ -4,7 +4,7 @@ const TimeSlot = require('../../models/TimeSlot');
 const User = require('../../models/Users');
 const Vehicle = require('../../models/Vehicle');
 
-// Get all time slots
+// Get all time slot
 router.get('/timeslots', async (req, res) => {
   try {
     const timeSlots = await TimeSlot.find()
