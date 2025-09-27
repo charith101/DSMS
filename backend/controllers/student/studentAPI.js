@@ -7,6 +7,7 @@ const TimeSlotModel = require('../../models/TimeSlot');
 const AttendanceModel = require('../../models/AttendanceStudent');
 const VehicleModel = require('../../models/Vehicle');
 const MockQuestionModel = require('../../models/MockQuestion');
+const StudentFeedbackModel = require('../../models/StudentFeedback');
 
 router.post('/registerUser', (req, res) => {
   UserModel.create(req.body)
@@ -195,6 +196,113 @@ router.get('/getMockQuestions', async (req, res) => {
     res.json(questions);
   } catch (err) {
     res.status(500).json({ message: "Error fetching questions", error: err.message });
+  }
+});
+
+router.get('/getInstructors', async (req, res) => {
+  try {
+    const instructors = await UserModel.find({ role: 'instructor' })
+      .select('name email')
+      .lean();
+    res.json(instructors);
+  } catch (err) {
+    res.status(500).json({ error: 'Server error', details: err.message });
+  }
+});
+
+router.post('/createFeedback', async (req, res) => {
+  try {
+    const { studentId, instructorId, rating, comment } = req.body;
+
+    const student = await UserModel.findById(studentId);
+    if (!student || student.role !== 'student') {
+      return res.status(404).json({ error: 'Student not found' });
+    }
+
+    const instructor = await UserModel.findById(instructorId);
+    if (!instructor || instructor.role !== 'instructor') {
+      return res.status(404).json({ error: 'Instructor not found' });
+    }
+
+    const feedback = await StudentFeedbackModel.create({
+      studentId,
+      instructorId,
+      rating,
+      comment
+    });
+
+    res.status(201).json(feedback);
+  } catch (err) {
+    if (err.code === 11000) {
+      return res.status(400).json({ error: 'Feedback already exists for this student and instructor on this date' });
+    } else if (err.name === 'ValidationError') {
+      return res.status(400).json({ error: err.message });
+    }
+    res.status(500).json({ error: 'Server error', details: err.message });
+  }
+});
+
+router.get('/getFeedbacks/:studentId', async (req, res) => {
+  try {
+    const { studentId } = req.params;
+    
+    const student = await UserModel.findById(studentId);
+    if (!student || student.role !== 'student') {
+      return res.status(404).json({ error: 'Student not found' });
+    }
+
+    const feedbacks = await StudentFeedbackModel.find({ studentId })
+      .populate('instructorId', 'name email')
+      .lean();
+    
+    res.json(feedbacks);
+  } catch (err) {
+    res.status(500).json({ error: 'Server error', details: err.message });
+  }
+});
+
+router.put('/updateFeedback/:id', async (req, res) => {
+  try {
+    const feedback = await StudentFeedbackModel.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { runValidators: true, new: true }
+    );
+
+    if (!feedback) {
+      return res.status(404).json({ error: 'Feedback not found' });
+    }
+
+    const student = await UserModel.findById(feedback.studentId);
+    if (!student || student.role !== 'student') {
+      return res.status(404).json({ error: 'Student not found' });
+    }
+
+    res.json(feedback);
+  } catch (err) {
+    if (err.name === 'ValidationError') {
+      return res.status(400).json({ error: err.message });
+    }
+    res.status(500).json({ error: 'Server error', details: err.message });
+  }
+});
+
+router.delete('/deleteFeedback/:id', async (req, res) => {
+  try {
+    const feedback = await StudentFeedbackModel.findByIdAndDelete(req.params.id);
+
+    if (!feedback) {
+      return res.status(404).json({ error: 'Feedback not found' });
+    }
+
+    const student = await UserModel.findById(feedback.studentId);
+    if (!student || student.role !== 'student') {
+      return res.status(404).json({ error: 'Student not found' });
+    }
+
+    res.json({ message: 'Feedback deleted successfully' });
+  } catch (err) {
+    res.status(500).json({ error: 'Server error', details: err.message });
   }
 });
 
