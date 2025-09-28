@@ -37,19 +37,19 @@ function StudentNav({ page }) {
           </button>
           <div className="collapse navbar-collapse" id="navbarNav">
             <div className="ms-auto d-flex flex-column flex-lg-row gap-2 mt-3 mt-lg-0">
-              <Link to="/student-dashboard" className={`fw-medium mx-2 my-auto relative text-black ${page === 'home' ? 'border-b border-black' : ''}`}>
+              <Link to="/Student/Dashboard" className={`fw-medium mx-2 my-auto relative text-black ${page === 'home' ? 'border-b border-black' : ''}`}>
                 Home
               </Link>
-              <Link to="/Time-Slot" className={`fw-medium mx-2 my-auto relative text-black ${page === 'timeslot' ? 'border-b border-black' : ''}`}>
+              <Link to="/Student/Time-Slot" className={`fw-medium mx-2 my-auto relative text-black ${page === 'timeslot' ? 'border-b border-black' : ''}`}>
                 Pick Time Slot
               </Link>
-              <Link to="/Mock-Exam" className={`fw-medium mx-2 my-auto relative text-black ${page === 'mockexam' ? 'border-b border-black' : ''}`}>
+              <Link to="/Student/Mock-Exam" className={`fw-medium mx-2 my-auto relative text-black ${page === 'mockexam' ? 'border-b border-black' : ''}`}>
                 Mock Exam
               </Link>
-              <Link to="/student-feedback" className={`fw-medium mx-2 my-auto relative text-black ${page === 'feedback' ? 'border-b border-black' : ''}`}>
+              <Link to="/Student/Feedback" className={`fw-medium mx-2 my-auto relative text-black ${page === 'feedback' ? 'border-b border-black' : ''}`}>
                 Feedback
               </Link>
-              <Link to="/Student-Profile" className={`fw-medium mx-2 my-auto relative text-black ${page === 'profile' ? 'border-b border-black' : ''}`}>
+              <Link to="/Student/Profile" className={`fw-medium mx-2 my-auto relative text-black ${page === 'profile' ? 'border-b border-black' : ''}`}>
                 Profile
               </Link>
               <button 
