@@ -13,6 +13,7 @@ import StudentFeedback from './components/student/StudentFeedback';
 import TimeSlot from './components/student/TimeSlot';
 import MockExam from './components/student/MockExam';
 import StudentProfile from './components/student/StudentProfile';
+import StudentPayments from './components/student/StudentPayments';
 
 // Other dashboards
 import LandingPage from './components/landingPage';
@@ -48,6 +49,8 @@ import ReceptionistStudents from './components/receptionist/ReceptionistStudents
 import ReceptionistLateStudents from './components/receptionist/ReceptionistLateStudents';
 import ReceptionistFeedback from './components/receptionist/ReceptionistFeedback';
 
+
+
 function App() {
   return (
     <div>
@@ -59,7 +62,7 @@ function App() {
           <Route path='/register' element={<UserRegister />} />
 
           {/* Dashboards */}
-          <Route path='/student-dashboard' element={<StudentDashboard />} />
+          <Route path='/Student/Dashboard' element={<StudentDashboard />} />
           <Route path='/receptionist-dashboard' element={<ReceptionistDashboard />} />
           <Route path='/instructor-dashboard' element={<InstructorDashboard />} />
           <Route path='/admin-dashboard' element={<AdminDashboard />} />
@@ -82,10 +85,11 @@ function App() {
           {/* User management */}
           <Route path='/create' element={<AddUser />} />
           <Route path='/update/:id' element={<UpdateUser />} />
-          <Route path='/student-feedback' element={<StudentFeedback />} />
-          <Route path='/Time-Slot' element={<TimeSlot />} />
-          <Route path='/Mock-Exam' element={<MockExam />} />
-          <Route path='/Student-Profile' element={<StudentProfile />} />
+          <Route path='/Student/Feedback' element={<StudentFeedback />} />
+          <Route path='/Student/Time-Slot' element={<TimeSlot />} />
+          <Route path='/Student/Mock-Exam' element={<MockExam />} />
+          <Route path='/Student/Profile' element={<StudentProfile />} />
+          <Route path='/Student/Payments' element={<StudentPayments />} />
 
           {/* Instructor management routes */}
           <Route path='/instructor-schedule' element={<InstructorSchedule />} />

@@ -52,7 +52,15 @@ router.put('/updateUser/:id', (req, res) => {
       }
       res.json(user);
     })
-    .catch(err => res.status(500).json({ error: 'Server error' }));
+    .catch(err => {
+      if (err.code === 11000 && err.keyPattern?.email) {
+        return res.status(400).json({ error: "ear:Email already registered" });
+      } else if (err.name === 'ValidationError') {
+        res.status(400).json({ error: err.message });
+      } else {
+        res.status(500).json({ error: 'Server error' });
+      }
+    });
 });
 
 router.delete('/deleteUser/:id', (req, res) => {
