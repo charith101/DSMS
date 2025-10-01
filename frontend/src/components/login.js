@@ -27,7 +27,7 @@ function UserLogin() {
         localStorage.setItem("userId", result.data.id);
         switch (result.data.role) {
           case 'student':
-            navigate('/student-dashboard');
+            navigate('/Student/Dashboard');
             break;
           case 'instructor':
             navigate('/instructor-dashboard');
