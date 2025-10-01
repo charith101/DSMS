@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import jsPDF from 'jspdf';
 import StudentNav from "./StudentNav";
-import { User2 } from "lucide-react";
+import { User2,Edit, FileText, CreditCard } from "lucide-react";
 import ErrorHandle from "../errorHandle";
 import { Link } from "react-router-dom";
 
@@ -118,6 +119,126 @@ function StudentProfile() {
     }
   };
 
+  const handleGenerateReport = async () => {
+    if (!user) {
+      alert('User data not available. Please refresh the page.');
+      return;
+    }
+
+    try {
+      // Fetch attendance, time slots, and feedback concurrently
+      const [attendanceRes, timeSlotsRes, feedbackRes] = await Promise.all([
+        axios.get(`http://localhost:3001/student/getAttendance/${userId}`),
+        axios.get(`http://localhost:3001/student/getStudentTimeSlots/${userId}`),
+        axios.get(`http://localhost:3001/student/getFeedbacks/${userId}`)
+      ]);
+
+      const attendance = attendanceRes.data;
+      const timeSlots = timeSlotsRes.data;
+      const feedbacks = feedbackRes.data;
+
+      // Create PDF
+      const doc = new jsPDF();
+      let yPos = 20;
+
+      // Title
+      doc.setFontSize(20);
+      doc.text('Student Report', 20, yPos);
+      yPos += 15;
+
+      // Personal Details Section
+      doc.setFontSize(14);
+      doc.text('Personal Details', 20, yPos);
+      yPos += 10;
+
+      doc.setFontSize(10);
+      doc.text(`Name: ${user.name}`, 20, yPos); yPos += 7;
+      doc.text(`Email: ${user.email}`, 20, yPos); yPos += 7;
+      doc.text(`Age: ${user.age}`, 20, yPos); yPos += 7;
+      doc.text(`NIC: ${user.nic}`, 20, yPos); yPos += 7;
+      doc.text(`License Types: ${user.licenseType.join(', ')}`, 20, yPos); yPos += 7;
+      doc.text(`Joined: ${new Date(user.createdAt).toLocaleDateString()}`, 20, yPos); yPos += 15;
+
+      // Attendance Section
+      doc.setFontSize(14);
+      doc.text('Attendance Records', 20, yPos);
+      yPos += 10;
+
+      if (attendance.length > 0) {
+        doc.setFontSize(10);
+        attendance.forEach(record => {
+          const slotDate = new Date(record.date).toLocaleDateString();
+          doc.text(`${slotDate} - ${record.status}`, 20, yPos);
+          yPos += 7;
+          if (yPos > 280) {
+            doc.addPage();
+            yPos = 20;
+          }
+        });
+      } else {
+        doc.setFontSize(10);
+        doc.text('No attendance records found.', 20, yPos);
+        yPos += 7;
+      }
+      yPos += 8;
+
+      // Time Slots Section
+      doc.setFontSize(14);
+      doc.text('Booked Time Slots', 20, yPos);
+      yPos += 10;
+
+      if (timeSlots.length > 0) {
+        doc.setFontSize(10);
+        timeSlots.forEach(slot => {
+          const slotDate = new Date(slot.date).toLocaleDateString();
+          const instructor = slot.instructorId?.name || 'N/A';
+          const vehicle = slot.vehicleId?.model || 'N/A';
+          doc.text(`${slotDate} (${slot.startTime} - ${slot.endTime}) - Instructor: ${instructor}, Vehicle: ${vehicle}`, 20, yPos);
+          yPos += 7;
+          if (yPos > 280) {
+            doc.addPage();
+            yPos = 20;
+          }
+        });
+      } else {
+        doc.setFontSize(10);
+        doc.text('No booked time slots found.', 20, yPos);
+        yPos += 7;
+      }
+      yPos += 8;
+
+      // Feedback Section
+      doc.setFontSize(14);
+      doc.text('Feedback Given', 20, yPos);
+      yPos += 10;
+
+      if (feedbacks.length > 0) {
+        doc.setFontSize(10);
+        feedbacks.forEach(fb => {
+          const fbDate = new Date(fb.date).toLocaleDateString();
+          const instructor = fb.instructorId?.name || 'N/A';
+          const comment = fb.comment || 'No comment';
+          doc.text(`Date: ${fbDate}, Instructor: ${instructor}, Rating: ${fb.rating}/5, Comment: ${comment}`, 20, yPos);
+          yPos += 7;
+          if (yPos > 280) {
+            doc.addPage();
+            yPos = 20;
+          }
+        });
+      } else {
+        doc.setFontSize(10);
+        doc.text('No feedback records found.', 20, yPos);
+        yPos += 7;
+      }
+
+      // Save PDF
+      doc.save(`student-report-${user.name.replace(/\s+/g, '-')}.pdf`);
+    } catch (err) {
+      console.error('Error generating report:', err);
+      alert('Failed to generate report. Please try again.');
+    }
+  };
+
   if (loading) {
     return (
       <div 
@@ -140,13 +261,7 @@ function StudentProfile() {
       <StudentNav page="profile" />
       <section
         className="text-white pb-5"
-        style={{
-          background: `linear-gradient(90deg, rgba(13,81,253,1) 20%, rgba(10,132,202,0.3) 100%), url('https://images.unsplash.com/photo-1496185106368-308ed96f204b?q=80&w=2121&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D') center/cover no-repeat`,
-          marginTop: "76px",
-          minHeight: "50vh",
-          display: "flex",
-          alignItems: "center",
-          width: "100%",
+        style={{ background: `linear-gradient(90deg, rgba(13,81,253,1) 20%, rgba(10,132,202,0.3) 100%), url('https://images.unsplash.com/photo-1496185106368-308ed96f204b?q=80&w=2121&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D') center/cover no-repeat`, marginTop: "76px", minHeight: "50vh",  display: "flex", alignItems: "center", width: "100%",
         }}
       >
         <div className="container py-5">
@@ -202,113 +317,59 @@ function StudentProfile() {
               </div>
             </div>
           </div>
-          <div className="d-flex flex-column flex-md-row mt-4 gap-2">
-          <button
-            className="btn btn-primary w-100"
-            onClick={handleEditClick}
-          >
-            Edit Profile
-          </button>
-          <Link
-            to="/Student/Payments"
-            className="btn btn-dark w-100"
-          >
-            View Payments
-          </Link>
-        </div>        
+          <div className="d-flex flex-column mt-4 gap-2">
+            <button className="btn btn-primary w-100 d-flex align-items-center justify-content-center gap-2" onClick={handleEditClick}>
+              <Edit size={18} /> Edit Profile
+            </button>
+            
+            <div className="d-flex gap-2 w-100">
+              <Link to="/Student/Payments" className="btn btn-dark flex-fill d-flex align-items-center justify-content-center gap-2">
+                <CreditCard size={18} /> View Payments
+              </Link>
+              
+              <button className="btn btn-secondary flex-fill d-flex align-items-center justify-content-center gap-2" onClick={handleGenerateReport}>
+                <FileText size={18} /> Generate Report
+              </button>
+            </div>
+          </div>      
         </div>
       </div>
 
       {/* Edit Profile Modal */}
       {showModal && (
-        <div
-          className="modal fade show d-block"
-          style={{ backgroundColor: "rgba(0, 0, 0, 0.5)" }}
-          tabIndex="-1"
-          role="dialog"
-        >
+        <div className="modal fade show d-block" style={{ backgroundColor: "rgba(0, 0, 0, 0.5)" }} tabIndex="-1" role="dialog" >
           <div className="modal-dialog modal-dialog-centered" role="document">
             <div className="modal-content" style={{ borderRadius: "12px", border: "none" }}>
               <div className="modal-header border-0">
                 <h5 className="modal-title fw-bold text-primary">Edit Profile</h5>
-                <button
-                  type="button"
-                  className="btn-close"
-                  onClick={handleModalClose}
-                  aria-label="Close"
-                ></button>
+                <button type="button" className="btn-close" onClick={handleModalClose} aria-label="Close" ></button>
               </div>
               <div className="modal-body p-4">
                 <form onSubmit={handleSaveChanges}>
                   <div className="mb-2">
-                    <label htmlFor="name" className="form-label fw-bold text-dark">
-                      Name
-                    </label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      id="name"
-                      name="name"
-                      value={formData.name}
-                      onChange={handleInputChange}
-                    />
+                    <label htmlFor="name" className="form-label fw-bold text-dark">Name</label>
+                    <input type="text" className="form-control" id="name" name="name" value={formData.name} onChange={handleInputChange} />
                     <ErrorHandle for="name" error={errorMsg} />
                   </div>
                   <div className="mb-2">
-                    <label htmlFor="email" className="form-label fw-bold text-dark">
-                      Email
-                    </label>
-                    <input
-                      type="email"
-                      className="form-control"
-                      id="email"
-                      name="email"
-                      value={formData.email}
-                      onChange={handleInputChange}
-                    />
+                    <label htmlFor="email" className="form-label fw-bold text-dark">Email</label>
+                    <input type="email" className="form-control" id="email" name="email" value={formData.email} onChange={handleInputChange} />
                     <ErrorHandle for="email" error={errorMsg} />
                     <ErrorHandle for="ear" error={errorMsg} />
                   </div>
                   <div className="mb-2">
-                    <label htmlFor="age" className="form-label fw-bold text-dark">
-                      Age
-                    </label>
-                    <input
-                      type="number"
-                      className="form-control"
-                      id="age"
-                      name="age"
-                      value={formData.age}
-                      onChange={handleInputChange}
-                    />
+                    <label htmlFor="age" className="form-label fw-bold text-dark">Age</label>
+                    <input type="number" className="form-control" id="age" name="age" value={formData.age} onChange={handleInputChange} />
                     <ErrorHandle for="age" error={errorMsg} />
                   </div>
                   <div className="mb-2">
-                    <label htmlFor="nic" className="form-label fw-bold text-dark">
-                      NIC
-                    </label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      id="nic"
-                      name="nic"
-                      value={formData.nic}
-                      onChange={handleInputChange}
-                    />
+                    <label htmlFor="nic" className="form-label fw-bold text-dark">NIC</label>
+                    <input type="text" className="form-control" id="nic" name="nic" value={formData.nic} onChange={handleInputChange} />
                     <ErrorHandle for="nic" error={errorMsg} />
                   </div>
                   <div className="mb-2">
-                    <label htmlFor="password" className="form-label fw-bold text-dark">
-                      Password (leave blank to keep current)
-                    </label>
-                    <input
-                      type="password"
-                      className="form-control"
-                      id="password"
-                      name="password"
-                      value={formData.password}
-                      onChange={handleInputChange}
-                    />
+                    <label htmlFor="password" className="form-label fw-bold text-dark">Password (leave blank to keep current)</label>
+                    <input type="password" className="form-control" id="password" name="password" value={formData.password} onChange={handleInputChange} />
                     <ErrorHandle for="password" error={errorMsg} />
                   </div>
                   <div className="mb-2">
@@ -316,24 +377,8 @@ function StudentProfile() {
                     <p className="form-control bg-light">{user.licenseType.join(', ')}</p>
                   </div>
                   <div className="d-flex justify-content-end gap-2">
-                    <button
-                      type="button"
-                      className="btn btn-outline-secondary px-4 py-2"
-                      style={{ borderRadius: "8px", fontWeight: "500" }}
-                      onClick={handleModalClose}
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="submit"
-                      className="btn btn-primary px-4 py-2"
-                      style={{
-                        borderRadius: "8px",
-                        fontWeight: "500",
-                        background: "linear-gradient(135deg, #0d51fdff, #0a84caff)",
-                      }}
-                      disabled={updateLoading}
-                    >
+                    <button type="button" className="btn btn-outline-secondary px-4 py-2" style={{ borderRadius: "8px", fontWeight: "500" }} onClick={handleModalClose} >Cancel</button>
+                    <button type="submit" className="btn btn-primary px-4 py-2" style={{borderRadius: "8px",fontWeight: "500",background: "linear-gradient(135deg, #0d51fdff, #0a84caff)",}} disabled={updateLoading} >
                       {updateLoading ? 'Saving...' : 'Save Changes'}
                     </button>
                   </div>
