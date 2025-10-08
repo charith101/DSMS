@@ -1,23 +1,29 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { UserRoundCheck } from "lucide-react";
 import ReceptionistNav from "./ReceptionistNav";
 import { useNavigate } from "react-router-dom";
 
 function ReceptionistStudentTimeline() {
   const navigate = useNavigate();
-  const timeline = [
-    { label: "Registered", date: "2025-09-01" },
-    { label: "First Class Attended", date: "2025-09-03" },
-    { label: "First Payment Made", date: "2025-09-04" },
-    { label: "Class Completed", date: "2025-09-14" },
-    { label: "Feedback Given", date: "2025-09-15" },
-  ];
+  const [timeline, setTimeline] = useState([]);
+  const [studentName, setStudentName] = useState("Emma Watson"); // Default or from props/param
 
   useEffect(() => {
     if (localStorage.getItem("isAuthenticated") !== "true") {
       navigate("/login");
     }
-  }, []);
+    fetchTimeline();
+  }, [studentName]);
+
+  const fetchTimeline = async () => {
+    try {
+      const response = await fetch(`/receptionist/studentTimeline/${studentName}`);
+      const data = await response.json();
+      setTimeline(data);
+    } catch (err) {
+      console.error('Error fetching timeline');
+    }
+  };
 
   return (
     <div>

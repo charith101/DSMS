@@ -1,21 +1,28 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Lightbulb } from "lucide-react";
 import ReceptionistNav from "./ReceptionistNav";
 import { useNavigate } from "react-router-dom";
 
 function ReceptionistSmartSuggestions() {
   const navigate = useNavigate();
-  const suggestions = [
-    "10:00 AM Monday is the most preferred slot.",
-    "Avoid scheduling on Friday evenings – high cancellation rate.",
-    "Angela White has best feedback – schedule peak hours with her.",
-  ];
+  const [suggestions, setSuggestions] = useState([]);
 
   useEffect(() => {
     if (localStorage.getItem("isAuthenticated") !== "true") {
       navigate("/login");
     }
+    fetchSuggestions();
   }, []);
+
+  const fetchSuggestions = async () => {
+    try {
+      const response = await fetch('/receptionist/smartSuggestions');
+      const data = await response.json();
+      setSuggestions(data);
+    } catch (err) {
+      console.error('Error fetching suggestions');
+    }
+  };
 
   return (
     <div>

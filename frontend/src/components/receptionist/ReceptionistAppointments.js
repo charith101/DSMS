@@ -5,19 +5,38 @@ import { useNavigate } from "react-router-dom";
 
 function ReceptionistAppointments() {
   const navigate = useNavigate();
-  const [appointments, setAppointments] = useState([
-    { time: "10:00 AM", student: "Sarah Williams", instructor: "Mike Tyson" },
-    { time: "11:00 AM", student: "John Lee", instructor: "Angela White" },
-  ]);
+  const [appointments, setAppointments] = useState([]);
 
   useEffect(() => {
     if (localStorage.getItem("isAuthenticated") !== "true") {
       navigate("/login");
     }
+    fetchAppointments();
   }, []);
 
-  const sendReminder = (student) => {
-    alert(`Reminder sent to ${student}! 📩`);
+  const fetchAppointments = async () => {
+    try {
+      const response = await fetch('/receptionist/upcomingAppointments');
+      const data = await response.json();
+      setAppointments(data);
+    } catch (err) {
+      console.error('Error fetching appointments');
+    }
+  };
+
+  const sendReminder = async (student) => {
+    try {
+      const response = await fetch('/receptionist/sendReminder', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ studentName: student })
+      });
+      if (response.ok) {
+        alert(`Reminder sent to ${student}! 📩`);
+      }
+    } catch (err) {
+      alert('Error sending reminder');
+    }
   };
 
   return (
