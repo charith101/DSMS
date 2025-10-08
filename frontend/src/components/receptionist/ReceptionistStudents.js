@@ -5,16 +5,24 @@ import { useNavigate } from "react-router-dom";
 
 function ReceptionistStudents() {
   const navigate = useNavigate();
-  const [students, setStudents] = useState([
-    { name: "Emma Watson", status: "Active" },
-    { name: "Harry Potter", status: "Completed" },
-  ]);
+  const [students, setStudents] = useState([]);
 
   useEffect(() => {
     if (localStorage.getItem("isAuthenticated") !== "true") {
       navigate("/login");
     }
+    fetchStudents();
   }, []);
+
+  const fetchStudents = async () => {
+    try {
+      const response = await fetch('/receptionist/students');
+      const data = await response.json();
+      setStudents(data);
+    } catch (err) {
+      console.error('Error fetching students');
+    }
+  };
 
   return (
     <div>

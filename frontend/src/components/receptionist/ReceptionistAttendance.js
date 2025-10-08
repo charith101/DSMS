@@ -5,27 +5,45 @@ import { useNavigate } from "react-router-dom";
 
 function ReceptionistAttendance() {
   const navigate = useNavigate();
-  const [students, setStudents] = useState([
-    { name: "Emma Watson", status: "present" },
-    { name: "Harry Potter", status: "late" },
-    { name: "John Lee", status: "absent" },
-  ]);
+  const [students, setStudents] = useState([]);
 
   useEffect(() => {
     if (localStorage.getItem("isAuthenticated") !== "true") {
       navigate("/login");
     }
+    fetchStudents();
   }, []);
 
-  const toggleStatus = (index) => {
+  const fetchStudents = async () => {
+    try {
+      const response = await fetch('/receptionist/studentsForAttendance');
+      const data = await response.json();
+      setStudents(data);
+    } catch (err) {
+      console.error('Error fetching students');
+    }
+  };
+
+  const toggleStatus = async (index) => {
     const updated = [...students];
     const nextStatus = {
       present: "absent",
       absent: "late",
       late: "present",
     };
-    updated[index].status = nextStatus[updated[index].status];
-    setStudents(updated);
+    const newStatus = nextStatus[updated[index].status];
+    updated[index].status = newStatus;
+
+    try {
+      await fetch('/receptionist/markAttendance', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ studentName: updated[index].name, status: newStatus })
+      });
+      setStudents(updated);
+    } catch (err) {
+      alert('Error marking attendance');
+    }
   };
 
   return (

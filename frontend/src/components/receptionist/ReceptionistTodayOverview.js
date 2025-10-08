@@ -1,23 +1,33 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { BarChart } from "lucide-react";
 import ReceptionistNav from "./ReceptionistNav";
 import { useNavigate } from "react-router-dom";
 
 function ReceptionistTodayOverview() {
   const navigate = useNavigate();
-
-  const stats = {
-    appointments: 8,
-    students: 6,
-    classes: 3,
-    cancellations: 1,
-  };
+  const [stats, setStats] = useState({
+    appointments: 0,
+    students: 0,
+    classes: 0,
+    cancellations: 0,
+  });
 
   useEffect(() => {
     if (localStorage.getItem("isAuthenticated") !== "true") {
       navigate("/login");
     }
+    fetchStats();
   }, []);
+
+  const fetchStats = async () => {
+    try {
+      const response = await fetch('/receptionist/todayOverview');
+      const data = await response.json();
+      setStats(data);
+    } catch (err) {
+      console.error('Error fetching stats');
+    }
+  };
 
   return (
     <div>
