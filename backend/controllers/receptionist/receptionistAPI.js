@@ -321,4 +321,43 @@ router.get('/vehicleUsage', verifyReceptionist, async (req, res) => {
   }
 });
 
+// Get profile
+router.get('/profile', verifyReceptionist, async (req, res) => {
+try {
+const user = await UserModel.findById(req.receptionist._id).select('name email phone address');
+if (!user) return res.status(404).json({ error: 'Profile not found' });
+res.json(user);
+} catch (err) {
+console.error('Error fetching profile:', err);
+res.status(500).json({ error: 'Server error' });
+}
+});
+
+// Update profile
+router.put('/profile', verifyReceptionist, async (req, res) => {
+const { name, email, phone, address } = req.body;
+
+if (!name || !email) {
+return res.status(400).json({ error: 'Name and email are required' });
+}
+
+try {
+const updated = await UserModel.findByIdAndUpdate(
+req.receptionist._id,
+{ name, email, phone, address },
+{ new: true, runValidators: true }
+).select('name email phone address');
+
+if (!updated) return res.status(404).json({ error: 'Profile not found' });
+res.json(updated);
+} catch (err) {
+console.error('Profile update error:', err);
+if (err.name === 'ValidationError') {
+res.status(400).json({ error: err.message });
+} else {
+res.status(500).json({ error: 'Server error' });
+}
+}
+});
+
 module.exports = router;
