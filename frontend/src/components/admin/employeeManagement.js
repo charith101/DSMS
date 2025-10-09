@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Trash2, Plus, Users, Edit } from 'lucide-react';
+import jsPDF from 'jspdf';
+import { Trash2, Plus, Users, Edit, FileText } from 'lucide-react';
 import AdminNav from './AdminNav';
 import ErrorHandle from "../errorHandle";
 
@@ -32,13 +33,33 @@ const EmployeeManagement = () => {
   useEffect(() => {
     axios
       .get('http://localhost:3001/employee')
-      .then((result) => setEmployees(result.data))
-      .catch((err) => console.log(err));
+      .then((result) => {
+        console.log('Fetched employees:', result.data);
+        if (Array.isArray(result.data)) {
+          setEmployees(result.data);
+        } else {
+          setErrorMsg('Invalid employee data format from server.');
+        }
+      })
+      .catch((err) => {
+        console.error('Fetch employees error:', err);
+        setErrorMsg('Failed to fetch employees. Please check the server.');
+      });
 
     axios
       .get('http://localhost:3001/employee/getLeave')
-      .then((result) => setLeaveRequests(result.data))
-      .catch((err) => console.log(err));
+      .then((result) => {
+        console.log('Fetched leave requests:', result.data);
+        if (Array.isArray(result.data)) {
+          setLeaveRequests(result.data);
+        } else {
+          setErrorMsg('Invalid leave request data format from server.');
+        }
+      })
+      .catch((err) => {
+        console.error('Fetch leave requests error:', err);
+        setErrorMsg('Failed to fetch leave requests. Please check the server.');
+      });
   }, []);
 
   const handleAddEmployee = () => {
@@ -59,22 +80,26 @@ const EmployeeManagement = () => {
       })
       .catch((err) => {
         if (err.response && err.response.status === 400) {
-          setErrorMsg(err.response.data.error);
+          setErrorMsg(err.response.data.error || 'Validation error occurred');
         } else {
-          console.error(err);
-          setErrorMsg("Something went wrong");
+          console.error('Add employee error:', err);
+          setErrorMsg("Something went wrong - check console for details");
         }
       });
   };
 
   const handleEditEmployee = (id) => {
     const employee = employees.find((e) => e._id === id);
+    if (!employee) {
+      setErrorMsg("Employee not found.");
+      return;
+    }
     setEditEmployee({
-      name: employee.name,
-      email: employee.email,
-      age: employee.age,
-      nic: employee.nic,
-      role: employee.role,
+      name: employee.name || '',
+      email: employee.email || '',
+      age: employee.age || '',
+      nic: employee.nic || '',
+      role: employee.role || 'receptionist',
     });
     setEditEmployeeId(id);
     setEditMode(true);
@@ -100,10 +125,10 @@ const EmployeeManagement = () => {
       })
       .catch((err) => {
         if (err.response && err.response.status === 400) {
-          setErrorMsg(err.response.data.error);
+          setErrorMsg(err.response.data.error || 'Validation error occurred');
         } else {
-          console.error(err);
-          setErrorMsg("Something went wrong");
+          console.error('Update employee error:', err);
+          setErrorMsg("Something went wrong - check console for details");
         }
       });
   };
@@ -117,7 +142,10 @@ const EmployeeManagement = () => {
     axios
       .delete(`http://localhost:3001/employee/deleteEmployee/${deleteEmployeeId}`)
       .then(() => setEmployees(employees.filter((e) => e._id !== deleteEmployeeId)))
-      .catch((err) => console.log(err));
+      .catch((err) => {
+        console.error('Delete employee error:', err);
+        setErrorMsg('Failed to delete employee. Please try again.');
+      });
     setShowConfirmDelete(false);
     setDeleteEmployeeId(null);
   };
@@ -157,8 +185,68 @@ const EmployeeManagement = () => {
       })
       .catch((err) => {
         console.error('Error updating leave status:', err);
-        alert('Failed to update leave status');
+        setErrorMsg('Failed to update leave status. Please try again.');
       });
+  };
+
+  const handleGenerateAllEmployeesReport = () => {
+    try {
+      console.log('Generating PDF with employees:', employees);
+      if (!Array.isArray(employees) || employees.length === 0) {
+        setErrorMsg('No employee data available to generate the report.');
+        alert('No employee data available to generate the report.');
+        return;
+      }
+
+      const doc = new jsPDF();
+      let yPos = 20;
+
+      // Title
+      doc.setFontSize(20);
+      doc.text('Employee List', 20, yPos);
+      yPos += 15;
+
+      // Column Headers
+      doc.setFontSize(12);
+      doc.text('Name', 20, yPos);
+      doc.text('Email', 50, yPos);
+      doc.text('Age', 100, yPos);
+      doc.text('NIC', 120, yPos);
+      doc.text('Role', 150, yPos);
+      yPos += 10;
+      doc.line(20, yPos, 190, yPos); // Horizontal line under headers
+      yPos += 5;
+
+      // Employee Data
+      doc.setFontSize(10);
+      employees.forEach((employee, index) => {
+        console.log(`Processing employee ${index + 1}:`, employee);
+        if (yPos > 270) {
+          doc.addPage();
+          yPos = 20;
+        }
+        // Convert all fields to strings and handle undefined/null
+        const name = String(employee.name || 'N/A').substring(0, 25);
+        const email = String(employee.email || 'N/A').substring(0, 25);
+        const age = String(employee.age || 'N/A').substring(0, 10);
+        const nic = String(employee.nic || 'N/A').substring(0, 15);
+        const role = String(employee.role || 'N/A').substring(0, 15);
+
+        doc.text(name, 20, yPos);
+        doc.text(email, 50, yPos);
+        doc.text(age, 100, yPos);
+        doc.text(nic, 120, yPos);
+        doc.text(role, 150, yPos);
+        yPos += 7;
+      });
+
+      // Save PDF
+      doc.save('employee-list.pdf');
+    } catch (err) {
+      console.error('Error generating report:', err);
+      setErrorMsg('Failed to generate report. Please check the console for details.');
+      alert('Failed to generate report. Please check the console for details.');
+    }
   };
 
   return (
@@ -227,6 +315,18 @@ const EmployeeManagement = () => {
                         <small className="text-muted">View and manage all employees</small>
                       </div>
                     </div>
+                    {errorMsg && (
+                      <div className="alert alert-danger" role="alert">
+                        {errorMsg}
+                      </div>
+                    )}
+                    <button
+                      className="btn btn-secondary mb-3"
+                      style={{ padding: '6px 12px', fontSize: '16px', maxWidth: '200px' }}
+                      onClick={handleGenerateAllEmployeesReport}
+                    >
+                      <FileText className="me-2" size={20} /> Generate PDF
+                    </button>
                     <div className="table-responsive">
                       <table className="table table-striped">
                         <thead>
