@@ -1,9 +1,27 @@
-import React, { useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Outlet, Link } from "react-router-dom";
 import { Users, Briefcase, DollarSign, Truck, User } from "lucide-react";
 import AdminNav from "./AdminNav";
+import axios from "axios";
 
 function AdminDashboard() {
+  const [studentCount, setStudentCount] = useState(0);
+  const [employeeCount, setEmployeeCount] = useState(0);
+
+  useEffect(() => {
+    // Fetch student count
+    axios
+      .get('http://localhost:3001/student')
+      .then((result) => setStudentCount(result.data.length))
+      .catch((err) => console.log('Error fetching students:', err));
+
+    // Fetch employee count
+    axios
+      .get('http://localhost:3001/employee')
+      .then((result) => setEmployeeCount(result.data.length))
+      .catch((err) => console.log('Error fetching employees:', err));
+  }, []);
+
   return (  
     <div>
       <AdminNav page="home" />
@@ -23,6 +41,33 @@ function AdminDashboard() {
           <h6 className="fs-6 lead opacity-90">
             Manage students, employees, and school operations
           </h6>
+        </div>
+      </section>
+
+      <section className="py-4 bg-light">
+        <div className="container">
+          <div className="d-flex gap-4 align-items-center">
+            <div className="card border-0 shadow-sm bg-primary text-white p-4"
+                 style={{ borderRadius: '12px', minWidth: '200px' }}>
+              <div className="d-flex align-items-center gap-3">
+                <Users size={28} className="text-white" />
+                <div>
+                  <h6 className="fw-bold mb-1">Active Students</h6>
+                  <p className="fs-3 mb-0 fw-semibold">{studentCount}</p>
+                </div>
+              </div>
+            </div>
+            <div className="card border-0 shadow-sm bg-info text-white p-4"
+                 style={{ borderRadius: '12px', minWidth: '200px' }}>
+              <div className="d-flex align-items-center gap-3">
+                <Briefcase size={28} className="text-white" />
+                <div>
+                  <h6 className="fw-bold mb-1">Active Employees</h6>
+                  <p className="fs-3 mb-0 fw-semibold">{employeeCount}</p>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -57,15 +102,15 @@ function AdminDashboard() {
                 <div className="col-12">
                   <div className="card border-0 shadow-sm h-100">
                     <div className="card-body p-4 text-center">
-                      <div className="bg-success rounded-circle p-3 mx-auto mb-3 d-inline-block"
+                      <div className="bg-info rounded-circle p-3 mx-auto mb-3 d-inline-block"
                            style={{ width: '60px', height: '60px' }}>
                         <Briefcase size={28} className="text-white mt-1" />
                       </div>
-                      <h6 className="fw-bold mb-2 text-success">Employees</h6>
+                      <h6 className="fw-bold mb-2 text-info">Employees</h6>
                       <p className="text-muted small mb-3">Manage instructors and staff</p>
                       <Link
                         to="/employees"
-                        className="btn btn-success btn-sm w-100 py-2 fw-semibold"
+                        className="btn btn-info btn-sm w-100 py-2 fw-semibold"
                         style={{ borderRadius: '8px' }}
                       >
                         View Employees
@@ -83,15 +128,15 @@ function AdminDashboard() {
                 <div className="col-12">
                   <div className="card border-0 shadow-sm h-100">
                     <div className="card-body p-4 text-center">
-                      <div className="bg-info rounded-circle p-3 mx-auto mb-3 d-inline-block"
+                      <div className="bg-success rounded-circle p-3 mx-auto mb-3 d-inline-block"
                            style={{ width: '60px', height: '60px' }}>
                         <DollarSign size={28} className="text-white mt-1" />
                       </div>
-                      <h6 className="fw-bold mb-2 text-info">Finance</h6>
+                      <h6 className="fw-bold mb-2 text-success">Finance</h6>
                       <p className="text-muted small mb-3">Track payments and expenses</p>
                       <Link
                         to="/finance"
-                        className="btn btn-info btn-sm w-100 py-2 fw-semibold"
+                        className="btn btn-success btn-sm w-100 py-2 fw-semibold"
                         style={{ borderRadius: '8px' }}
                       >
                         View Finance
@@ -134,7 +179,7 @@ function AdminDashboard() {
                   <h6 className="fw-bold mb-2 text-primary">Profile</h6>
                   <p className="text-muted small mb-3">Update your information and settings</p>
                   <Link
-                    to="/admin-Profile"  // ✅ Fixed: Now matches AdminNav
+                    to="/admin-Profile"
                     className="btn btn-primary btn-sm w-100 py-2 fw-semibold"
                     style={{ borderRadius: '8px' }}
                   >

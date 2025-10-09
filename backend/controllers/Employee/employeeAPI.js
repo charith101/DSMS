@@ -4,6 +4,7 @@ const router = express.Router();
 const UserModel = require('../../models/Users');
 const LeaveRequestModel = require('../../models/LeaveRequest');
 const TimeSlotModel = require('../../models/TimeSlot');
+const PayrollModel = require('../../models/Payroll');
 
 // verify instructor access
 const verifyInstructor = async (req, res, next) => {
@@ -95,6 +96,30 @@ router.delete('/deleteEmployee/:id', (req, res) => {
       res.json(user);
     })
     .catch(err => res.status(500).json({ error: 'Server error' }));
+});
+
+// === PAYROLL ROUTES (Instructor) ===
+// Get instructor's own payroll records
+router.get('/getMyPayroll', verifyInstructor, async (req, res) => {
+  try {
+    const instructorId = req.instructor._id;
+    const { year } = req.query; // Optional year filter
+
+    let query = { employeeId: instructorId };
+
+    if (year) {
+      query.month = new RegExp(`^${year}-`);
+    }
+
+    const payrollRecords = await PayrollModel.find(query)
+      .populate('employeeId', 'name email role')
+      .sort({ month: -1 }); // Most recent first
+
+    res.json(payrollRecords);
+  } catch (err) {
+    console.error('Error fetching payroll records:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
 });
 
 // === GENERAL LEAVE REQUEST ROUTES (Instructor) ===
@@ -351,8 +376,7 @@ router.get('/getMyTimeSlots', verifyInstructor, async (req, res) => {
   }
 });
 
-// === ADMINT TIME SLOT ROUTES ===
-// Get all time slots (for admin scheduling)
+// === ADMIN TIME SLOT ROUTES ===
 router.get('/getAllTimeSlots', async (req, res) => {
   try {
     const { date, instructorId, status } = req.query;

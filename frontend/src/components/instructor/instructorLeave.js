@@ -233,7 +233,7 @@ const InstructorLeave = () => {
         }}
       >
         <div className="container py-5 mt-5">
-          <h1 className="fw-bold display-5 mb-3 mx-1">Leave Management</h1>
+          <h1 className="fw-bold display-5 mb-3 mx-1">My Leave Management</h1>
           <h6 className="fs-6 lead opacity-90">
             Submit and track your leave requests for the driving school
           </h6>

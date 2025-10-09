@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Trash2, Plus, Users, Edit, Calendar } from 'lucide-react';
+import jsPDF from 'jspdf';
+import { Trash2, Plus, Users, Edit, Calendar, FileText } from 'lucide-react';
 import AdminNav from './AdminNav';
 import ErrorHandle from "../errorHandle";
 
@@ -15,7 +16,7 @@ const StudentManagement = () => {
     nic: '',
     password: '',
     level: '',
-    licenseType: [], // Changed to empty array
+    licenseType: [],
     role: 'student',
   });
   const [editMode, setEditMode] = useState(false);
@@ -26,7 +27,7 @@ const StudentManagement = () => {
     age: '',
     nic: '',
     level: '',
-    licenseType: [], // Changed to empty array
+    licenseType: [],
   });
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
   const [deleteStudentId, setDeleteStudentId] = useState(null);
@@ -39,8 +40,18 @@ const StudentManagement = () => {
     setCurrentUser({ role: 'instructor' });
     axios
       .get('http://localhost:3001/student')
-      .then((result) => setStudents(result.data))
-      .catch((err) => console.log(err));
+      .then((result) => {
+        console.log('Fetched students:', result.data);
+        if (Array.isArray(result.data)) {
+          setStudents(result.data);
+        } else {
+          setErrorMsg('Invalid student data format from server.');
+        }
+      })
+      .catch((err) => {
+        console.error('Fetch students error:', err);
+        setErrorMsg('Failed to fetch students. Please check the server.');
+      });
   }, []);
 
   const handleAddStudent = () => {
@@ -49,8 +60,6 @@ const StudentManagement = () => {
       licenseType: newStudent.licenseType.filter(type => type && type.trim() !== ''),
       role: 'student'
     };
-
-    console.log('Sending student data:', cleanedStudent);
 
     axios
       .post('http://localhost:3001/student/registerUser', cleanedStudent)
@@ -76,7 +85,6 @@ const StudentManagement = () => {
         } else if (err.response && err.response.status === 500) {
           setErrorMsg('Server error - please try again');
         } else {
-          console.error(err);
           setErrorMsg("Something went wrong - check console for details");
         }
       });
@@ -88,12 +96,16 @@ const StudentManagement = () => {
       return;
     }
     const student = students.find((s) => s._id === id);
+    if (!student) {
+      setErrorMsg("Student not found.");
+      return;
+    }
     setEditStudent({
-      name: student.name,
-      email: student.email,
-      age: student.age,
-      nic: student.nic,
-      level: student.level,
+      name: student.name || '',
+      email: student.email || '',
+      age: student.age || '',
+      nic: student.nic || '',
+      level: student.level || '',
       licenseType: Array.isArray(student.licenseType) ? student.licenseType : [],
     });
     setEditStudentId(id);
@@ -147,7 +159,10 @@ const StudentManagement = () => {
     axios
       .delete(`http://localhost:3001/student/deleteUser/${deleteStudentId}`)
       .then(() => setStudents(students.filter((s) => s._id !== deleteStudentId)))
-      .catch((err) => console.log(err));
+      .catch((err) => {
+        console.error('Delete student error:', err);
+        setErrorMsg('Failed to delete student. Please try again.');
+      });
     setShowConfirmDelete(false);
     setDeleteStudentId(null);
   };
@@ -190,7 +205,10 @@ const StudentManagement = () => {
         console.log('Timetable Data:', result.data);
         setTimetables(result.data);
       })
-      .catch((err) => console.log(err));
+      .catch((err) => {
+        console.error('Fetch timetables error:', err);
+        setErrorMsg('Failed to fetch timetables. Please try again.');
+      });
     setShowTimetableModal(true);
   };
 
@@ -198,6 +216,71 @@ const StudentManagement = () => {
     setShowTimetableModal(false);
     setSelectedStudentId(null);
     setTimetables([]);
+  };
+
+  const handleGenerateAllStudentsReport = () => {
+    try {
+      console.log('Generating PDF with students:', students);
+      if (!Array.isArray(students) || students.length === 0) {
+        setErrorMsg('No student data available to generate the report.');
+        alert('No student data available to generate the report.');
+        return;
+      }
+
+      const doc = new jsPDF();
+      let yPos = 20;
+
+      // Title
+      doc.setFontSize(20);
+      doc.text('Student List', 20, yPos);
+      yPos += 15;
+
+      // Column Headers
+      doc.setFontSize(12);
+      doc.text('Name', 20, yPos);
+      doc.text('Email', 50, yPos);
+      doc.text('Age', 100, yPos);
+      doc.text('NIC', 120, yPos);
+      doc.text('Level', 150, yPos);
+      doc.text('License Type', 170, yPos);
+      yPos += 10;
+      doc.line(20, yPos, 190, yPos); // Horizontal line under headers
+      yPos += 5;
+
+      // Student Data
+      doc.setFontSize(10);
+      students.forEach((student, index) => {
+        console.log(`Processing student ${index + 1}:`, student);
+        if (yPos > 270) {
+          doc.addPage();
+          yPos = 20;
+        }
+        // Convert all fields to strings and handle undefined/null
+        const name = String(student.name || 'N/A').substring(0, 25);
+        const email = String(student.email || 'N/A').substring(0, 25);
+        const age = String(student.age || 'N/A').substring(0, 10);
+        const nic = String(student.nic || 'N/A').substring(0, 15);
+        const level = String(student.level || 'N/A').substring(0, 10);
+        const licenseType = Array.isArray(student.licenseType) && student.licenseType.length > 0
+          ? student.licenseType.join(', ').substring(0, 20)
+          : 'N/A';
+
+        doc.text(name, 20, yPos);
+        doc.text(email, 50, yPos);
+        doc.text(age, 100, yPos);
+        doc.text(nic, 120, yPos);
+        doc.text(level, 150, yPos);
+        doc.text(licenseType, 170, yPos);
+        yPos += 7;
+      });
+
+      // Save PDF
+      doc.save('student-list.pdf');
+    } catch (err) {
+      console.error('Error generating report:', err);
+      setErrorMsg('Failed to generate report. Please check the console for details.');
+      alert('Failed to generate report. Please check the console for details.');
+    }
   };
 
   return (
@@ -258,6 +341,18 @@ const StudentManagement = () => {
                         <small className="text-muted">View and manage all students</small>
                       </div>
                     </div>
+                    {errorMsg && (
+                      <div className="alert alert-danger" role="alert">
+                        {errorMsg}
+                      </div>
+                    )}
+                    <button
+                      className="btn btn-secondary mb-3"
+                      style={{ padding: '6px 12px', fontSize: '16px', maxWidth: '200px' }}
+                      onClick={handleGenerateAllStudentsReport}
+                    >
+                      <FileText className="me-2" size={20} /> Generate PDF
+                    </button>
                     <div className="table-responsive">
                       <table className="table table-striped">
                         <thead>
