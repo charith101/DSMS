@@ -6,6 +6,7 @@ const studentRouter = require('./controllers/student/studentAPI');
 const authRouter = require('./controllers/auth/authAPI');
 const employeeRouter = require('./controllers/Employee/employeeAPI');
 const receptionistRouter = require('./controllers/receptionist/receptionistAPI');
+const userProfileRouter = require('./controllers/userProfile/userProfileAPI.js');
 
 const app = express();
 app.use(cors());
@@ -31,7 +32,7 @@ app.use('/employee', employeeRouter);
 app.use('/receptionist', receptionistRouter);
 app.use('/finance', require('./controllers/payment/financeAPI'));
 app.use('/api/finance/transactions', require('./controllers/payment/transactionRoutes'));
-
+app.use('/users', userProfileRouter);
 
 app.listen(3005, () => {
   console.log('Server started on port 3005');
