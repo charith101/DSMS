@@ -33,11 +33,11 @@ const InstructorSchedule = () => {
       
       const params = new URLSearchParams();
       
-      // Add date filter only if not showing past schedules
+      // Only add date filter for upcoming lessons if showPast is false
       if (!showPast) {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
-        params.append('date', today.toISOString().split('T')[0]);
+        params.append('dateFrom', today.toISOString().split('T')[0]);
       }
       
       const response = await axios.get(
@@ -92,20 +92,21 @@ const InstructorSchedule = () => {
     const slotDate = new Date(date);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
+    slotDate.setHours(0, 0, 0, 0);
     
     if (slotDate.toDateString() === today.toDateString()) {
       return 'Today';
-    } else if (slotDate < today) {
-      return `Past - ${slotDate.toLocaleDateString('en-US', { 
-        month: 'short', 
-        day: 'numeric' 
-      })}`;
-    } else {
+    } else if (slotDate >= today) {
       return slotDate.toLocaleDateString('en-US', { 
         weekday: 'short', 
         month: 'short', 
         day: 'numeric' 
       });
+    } else {
+      return `Past - ${slotDate.toLocaleDateString('en-US', { 
+        month: 'short', 
+        day: 'numeric' 
+      })}`;
     }
   };
 
@@ -136,12 +137,21 @@ const InstructorSchedule = () => {
       grouped[dateKey].push(slot);
     });
 
-    // Sort dates (today first, then future dates)
+    // Sort dates: upcoming first (including today), then past
     const today = new Date().toLocaleDateString('en-CA');
     const sortedDates = Object.keys(grouped).sort((a, b) => {
-      if (a === today) return -1;
-      if (b === today) return 1;
-      return new Date(a) - new Date(b);
+      const dateA = new Date(a);
+      const dateB = new Date(b);
+      const isAFutureOrToday = dateA >= new Date(today);
+      const isBFutureOrToday = dateB >= new Date(today);
+
+      if (isAFutureOrToday && isBFutureOrToday) {
+        return dateA - dateB; // Sort upcoming dates ascending
+      } else if (!isAFutureOrToday && !isBFutureOrToday) {
+        return dateB - dateA; // Sort past dates descending
+      } else {
+        return isAFutureOrToday ? -1 : 1; // Upcoming before past
+      }
     });
 
     return sortedDates.map(date => ({
@@ -154,12 +164,18 @@ const InstructorSchedule = () => {
 
   const groupedSlots = groupByDate(timeSlots);
 
+  // Separate upcoming and past slots
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const upcomingSlots = groupedSlots.filter(group => new Date(group.date) >= today);
+  const pastSlots = groupedSlots.filter(group => new Date(group.date) < today);
+
   return (
     <div>
-      {/* Navbar - Updated to match dashboard */}
+      {/* Navbar */}
       <InstructorNav page="schedule" />
 
-      {/* Header Section - Updated to match dashboard styling */}
+      {/* Header Section */}
       <section
         className="text-white pb-5"
         style={{
@@ -171,14 +187,14 @@ const InstructorSchedule = () => {
         }}
       >
         <div className="container py-5 mt-5">
-          <h1 className="fw-bold display-5 mb-3 mx-1">My Complete Schedule</h1>
+          <h1 className="fw-bold display-5 mb-3 mx-1">My Schedule</h1>
           <h6 className="fs-6 lead opacity-90">
             View all your upcoming and past driving lesson timetable
           </h6>
         </div>
       </section>
 
-      {/* Main Content - Updated to match StudentManagement layout */}
+      {/* Main Content */}
       <div className="ms-auto" style={{ marginLeft: '250px', paddingTop: '40px' }}>
         <div className="py-5 bg-light">
           <div className="container">
@@ -210,7 +226,7 @@ const InstructorSchedule = () => {
             )}
 
             <div className="row g-4">
-              {/* Toggle Control - Minimal */}
+              {/* Toggle Control */}
               <div className="col-12">
                 <div className="card border-2 shadow-sm p-3">
                   <div className="card-body p-4">
@@ -224,7 +240,7 @@ const InstructorSchedule = () => {
                           onChange={toggleShowPast}
                         />
                         <label className="form-check-label fw-semibold" htmlFor="showPast">
-                          Include past lessons
+                          Show past lessons
                         </label>
                       </div>
                     </div>
@@ -232,7 +248,7 @@ const InstructorSchedule = () => {
                     <div className="border-top pt-3">
                       <small className="text-muted">
                         Showing {timeSlots.length} {pluralize(timeSlots.length, 'lesson', 'lessons')} across {groupedSlots.length} {pluralize(groupedSlots.length, 'day', 'days')}
-                        {showPast && ' (including past lessons)'}
+                        {showPast ? ' (past lessons)' : ' (upcoming lessons)'}
                       </small>
                     </div>
                   </div>
@@ -248,10 +264,10 @@ const InstructorSchedule = () => {
                         <Calendar size={64} className="text-info" />
                       </div>
                       <div>
-                        <h3 className="mb-1 fw-bold">Complete Lesson Schedule</h3>
+                        <h3 className="mb-1 fw-bold">{showPast ? 'Past Lessons' : 'Upcoming Lessons'}</h3>
                         <small className="text-muted">
                           {loading ? 'Loading...' : 
-                            `${timeSlots.length} total ${pluralize(timeSlots.length, 'lesson', 'lessons')} across ${groupedSlots.length} ${pluralize(groupedSlots.length, 'day', 'days')}`}
+                            `${timeSlots.length} ${pluralize(timeSlots.length, 'lesson', 'lessons')} across ${groupedSlots.length} ${pluralize(groupedSlots.length, 'day', 'days')}`}
                         </small>
                       </div>
                     </div>
@@ -259,8 +275,8 @@ const InstructorSchedule = () => {
                     {loading ? (
                       <div className="text-center py-5">
                         <RefreshCw className="animate-spin text-primary mb-3" size={64} />
-                        <h5 className="text-muted">Loading your complete schedule...</h5>
-                        <p className="text-muted">Please wait while we fetch all your lessons</p>
+                        <h5 className="text-muted">Loading your {showPast ? 'past' : 'upcoming'} schedule...</h5>
+                        <p className="text-muted">Please wait while we fetch your lessons</p>
                         <div className="spinner-border spinner-border-sm text-primary" role="status">
                           <span className="visually-hidden">Loading...</span>
                         </div>
@@ -271,7 +287,7 @@ const InstructorSchedule = () => {
                         <h5 className="text-muted mb-4">No lessons found</h5>
                         <p className="text-muted mb-4">
                           {showPast 
-                            ? "You don't have any lessons scheduled. Check back later!" 
+                            ? "You don't have any past lessons." 
                             : "No upcoming lessons found. Try showing past lessons or check with receptionist."
                           }
                         </p>
@@ -307,7 +323,7 @@ const InstructorSchedule = () => {
                       </div>
                     ) : (
                       <div className="schedule-container">
-                        {groupedSlots.map((dateGroup) => (
+                        {(showPast ? pastSlots : upcomingSlots).map((dateGroup) => (
                           <div key={dateGroup.date} className="mb-4">
                             {/* Date Header */}
                             <div className="date-header mb-3 p-3 rounded bg-light border">
@@ -323,8 +339,8 @@ const InstructorSchedule = () => {
                                     </small>
                                   </div>
                                 </div>
-                                <span className={`badge bg-${new Date(dateGroup.date) >= new Date() ? 'info' : 'secondary'}`}>
-                                  {new Date(dateGroup.date) >= new Date() ? 'Upcoming' : 'Past'}
+                                <span className={`badge bg-${new Date(dateGroup.date) >= today ? 'info' : 'secondary'}`}>
+                                  {new Date(dateGroup.date) >= today ? 'Upcoming' : 'Past'}
                                 </span>
                               </div>
                             </div>
@@ -445,7 +461,7 @@ const InstructorSchedule = () => {
                 </div>
               </div>
 
-              {/* Schedule Summary Card - Updated without status breakdown */}
+              {/* Schedule Summary Card */}
               <div className="col-12">
                 <div className="card border-0 shadow-sm">
                   <div className="card-body p-4">
@@ -460,15 +476,21 @@ const InstructorSchedule = () => {
                     </div>
                     
                     <div className="row text-center g-4">
-                      <div className="col-md-6">
+                      <div className="col-md-4">
                         <div className="fw-bold text-primary fs-2">{timeSlots.length}</div>
                         <div className="text-muted">{pluralize(timeSlots.length, 'Total Lesson', 'Total Lessons')}</div>
                       </div>
-                      <div className="col-md-6">
+                      <div className="col-md-4">
                         <div className="fw-bold text-success fs-2">
-                          {timeSlots.filter(s => new Date(s.date) >= new Date()).length}
+                          {showPast ? 0 : upcomingSlots.reduce((sum, group) => sum + group.slots.length, 0)}
                         </div>
-                        <div className="text-muted">{pluralize(timeSlots.filter(s => new Date(s.date) >= new Date()).length, 'Upcoming', 'Upcoming')}</div>
+                        <div className="text-muted">{pluralize(upcomingSlots.reduce((sum, group) => sum + group.slots.length, 0), 'Upcoming', 'Upcoming')}</div>
+                      </div>
+                      <div className="col-md-4">
+                        <div className="fw-bold text-secondary fs-2">
+                          {showPast ? pastSlots.reduce((sum, group) => sum + group.slots.length, 0) : 0}
+                        </div>
+                        <div className="text-muted">{pluralize(pastSlots.reduce((sum, group) => sum + group.slots.length, 0), 'Past', 'Past')}</div>
                       </div>
                     </div>
                     
