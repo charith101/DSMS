@@ -24,7 +24,7 @@ function UserRegister() {
         localStorage.setItem("isAuthenticated", "true");
         localStorage.setItem("userId", result.data._id);
         setLoading(false);
-        navigate("/student-dashboard");
+        navigate("/Student/Dashboard");
       })
       .catch((err) => {
         if (err.response && err.response.status === 400) {

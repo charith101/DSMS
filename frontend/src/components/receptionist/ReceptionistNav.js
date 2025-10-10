@@ -48,13 +48,13 @@ function ReceptionistNav({ page }) {
             <Link
               to="/receptionist-dashboard"
               className={`fw-medium text-black mx-2 my-auto ${page === "home" ? "border-bottom border-success" : ""}`}>
-              Home
+              Time Slot
             </Link>
 
             <Link
-              to="/receptionist-appointments"
-              className={`fw-medium text-black mx-2 my-auto ${page === "appointments" ? "border-bottom border-success" : ""}`}>
-              Appointments
+              to="/receptionist-attendance"
+              className={`fw-medium text-black mx-2 my-auto ${page === "attendance" ? "border-bottom border-success" : ""}`}>
+              Student Attendance
             </Link>
 
             <Link

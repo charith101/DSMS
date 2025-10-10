@@ -43,7 +43,7 @@ import FinancialManagerLogin from './components/financialManager/FinancialManage
 import FinancialManagerRegister from './components/financialManager/FinancialManagerRegister';
 
 //Receptionist components
-import ReceptionistAppointments from './components/receptionist/ReceptionistAppointments';
+import ReceptionistAttendance from './components/receptionist/ReceptionistAttendance';
 import ReceptionistClasses from './components/receptionist/ReceptionistClasses';
 import ReceptionistStudents from './components/receptionist/ReceptionistStudents';
 import ReceptionistLateStudents from './components/receptionist/ReceptionistLateStudents';
@@ -98,7 +98,7 @@ function App() {
           <Route path='/instructor-payments' element={<InstructorPayments />} />
 
           {/* Receptionist management routes */}
-          <Route path='/receptionist-appointments' element={<ReceptionistAppointments />} />
+          <Route path='/receptionist-attendance' element={<ReceptionistAttendance />} />
           <Route path='/receptionist-classes' element={<ReceptionistClasses />} />
           <Route path='/receptionist-students' element={<ReceptionistStudents />} />
           <Route path='/receptionist-late-students' element={<ReceptionistLateStudents />} />
