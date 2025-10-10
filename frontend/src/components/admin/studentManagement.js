@@ -341,11 +341,6 @@ const StudentManagement = () => {
                         <small className="text-muted">View and manage all students</small>
                       </div>
                     </div>
-                    {errorMsg && (
-                      <div className="alert alert-danger" role="alert">
-                        {errorMsg}
-                      </div>
-                    )}
                     <button
                       className="btn btn-secondary mb-3"
                       style={{ padding: '6px 12px', fontSize: '16px', maxWidth: '200px' }}
@@ -415,11 +410,6 @@ const StudentManagement = () => {
                 <button type="button" className="btn-close" onClick={handleCloseModal}></button>
               </div>
               <div className="modal-body">
-                {errorMsg && (
-                  <div className="alert alert-danger" role="alert">
-                    {errorMsg}
-                  </div>
-                )}
                 <div className="d-flex flex-column gap-2">
                   <input
                     type="text"

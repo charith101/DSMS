@@ -315,11 +315,6 @@ const EmployeeManagement = () => {
                         <small className="text-muted">View and manage all employees</small>
                       </div>
                     </div>
-                    {errorMsg && (
-                      <div className="alert alert-danger" role="alert">
-                        {errorMsg}
-                      </div>
-                    )}
                     <button
                       className="btn btn-secondary mb-3"
                       style={{ padding: '6px 12px', fontSize: '16px', maxWidth: '200px' }}
