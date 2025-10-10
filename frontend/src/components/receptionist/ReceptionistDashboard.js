@@ -8,7 +8,7 @@ function ReceptionistDashboard() {
   const [timeSlots, setTimeSlots] = useState([]);
   const [instructors, setInstructors] = useState([]);
   const [vehicles, setVehicles] = useState([]);
-  const [newTimeSlot, setNewTimeSlot] = useState({
+  const [createTimeSlot, setCreateTimeSlot] = useState({
     date: "",
     startTime: "",
     endTime: "",
@@ -18,6 +18,18 @@ function ReceptionistDashboard() {
     maxCapacity: 1,
   });
   const [editingTimeSlot, setEditingTimeSlot] = useState(null);
+  const [editTimeSlotData, setEditTimeSlotData] = useState({
+    date: "",
+    startTime: "",
+    endTime: "",
+    status: "active",
+    instructorId: "",
+    vehicleId: "",
+    maxCapacity: 1,
+  });
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteSlotId, setDeleteSlotId] = useState(null);
   const [error, setError] = useState(null);
 
   useEffect(() => {
@@ -32,10 +44,10 @@ function ReceptionistDashboard() {
 
   const fetchTimeSlots = async () => {
     try {
-      const response = await fetch("http://localhost:3001/receptionist/timeslots");
+      const response = await fetch("http://localhost:3001/receptionist/getTimeSlots");
       if (!response.ok) throw new Error("Failed to fetch time slots");
       const data = await response.json();
-      console.log("Time slots data:", JSON.stringify(data, null, 2)); // Debug log
+      // console.log("Time slots data:", JSON.stringify(data, null, 2)); // Debug log
       setTimeSlots(data);
     } catch (error) {
       console.error("Error fetching time slots:", error);
@@ -45,10 +57,10 @@ function ReceptionistDashboard() {
 
   const fetchInstructors = async () => {
     try {
-      const response = await fetch("http://localhost:3001/employee/instructors");
+      const response = await fetch("http://localhost:3001/receptionist/getInstructors");
       if (!response.ok) throw new Error("Failed to fetch instructors");
       const data = await response.json();
-      console.log("Instructors data:", JSON.stringify(data, null, 2)); // Debug log
+      // console.log("Instructors data:", JSON.stringify(data, null, 2)); // Debug log
       setInstructors(data);
     } catch (error) {
       console.error("Error fetching instructors:", error);
@@ -58,10 +70,10 @@ function ReceptionistDashboard() {
 
   const fetchVehicles = async () => {
     try {
-      const response = await fetch("http://localhost:3001/vehicles");
+      const response = await fetch("http://localhost:3001/receptionist/getVehicles");
       if (!response.ok) throw new Error("Failed to fetch vehicles");
       const data = await response.json();
-      console.log("Vehicles data:", JSON.stringify(data, null, 2)); // Debug log
+      // console.log("Vehicles data:", JSON.stringify(data, null, 2)); // Debug log
       setVehicles(data);
     } catch (error) {
       console.error("Error fetching vehicles:", error);
@@ -73,14 +85,14 @@ function ReceptionistDashboard() {
     e.preventDefault();
     setError(null);
     try {
-      const response = await fetch("http://localhost:3001/receptionist/timeslots", {
+      const response = await fetch("http://localhost:3001/receptionist/createTimeSlot", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newTimeSlot),
+        body: JSON.stringify(createTimeSlot),
       });
       if (response.ok) {
         await fetchTimeSlots();
-        setNewTimeSlot({
+        setCreateTimeSlot({
           date: "",
           startTime: "",
           endTime: "",
@@ -91,7 +103,7 @@ function ReceptionistDashboard() {
         });
       } else {
         const errorData = await response.json();
-        setError(errorData.message || "Error creating time slot");
+        setError(errorData.error || "Error creating time slot");
       }
     } catch (error) {
       console.error("Error creating time slot:", error);
@@ -104,15 +116,16 @@ function ReceptionistDashboard() {
     if (!editingTimeSlot) return;
     setError(null);
     try {
-      const response = await fetch(`http://localhost:3001/receptionist/timeslots/${editingTimeSlot._id}`, {
+      const response = await fetch(`http://localhost:3001/receptionist/updateTimeSlot/${editingTimeSlot._id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newTimeSlot),
+        body: JSON.stringify(editTimeSlotData),
       });
       if (response.ok) {
         await fetchTimeSlots();
+        setShowEditModal(false);
         setEditingTimeSlot(null);
-        setNewTimeSlot({
+        setEditTimeSlotData({
           date: "",
           startTime: "",
           endTime: "",
@@ -123,7 +136,7 @@ function ReceptionistDashboard() {
         });
       } else {
         const errorData = await response.json();
-        setError(errorData.message || "Error updating time slot");
+        setError(errorData.error || "Error updating time slot");
       }
     } catch (error) {
       console.error("Error updating time slot:", error);
@@ -134,14 +147,14 @@ function ReceptionistDashboard() {
   const handleDeleteTimeSlot = async (id) => {
     setError(null);
     try {
-      const response = await fetch(`http://localhost:3001/receptionist/timeslots/${id}`, {
+      const response = await fetch(`http://localhost:3001/receptionist/deleteTimeSlot/${id}`, {
         method: "DELETE",
       });
       if (response.ok) {
         await fetchTimeSlots();
       } else {
         const errorData = await response.json();
-        setError(errorData.message || "Error deleting time slot");
+        setError(errorData.error || "Error deleting time slot");
       }
     } catch (error) {
       console.error("Error deleting time slot:", error);
@@ -151,7 +164,7 @@ function ReceptionistDashboard() {
 
   const startEditing = (slot) => {
     setEditingTimeSlot(slot);
-    setNewTimeSlot({
+    setEditTimeSlotData({
       date: new Date(slot.date).toISOString().split("T")[0],
       startTime: slot.startTime,
       endTime: slot.endTime,
@@ -159,6 +172,35 @@ function ReceptionistDashboard() {
       instructorId: slot.instructorId?._id || slot.instructorId || "",
       vehicleId: slot.vehicleId?._id || slot.vehicleId || "",
       maxCapacity: slot.maxCapacity,
+    });
+    setShowEditModal(true);
+    setError(null);
+  };
+
+  const handleDeleteConfirm = () => {
+    if (deleteSlotId) {
+      handleDeleteTimeSlot(deleteSlotId);
+      setDeleteSlotId(null);
+    }
+    setShowDeleteModal(false);
+  };
+
+  const handleCancelDelete = () => {
+    setShowDeleteModal(false);
+    setDeleteSlotId(null);
+  };
+
+  const handleCancelEdit = () => {
+    setShowEditModal(false);
+    setEditingTimeSlot(null);
+    setEditTimeSlotData({
+      date: "",
+      startTime: "",
+      endTime: "",
+      status: "active",
+      instructorId: "",
+      vehicleId: "",
+      maxCapacity: 1,
     });
     setError(null);
   };
@@ -206,17 +248,17 @@ function ReceptionistDashboard() {
                     </div>
                   )}
 
-                  {/* Create/Edit Time Slot Form */}
+                  {/* Create Time Slot Form */}
                   <div className="mb-4">
-                    <h5>{editingTimeSlot ? "Edit Time Slot" : "Create New Time Slot"}</h5>
-                    <form onSubmit={editingTimeSlot ? handleEditTimeSlot : handleCreateTimeSlot} className="row g-3">
+                    <h5>Create New Time Slot</h5>
+                    <form onSubmit={handleCreateTimeSlot} className="row g-3">
                       <div className="col-md-3">
                         <label className="form-label">Date</label>
                         <input
                           type="date"
                           className="form-control"
-                          value={newTimeSlot.date}
-                          onChange={(e) => setNewTimeSlot({ ...newTimeSlot, date: e.target.value })}
+                          value={createTimeSlot.date}
+                          onChange={(e) => setCreateTimeSlot({ ...createTimeSlot, date: e.target.value })}
                           required
                         />
                       </div>
@@ -225,8 +267,8 @@ function ReceptionistDashboard() {
                         <input
                           type="time"
                           className="form-control"
-                          value={newTimeSlot.startTime}
-                          onChange={(e) => setNewTimeSlot({ ...newTimeSlot, startTime: e.target.value })}
+                          value={createTimeSlot.startTime}
+                          onChange={(e) => setCreateTimeSlot({ ...createTimeSlot, startTime: e.target.value })}
                           required
                         />
                       </div>
@@ -235,8 +277,8 @@ function ReceptionistDashboard() {
                         <input
                           type="time"
                           className="form-control"
-                          value={newTimeSlot.endTime}
-                          onChange={(e) => setNewTimeSlot({ ...newTimeSlot, endTime: e.target.value })}
+                          value={createTimeSlot.endTime}
+                          onChange={(e) => setCreateTimeSlot({ ...createTimeSlot, endTime: e.target.value })}
                           required
                         />
                       </div>
@@ -244,8 +286,8 @@ function ReceptionistDashboard() {
                         <label className="form-label">Status</label>
                         <select
                           className="form-select"
-                          value={newTimeSlot.status}
-                          onChange={(e) => setNewTimeSlot({ ...newTimeSlot, status: e.target.value })}
+                          value={createTimeSlot.status}
+                          onChange={(e) => setCreateTimeSlot({ ...createTimeSlot, status: e.target.value })}
                           required
                         >
                           <option value="active">Active</option>
@@ -256,8 +298,8 @@ function ReceptionistDashboard() {
                         <label className="form-label">Instructor</label>
                         <select
                           className="form-select"
-                          value={newTimeSlot.instructorId}
-                          onChange={(e) => setNewTimeSlot({ ...newTimeSlot, instructorId: e.target.value })}
+                          value={createTimeSlot.instructorId}
+                          onChange={(e) => setCreateTimeSlot({ ...createTimeSlot, instructorId: e.target.value })}
                           required
                           disabled={instructors.length === 0}
                         >
@@ -276,8 +318,8 @@ function ReceptionistDashboard() {
                         <label className="form-label">Vehicle</label>
                         <select
                           className="form-select"
-                          value={newTimeSlot.vehicleId}
-                          onChange={(e) => setNewTimeSlot({ ...newTimeSlot, vehicleId: e.target.value })}
+                          value={createTimeSlot.vehicleId}
+                          onChange={(e) => setCreateTimeSlot({ ...createTimeSlot, vehicleId: e.target.value })}
                           required
                           disabled={vehicles.length === 0}
                         >
@@ -297,8 +339,8 @@ function ReceptionistDashboard() {
                         <input
                           type="number"
                           className="form-control"
-                          value={newTimeSlot.maxCapacity}
-                          onChange={(e) => setNewTimeSlot({ ...newTimeSlot, maxCapacity: parseInt(e.target.value) })}
+                          value={createTimeSlot.maxCapacity}
+                          onChange={(e) => setCreateTimeSlot({ ...createTimeSlot, maxCapacity: parseInt(e.target.value) })}
                           min="1"
                           required
                         />
@@ -309,29 +351,8 @@ function ReceptionistDashboard() {
                           className="btn btn-primary w-100"
                           disabled={instructors.length === 0 || vehicles.length === 0}
                         >
-                          {editingTimeSlot ? "Update Time Slot" : "Create Time Slot"}
+                          Create Time Slot
                         </button>
-                        {editingTimeSlot && (
-                          <button
-                            type="button"
-                            className="btn btn-secondary ms-2"
-                            onClick={() => {
-                              setEditingTimeSlot(null);
-                              setNewTimeSlot({
-                                date: "",
-                                startTime: "",
-                                endTime: "",
-                                status: "active",
-                                instructorId: "",
-                                vehicleId: "",
-                                maxCapacity: 1,
-                              });
-                              setError(null);
-                            }}
-                          >
-                            Cancel
-                          </button>
-                        )}
                       </div>
                     </form>
                   </div>
@@ -339,15 +360,14 @@ function ReceptionistDashboard() {
                   {/* Time Slots List */}
                   <div className="d-flex flex-column gap-2">
                     {timeSlots.length > 0 ? (
-                      timeSlots.map((slot, index) => (
-                        <div key={index} className="bg-info bg-opacity-10 border rounded-3 p-3">
+                      timeSlots.map((slot) => (
+                        <div key={slot._id} className="bg-info bg-opacity-10 border rounded-3 p-3">
                           <strong>Date:</strong> {new Date(slot.date).toLocaleDateString()}<br />
                           <strong>Time:</strong> {slot.startTime} - {slot.endTime}<br />
                           <strong>Status:</strong> {slot.status}<br />
                           <strong>Instructor:</strong> {slot.instructorId?.name || "N/A"}<br />
-                          <strong>Vehicle:</strong> {slot.vehicleId?.vehicleNumber || "N/A"}<br />
-                          <strong>Max Capacity:</strong> {slot.maxCapacity}<br />
-                          <strong>Booked Students:</strong> {slot.bookedStudents?.map(s => s.name || "N/A").join(", ") || "None"}<br />
+                          <strong>Vehicle:</strong> {slot.vehicleId?.model || "N/A"}<br />
+                          <strong>Capacity:</strong> {slot.bookedStudents?.length || 0} / {slot.maxCapacity}<br />
                           <button
                             className="btn btn-sm btn-outline-primary me-2 mt-2"
                             onClick={() => startEditing(slot)}
@@ -356,7 +376,7 @@ function ReceptionistDashboard() {
                           </button>
                           <button
                             className="btn btn-sm btn-outline-danger mt-2"
-                            onClick={() => handleDeleteTimeSlot(slot._id)}
+                            onClick={() => { setDeleteSlotId(slot._id); setShowDeleteModal(true); }}
                           >
                             Delete
                           </button>
@@ -370,6 +390,173 @@ function ReceptionistDashboard() {
                   </div>
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Edit Time Slot Modal */}
+      <div 
+        className={`modal fade ${showEditModal ? 'show' : ''}`} 
+        tabIndex="-1" 
+        style={{ 
+          display: showEditModal ? 'block' : 'none', 
+          backgroundColor: 'rgba(0,0,0,0.5)' 
+        }}
+        onClick={handleCancelEdit}
+      >
+        <div className="modal-dialog" onClick={(e) => e.stopPropagation()}>
+          <div className="modal-content">
+            <div className="modal-header">
+              <h5 className="modal-title">Edit Time Slot</h5>
+              <button 
+                type="button" 
+                className="btn-close" 
+                onClick={handleCancelEdit}
+                aria-label="Close"
+              ></button>
+            </div>
+            <form onSubmit={handleEditTimeSlot}>
+              <div className="modal-body">
+                {error && (
+                  <div className="alert alert-danger" role="alert">
+                    {error}
+                  </div>
+                )}
+                <div className="row g-3">
+                  <div className="col-6">
+                    <label className="form-label">Date</label>
+                    <input
+                      type="date"
+                      className="form-control"
+                      value={editTimeSlotData.date}
+                      onChange={(e) => setEditTimeSlotData({ ...editTimeSlotData, date: e.target.value })}
+                      required
+                    />
+                  </div>
+                  <div className="col-6">
+                    <label className="form-label">Start Time</label>
+                    <input
+                      type="time"
+                      className="form-control"
+                      value={editTimeSlotData.startTime}
+                      onChange={(e) => setEditTimeSlotData({ ...editTimeSlotData, startTime: e.target.value })}
+                      required
+                    />
+                  </div>
+                  <div className="col-6">
+                    <label className="form-label">End Time</label>
+                    <input
+                      type="time"
+                      className="form-control"
+                      value={editTimeSlotData.endTime}
+                      onChange={(e) => setEditTimeSlotData({ ...editTimeSlotData, endTime: e.target.value })}
+                      required
+                    />
+                  </div>
+                  <div className="col-6">
+                    <label className="form-label">Status</label>
+                    <select
+                      className="form-select"
+                      value={editTimeSlotData.status}
+                      onChange={(e) => setEditTimeSlotData({ ...editTimeSlotData, status: e.target.value })}
+                      required
+                    >
+                      <option value="active">Active</option>
+                      <option value="disabled">Disabled</option>
+                    </select>
+                  </div>
+                  <div className="col-6">
+                    <label className="form-label">Instructor</label>
+                    <select
+                      className="form-select"
+                      value={editTimeSlotData.instructorId}
+                      onChange={(e) => setEditTimeSlotData({ ...editTimeSlotData, instructorId: e.target.value })}
+                      required
+                      disabled={instructors.length === 0}
+                    >
+                      <option value="">Select Instructor</option>
+                      {instructors.map((instructor) => (
+                        <option key={instructor._id} value={instructor._id}>
+                          {instructor.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="col-6">
+                    <label className="form-label">Vehicle</label>
+                    <select
+                      className="form-select"
+                      value={editTimeSlotData.vehicleId}
+                      onChange={(e) => setEditTimeSlotData({ ...editTimeSlotData, vehicleId: e.target.value })}
+                      required
+                      disabled={vehicles.length === 0}
+                    >
+                      <option value="">Select Vehicle</option>
+                      {vehicles.map((vehicle) => (
+                        <option key={vehicle._id} value={vehicle._id}>
+                          {vehicle.vehicleNumber} ({vehicle.make} {vehicle.model})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="col-6">
+                    <label className="form-label">Max Capacity</label>
+                    <input
+                      type="number"
+                      className="form-control"
+                      value={editTimeSlotData.maxCapacity}
+                      onChange={(e) => setEditTimeSlotData({ ...editTimeSlotData, maxCapacity: parseInt(e.target.value) })}
+                      min="1"
+                      required
+                    />
+                  </div>
+                </div>
+              </div>
+              <div className="modal-footer">
+                <button type="button" className="btn btn-secondary" onClick={handleCancelEdit}>
+                  Cancel
+                </button>
+                <button type="submit" className="btn btn-primary">
+                  Update Time Slot
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      {/* Delete Confirmation Modal */}
+      <div 
+        className={`modal fade ${showDeleteModal ? 'show' : ''}`} 
+        tabIndex="-1" 
+        style={{ 
+          display: showDeleteModal ? 'block' : 'none', 
+          backgroundColor: 'rgba(0,0,0,0.5)' 
+        }}
+        onClick={handleCancelDelete}
+      >
+        <div className="modal-dialog" onClick={(e) => e.stopPropagation()}>
+          <div className="modal-content">
+            <div className="modal-header">
+              <h5 className="modal-title">Confirm Delete</h5>
+              <button 
+                type="button" 
+                className="btn-close" 
+                onClick={handleCancelDelete}
+                aria-label="Close"
+              ></button>
+            </div>
+            <div className="modal-body">
+              Are you sure you want to delete this time slot? This action cannot be undone.
+            </div>
+            <div className="modal-footer">
+              <button type="button" className="btn btn-secondary" onClick={handleCancelDelete}>
+                Cancel
+              </button>
+              <button type="button" className="btn btn-danger" onClick={handleDeleteConfirm}>
+                Delete
+              </button>
             </div>
           </div>
         </div>
