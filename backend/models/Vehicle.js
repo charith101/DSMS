@@ -1,16 +1,61 @@
 const mongoose = require('mongoose');
 
+const MaintenanceHistorySchema = new mongoose.Schema({
+  serviceDate: {
+    type: Date,
+    required: true,
+  },
+  description: {
+    type: String,
+    required: true,
+    trim: true,
+  },
+  nextServiceDue: {
+    type: Date,
+    required: true,
+  },
+});
+
+const FuelLogSchema = new mongoose.Schema({
+  date: {
+    type: Date,
+    required: true,
+  },
+  liters: {
+    type: Number,
+    required: true,
+    min: 0,
+  },
+  cost: {
+    type: Number,
+    required: true,
+    min: 0,
+  },
+});
+
+const InsuranceSchema = new mongoose.Schema({
+  provider: {
+    type: String,
+    required: true,
+    trim: true,
+  },
+  policyNumber: {
+    type: String,
+    required: true,
+    trim: true,
+  },
+  expiryDate: {
+    type: Date,
+    required: true,
+  },
+});
+
 const VehicleSchema = mongoose.Schema(
   {
-    vehicleNumber: {
+    type: {
       type: String,
       required: true,
-      unique: true,
-      trim: true,
-    },
-    make: {
-      type: String,
-      required: true,
+      enum: ['Car', 'Bike', 'Van', 'Other'], // Adjust enum based on needs
       trim: true,
     },
     model: {
@@ -18,40 +63,33 @@ const VehicleSchema = mongoose.Schema(
       required: true,
       trim: true,
     },
-    year: {
+    licensePlate: {
+      type: String,
+      required: true,
+      unique: true,
+      trim: true,
+    },
+    capacity: {
       type: Number,
       required: true,
-      min: 1900,
-      max: new Date().getFullYear() + 1,
+      min: 1,
     },
-    transmissionType: {
-      type: String,
-      enum: ['Manual', 'Auto'],
-      required: true,
-    },
-    engineCapacity: {
-      type: Number, // in CC
-      required: true,
-      min: 50,
-    },
-    registrationDate: {
+    purchaseDate: {
       type: Date,
       required: true,
     },
-    vehiclePhoto: {
-      type: String, // Storing the path to the photo
-      default: null,
+    licenseExpiry: {
+      type: Date,
+      required: true,
     },
-    // Other potential fields like status, current mileage, etc.
-    status: {
+    availabilityStatus: {
       type: String,
-      enum: ['Active', 'In Maintenance', 'Sold'],
-      default: 'Active',
+      enum: ['Available', 'In Use', 'Maintenance', 'Unavailable'],
+      default: 'Available',
     },
-    currentMileage: {
-      type: Number,
-      default: 0,
-    },
+    maintenanceHistory: [MaintenanceHistorySchema],
+    fuelLogs: [FuelLogSchema],
+    insurance: InsuranceSchema,
   },
   {
     timestamps: true, // Adds createdAt and updatedAt fields
