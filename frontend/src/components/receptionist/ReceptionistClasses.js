@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { CalendarCheck, Edit2 } from "lucide-react";
+import { CalendarCheck, Edit2, Download } from "lucide-react";
 import ReceptionistNav from "./ReceptionistNav";
 import { useNavigate } from "react-router-dom";
+import jsPDF from 'jspdf';
 
 function ReceptionistClasses() {
   const navigate = useNavigate();
@@ -72,7 +73,6 @@ function ReceptionistClasses() {
   });
 
   const handleEdit = (classId) => {
-    // Navigate to edit page or open modal; for now, log or navigate
     console.log("Edit class:", classId);
     // Example: navigate(`/receptionist/edit-class/${classId}`);
   };
@@ -81,6 +81,63 @@ function ReceptionistClasses() {
     setDateFilter('');
     setInstructorFilter('');
     setVehicleFilter('');
+  };
+
+  const generatePDF = () => {
+    const doc = new jsPDF();
+    doc.setFontSize(16);
+    doc.text("Class Schedule Timetable", 20, 20);
+
+    // Table configuration
+    const headers = ["Date", "Time", "Instructor", "Vehicle", "Status", "Capacity", "Booked Students"];
+    const rows = filteredClasses.map(cls => [
+      new Date(cls.date).toLocaleDateString(),
+      `${cls.startTime} - ${cls.endTime}`,
+      cls.instructorId?.name || "N/A",
+      cls.vehicleId?.model || "N/A",
+      cls.status,
+      `${cls.bookedStudents?.length || 0} / ${cls.maxCapacity}`,
+      cls.bookedStudents?.length > 0 ? cls.bookedStudents.map(student => student.name).join(", ") : "None"
+    ]);
+
+    const startX = 5;
+    const startY = 30;
+    const rowHeight = 10;
+    const colWidths = [25, 25, 25, 40, 20, 20, 40];
+    const pageWidth = 190; // A4 width (210mm) - margins
+    const fontSize = 10;
+
+    doc.setFontSize(fontSize);
+
+    // Draw table headers
+    doc.setLineWidth(0.5);
+    headers.forEach((header, index) => {
+      const x = startX + colWidths.slice(0, index).reduce((a, b) => a + b, 0);
+      doc.text(header, x + 2, startY + 7); // Offset text for padding
+      // Draw cell border
+      doc.rect(x, startY, colWidths[index], rowHeight);
+    });
+
+    // Draw table rows
+    rows.forEach((row, rowIndex) => {
+      row.forEach((cell, colIndex) => {
+        const x = startX + colWidths.slice(0, colIndex).reduce((a, b) => a + b, 0);
+        const y = startY + (rowIndex + 1) * rowHeight;
+        // Truncate long text to fit within cell width
+        const maxWidth = colWidths[colIndex] - 4; // Account for padding
+        const text = doc.splitTextToSize(cell, maxWidth);
+        doc.text(text, x + 2, y + 7); // Offset text for padding
+        // Draw cell border
+        doc.rect(x, y, colWidths[colIndex], rowHeight);
+      });
+    });
+
+    // Draw outer table border
+    const tableHeight = (rows.length + 1) * rowHeight;
+    doc.rect(startX, startY, colWidths.reduce((a, b) => a + b, 0), tableHeight);
+
+    // Download the PDF
+    doc.save("class_schedule.pdf");
   };
 
   if (loading) {
@@ -107,9 +164,15 @@ function ReceptionistClasses() {
             <CalendarCheck size={32} className="me-2 text-primary" />
             Class Schedule
           </h2>
-          <button className="btn btn-primary" onClick={fetchClasses}>
-            Refresh
-          </button>
+          <div>
+            <button className="btn btn-primary me-2" onClick={fetchClasses}>
+              Refresh
+            </button>
+            <button className="btn btn-success" onClick={generatePDF}>
+              <Download size={20} className="me-2" />
+              Download PDF
+            </button>
+          </div>
         </div>
 
         {error && (

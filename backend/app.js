@@ -7,6 +7,7 @@ const authRouter = require('./controllers/auth/authAPI');
 const employeeRouter = require('./controllers/Employee/employeeAPI');
 const receptionistRouter = require('./controllers/receptionist/receptionistAPI');
 const userProfileRouter = require('./controllers/userProfile/userProfileAPI.js');
+const vehicleRouter = require('./controllers/vehicle/vehicleAPI.js');
 
 const app = express();
 app.use(cors());
@@ -30,6 +31,7 @@ app.use('/student', studentRouter);
 app.use('/auth', authRouter);
 app.use('/employee', employeeRouter);
 app.use('/receptionist', receptionistRouter);
+app.use('/vehicle', vehicleRouter);
 app.use('/finance', require('./controllers/payment/financeAPI'));
 app.use('/api/finance/transactions', require('./controllers/payment/transactionRoutes'));
 app.use('/users', userProfileRouter);
