@@ -32,7 +32,8 @@ app.use('/auth', authRouter);
 app.use('/employee', employeeRouter);
 app.use('/receptionist', receptionistRouter);
 app.use('/vehicle', vehicleRouter);
-app.use('/finance', require('./controllers/payment/financeAPI'));
+//app.use('/finance', require('./controllers/payment/financeAPI'));
+app.use('/api/finance', require('./controllers/payment/financeAPI'));
 app.use('/api/finance/transactions', require('./controllers/payment/transactionRoutes'));
 app.use('/users', userProfileRouter);
 

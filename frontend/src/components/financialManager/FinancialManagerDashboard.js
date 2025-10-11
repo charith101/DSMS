@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Card } from 'react-bootstrap';
+import { Toast } from 'bootstrap';
 import FinancialManagerNav from './FinancialManagerNav';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
@@ -47,9 +48,9 @@ const FinancialManagerDashboard = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [transactionToDelete, setTransactionToDelete] = useState(null);
   
-  // Categories for transactions
+  // Categories for transactions - Updated to include all desired categories
   const incomeCategories = ["Tuition Fee", "Registration Fee", "Late Fee", "Other"];
-  const expenseCategories = ["Salary", "Vehicle Maintenance", "Fuel", "Office Supplies", "Other"];
+  const expenseCategories = ["Salary", "Vehicle Maintenance", "Fuel", "Office Supplies", "Insurance", "Marketing", "Maintenance", "Utilities", "Equipment", "Other"];
 
   // State for loading and error handling
   const [loading, setLoading] = useState({
@@ -70,7 +71,7 @@ const FinancialManagerDashboard = () => {
   const navigate = useNavigate();
 
   // API base URL - This should point to your backend server
-  const API_BASE_URL = "http://localhost:3001";
+  const API_BASE_URL = "http://localhost:3005";
   
   // State for refreshing data
   const [refreshData, setRefreshData] = useState(false);
@@ -95,25 +96,46 @@ const FinancialManagerDashboard = () => {
 
         // Use Promise.all to fetch all data concurrently for better performance
         const [
-          summaryResponse,
           transactionsResponse,
           incomeResponse,
-          expensesResponse,
+          expensesResponse, 
           monthlyResponse
         ] = await Promise.all([
-          axios.get(`${API_BASE_URL}/api/finance/summary`),
           axios.get(`${API_BASE_URL}/api/finance/recent-transactions`),
           axios.get(`${API_BASE_URL}/api/finance/income-by-category`),
           axios.get(`${API_BASE_URL}/api/finance/expenses-by-category`),
           axios.get(`${API_BASE_URL}/api/finance/monthly-data`)
         ]);
         
-        // Update state with fetched data
+        // Get transactions data
+        const transactionsData = transactionsResponse.data || [];
+        
+        // Calculate totals from ALL transactions (including payroll/payments)
+        const totalIncome = transactionsData
+          .filter(transaction => transaction.type === 'income')
+          .reduce((sum, transaction) => sum + (Number(transaction.amount) || 0), 0);
+        
+        const totalExpenses = transactionsData
+          .filter(transaction => transaction.type === 'expense')
+          .reduce((sum, transaction) => sum + (Number(transaction.amount) || 0), 0);
+        
+        const netProfit = totalIncome - totalExpenses;
+        
+        console.log('Financial Overview Calculation (All Transactions):', {
+          transactionsCount: transactionsData.length,
+          incomeTransactions: transactionsData.filter(t => t.type === 'income').length,
+          expenseTransactions: transactionsData.filter(t => t.type === 'expense').length,
+          totalIncome,
+          totalExpenses,
+          netProfit
+        });
+        
+        // Update state with all transaction data
         setFinancialData({
-          totalIncome: summaryResponse.data.income,
-          totalExpenses: summaryResponse.data.expenses,
-          netProfit: summaryResponse.data.profit,
-          recentTransactions: transactionsResponse.data
+          totalIncome,
+          totalExpenses,
+          netProfit,
+          recentTransactions: transactionsData
         });
         
         setIncomeByCategory(incomeResponse.data);
@@ -159,8 +181,22 @@ const FinancialManagerDashboard = () => {
     fetchFinancialData();
   }, [refreshData, navigate]);
 
-  // Filter transactions based on filters
-  const filteredTransactions = financialData.recentTransactions.filter(transaction => {
+  // Filter transactions based on filters and separate pure transactions from payment/payroll data
+  const pureTransactions = financialData.recentTransactions.filter(transaction => {
+    // Keep only pure transactions (not from payments or payroll)
+    const isPaymentEntry = transaction.category === 'Tuition Fee' && transaction.description && transaction.description.startsWith('Payment from');
+    const isPayrollEntry = transaction.category === 'Salary' && transaction.description && transaction.description.startsWith('Salary for');
+    return !isPaymentEntry && !isPayrollEntry;
+  });
+
+  const paymentPayrollData = financialData.recentTransactions.filter(transaction => {
+    // Keep only payment and payroll entries
+    const isPaymentEntry = transaction.category === 'Tuition Fee' && transaction.description && transaction.description.startsWith('Payment from');
+    const isPayrollEntry = transaction.category === 'Salary' && transaction.description && transaction.description.startsWith('Salary for');
+    return isPaymentEntry || isPayrollEntry;
+  });
+
+  const filteredTransactions = pureTransactions.filter(transaction => {
     if (filters.startDate && new Date(transaction.date) < new Date(filters.startDate)) {
       return false;
     }
@@ -254,7 +290,7 @@ const FinancialManagerDashboard = () => {
     document.body.appendChild(toast);
     
     const toastElement = document.getElementById(toastId);
-    const bsToast = new window.bootstrap.Toast(toastElement); // Use bootstrap's toast API
+    const bsToast = new Toast(toastElement); // Use imported Toast class
     bsToast.show();
 
     setTimeout(() => {
@@ -432,8 +468,8 @@ const FinancialManagerDashboard = () => {
                       <DollarSign size={64} className="text-primary" />
                     </div>
                     <div>
-                      <h3 className="mb-1 fw-bold">Transactions</h3>
-                      <small className="text-muted">Manage all income and expense records</small>
+                      <h3 className="mb-1 fw-bold">Direct Transactions</h3>
+                      <small className="text-muted">Manage direct income and expense transactions</small>
                     </div>
                   </div>
                   {/* MODIFICATION: The entire transactions table and its functionality is now nested here */}
@@ -516,6 +552,64 @@ const FinancialManagerDashboard = () => {
                 </div>
               </div>
             </div>
+
+            {/* Payment & Payroll Data Display Card */}
+            <div className="col-12">
+              <div className="card border-2 shadow-sm p-3">
+                <div className="card-body p-4">
+                  <div className="d-flex align-items-center mb-3">
+                    <div className="bg-info bg-opacity-25 rounded-circle p-3 me-3">
+                      <TrendingUp size={64} className="text-info" />
+                    </div>
+                    <div>
+                      <h3 className="mb-1 fw-bold">Payment & Payroll Records</h3>
+                      <small className="text-muted">View-only display of payment and payroll data</small>
+                    </div>
+                  </div>
+                  
+                  {paymentPayrollData.length > 0 ? (
+                    <div className="table-responsive">
+                      <table className="table table-hover">
+                        <thead className="table-light">
+                          <tr>
+                            <th>Date</th>
+                            <th>Description</th>
+                            <th>Category</th>
+                            <th>Amount</th>
+                            <th>Type</th>
+                            <th>Source</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {paymentPayrollData.map((record, index) => (
+                            <tr key={`payroll-payment-${index}`}>
+                              <td>{new Date(record.date).toLocaleDateString()}</td>
+                              <td>{record.description}</td>
+                              <td>{record.category}</td>
+                              <td className={record.type === 'income' ? 'text-success fw-bold' : 'text-danger fw-bold'}>
+                                LKR {record.amount.toLocaleString()}
+                              </td>
+                              <td>
+                                <span className={`badge ${record.type === 'income' ? 'bg-success' : 'bg-danger'}`}>{record.type}</span>
+                              </td>
+                              <td>
+                                <span className={`badge ${record.category === 'Tuition Fee' ? 'bg-info' : 'bg-warning'}`}>
+                                  {record.category === 'Tuition Fee' ? 'Payment System' : 'Payroll System'}
+                                </span>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  ) : (
+                    <div className="text-center py-4">
+                      <p className="text-muted mb-0">No payment or payroll records found.</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -593,7 +687,7 @@ const FinancialManagerDashboard = () => {
                   <div className="mb-3">
                     <label htmlFor="amount" className="form-label">Amount</label>
                     <div className="input-group">
-                      <span className="input-group-text">$</span>
+                      <span className="input-group-text">LKR</span>
                       <input
                         type="number"
                         step="0.01"

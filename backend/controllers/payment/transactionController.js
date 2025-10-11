@@ -1,4 +1,4 @@
-const Transaction = require('../../models/Transaction');
+const Transaction = require('../../model/Transaction');
 
 // @desc    Get all transactions with filtering
 // @route   GET /api/finance/transactions

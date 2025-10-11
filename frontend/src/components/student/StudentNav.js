@@ -16,6 +16,7 @@ function StudentNav({ page }) {
     timeslot: "Pick Time Slot",
     mockexam: "Mock Exam",
     feedback: "Feedback",
+    payments: "Payments",
     profile: "Profile"
   };
 
@@ -48,6 +49,9 @@ function StudentNav({ page }) {
               </Link>
               <Link to="/Student/Feedback" className={`fw-medium mx-2 my-auto relative text-black ${page === 'feedback' ? 'border-b border-black' : ''}`}>
                 Feedback
+              </Link>
+              <Link to="/Student/Payments" className={`fw-medium mx-2 my-auto relative text-black ${page === 'payments' ? 'border-b border-black' : ''}`}>
+                Payments
               </Link>
               <Link to="/Student/Profile" className={`fw-medium mx-2 my-auto relative text-black ${page === 'profile' ? 'border-b border-black' : ''}`}>
                 Profile
