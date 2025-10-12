@@ -13,7 +13,7 @@ const TransactionSchema = new mongoose.Schema({
   category: {
     type: String,
     required: [true, 'Please add a category'],
-    enum: ['Tuition Fee', 'Salary', 'Maintenance', 'Utilities', 'Equipment', 'Other'],
+    enum: ['Tuition Fee', 'Registration Fee', 'Late Fee', 'Salary', 'Maintenance', 'Utilities', 'Equipment', 'Vehicle Maintenance', 'Fuel', 'Office Supplies', 'Insurance', 'Marketing', 'Other'],
   },
   type: {
     type: String,

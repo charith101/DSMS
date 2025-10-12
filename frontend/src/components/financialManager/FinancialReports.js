@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { 
   Container, 
@@ -12,6 +12,7 @@ import {
   Select, 
   MenuItem, 
   TextField,
+  InputAdornment,
   Table,
   TableBody,
   TableCell,
@@ -34,9 +35,8 @@ import {
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { format, subMonths, startOfMonth, endOfMonth, parseISO } from 'date-fns';
+import { format, subMonths, startOfMonth, endOfMonth } from 'date-fns';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
-import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import PrintIcon from '@mui/icons-material/Print';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import FilterListIcon from '@mui/icons-material/FilterList';
@@ -52,17 +52,13 @@ import {
 } from 'recharts';
 
 // Import export libraries
-import { jsPDF } from 'jspdf';
-import 'jspdf-autotable';
 import * as XLSX from 'xlsx';
 
 
 // ======================================================================================
 // API Configuration
 // ======================================================================================
-// Remove the CORS proxy as it's causing issues and may not be necessary
-// if the backend is properly configured with CORS headers
-const API_BASE_URL = 'http://localhost:3001';
+const API_BASE_URL = 'http://localhost:3005';
 // ======================================================================================
 
 
@@ -72,7 +68,7 @@ const FinancialReports = () => {
   const [error, setError] = useState(null);
   const [reportType, setReportType] = useState('revenue');
   const [timeFrame, setTimeFrame] = useState('monthly');
-  const [startDate, setStartDate] = useState(startOfMonth(subMonths(new Date(), 5)));
+  const [startDate, setStartDate] = useState(startOfMonth(subMonths(new Date(), 11))); // 1 year ago
   const [endDate, setEndDate] = useState(endOfMonth(new Date()));
   const [financialData, setFinancialData] = useState({
     revenue: [],
@@ -96,67 +92,208 @@ const FinancialReports = () => {
   });
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
 
-  const fetchFinancialData = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const formattedStartDate = format(startDate, 'yyyy-MM-dd');
-      const formattedEndDate = format(endDate, 'yyyy-MM-dd');
-      
-      const response = await axios.get(`${API_BASE_URL}/api/finance/reports`, {
-        params: { startDate: formattedStartDate, endDate: formattedEndDate }
-      });
-      
-      if (response.data && response.data.transactions) {
-        processApiData(response.data);
-      } else {
-        setError('The server responded, but the data format is incorrect.');
+  const processMultipleApiData = useCallback((data) => {
+    const { summary, transactions = [] } = data;
+    
+    console.log('=== PROCESSING API DATA (TRANSACTIONS ONLY) ===');
+    console.log('Raw data received:', { 
+      summary, 
+      transactionsCount: transactions.length
+    });
+    console.log('Date range filter:', { 
+      startDate: format(startDate, 'yyyy-MM-dd'), 
+      endDate: format(endDate, 'yyyy-MM-dd') 
+    });
+
+    // Use transactions data directly
+    const actualTransactions = transactions;
+    
+    console.log('Using transactions data only:', { 
+      transactionsCount: actualTransactions.length
+    });
+    
+    // Convert transactions collection data (only source of data)
+    const allTransactions = actualTransactions.map(transactionItem => {
+      let transactionDate;
+      try {
+        if (transactionItem.date) {
+          transactionDate = new Date(transactionItem.date);
+          // Validate the date
+          if (isNaN(transactionDate.getTime())) {
+            console.warn('Invalid transaction date:', transactionItem.date);
+            transactionDate = new Date();
+          }
+        } else {
+          transactionDate = new Date();
+        }
+      } catch (error) {
+        console.warn('Failed to parse transaction date:', transactionItem.date);
+        transactionDate = new Date();
       }
-    } catch (err) {
-      console.error('Error fetching financial data:', err);
-      setError(err.response?.data?.message || 'Failed to connect to the server. Ensure the backend is running on port 3001.');
-    } finally {
-      setLoading(false);
+      
+      return {
+        id: transactionItem._id || transactionItem.id || `transaction_${Date.now()}_${Math.random()}`,
+        date: transactionDate,
+        description: transactionItem.description || 'Transaction',
+        amount: Number(transactionItem.amount) || 0,
+        type: transactionItem.type || 'income',
+        formattedDate: format(transactionDate, 'MMM dd, yyyy'),
+        formattedAmount: `LKR ${Number(transactionItem.amount || 0).toFixed(2)}`
+      };
+    });
+    console.log('=== ALL TRANSACTIONS (FROM TRANSACTIONS COLLECTION ONLY) ===');
+    console.log('Total transactions:', allTransactions.length);
+    
+    // Show all transaction dates to help debug
+    if (allTransactions.length > 0) {
+      console.log('All transactions with dates:');
+      allTransactions.forEach((transaction, index) => {
+        console.log(`  ${index + 1}. ${transaction.formattedDate} (${transaction.date.toISOString().split('T')[0]}) - ${transaction.description} - LKR ${transaction.amount} (${transaction.type})`);
+      });
+    } else {
+      console.log('❌ NO TRANSACTIONS FOUND IN DATABASE');
     }
-  };
-  
-  // (useEffect and processApiData remain the same)
-  useEffect(() => {
-    fetchFinancialData();
-  }, [reportType, timeFrame, startDate, endDate]);
+    
+    // Simple date filtering - convert dates to YYYY-MM-DD format for comparison
+    const startDateStr = format(startDate, 'yyyy-MM-dd');
+    const endDateStr = format(endDate, 'yyyy-MM-dd');
+    
+    console.log('=== DATE FILTERING ===');
+    console.log('Filter range (strings):', { startDateStr, endDateStr });
+    
+    const filteredTransactions = allTransactions.filter(transaction => {
+      try {
+        const transactionDateStr = format(transaction.date, 'yyyy-MM-dd');
+        const isInRange = transactionDateStr >= startDateStr && transactionDateStr <= endDateStr;
+        
+        console.log(`Checking transaction: ${transactionDateStr} >= ${startDateStr} && ${transactionDateStr} <= ${endDateStr} = ${isInRange}`);
+        
+        return isInRange;
+      } catch (error) {
+        console.error('Error comparing dates for transaction:', transaction, error);
+        return false;
+      }
+    });
 
-  const processApiData = (data) => {
-    // Process transactions data
-    const transactions = data.transactions.map(transaction => ({
-      ...transaction,
-      date: transaction.date ? parseISO(transaction.date) : new Date(),
-      formattedDate: transaction.date ? format(parseISO(transaction.date), 'MMM dd, yyyy') : 'N/A',
-      formattedAmount: `$${Number(transaction.amount).toFixed(2)}`
-    }));
+    console.log('=== FILTERED RESULTS ===');
+    console.log('Transactions after date filtering:', filteredTransactions.length);
+    
+    if (filteredTransactions.length > 0) {
+      console.log('Filtered transactions:');
+      filteredTransactions.forEach((transaction, index) => {
+        console.log(`  ${index + 1}. ${transaction.formattedDate} - ${transaction.description} - LKR ${transaction.amount} (${transaction.type})`);
+      });
+    } else {
+      console.log('❌ NO TRANSACTIONS FOUND IN DATE RANGE');
+      console.log('This could mean:');
+      console.log('1. No transactions exist in the database');
+      console.log('2. All transactions are outside the selected date range');
+      console.log('3. There is an issue with date parsing');
+    }
 
-    // Separate revenue and expenses
-    const revenue = transactions.filter(t => t.type === 'income');
-    const expenses = transactions.filter(t => t.type === 'expense');
+    // Separate revenue and expenses from filtered transactions
+    const revenue = filteredTransactions.filter(t => t.type === 'income');
+    const expenses = filteredTransactions.filter(t => t.type === 'expense');
 
-    // Calculate summary
-    const totalRevenue = revenue.reduce((sum, item) => sum + Number(item.amount), 0);
-    const totalExpenses = expenses.reduce((sum, item) => sum + Number(item.amount), 0);
-    const netProfit = totalRevenue - totalExpenses;
+    console.log('Separated data:', {
+      revenue: revenue.length,
+      expenses: expenses.length,
+      total: filteredTransactions.length
+    });
 
-    // Update state
+    // Calculate totals from filtered data only
+    const calculatedRevenue = revenue.reduce((sum, item) => sum + Number(item.amount), 0);
+    const calculatedExpenses = expenses.reduce((sum, item) => sum + Number(item.amount), 0);
+    const calculatedProfit = calculatedRevenue - calculatedExpenses;
+
+    console.log('=== FINAL SUMMARY ===');
+    console.log('Calculated totals:', {
+      revenue: calculatedRevenue,
+      expenses: calculatedExpenses,
+      profit: calculatedProfit,
+      transactionCount: filteredTransactions.length
+    });
+
+    // Update state with filtered data
     setFinancialData({
       revenue,
       expenses,
-      transactions
+      transactions: filteredTransactions
     });
 
+    // Use calculated values from filtered data
     setSummary({
-      totalRevenue,
-      totalExpenses,
-      netProfit,
-      transactionCount: transactions.length
+      totalRevenue: calculatedRevenue,
+      totalExpenses: calculatedExpenses,
+      netProfit: calculatedProfit,
+      transactionCount: filteredTransactions.length
     });
-  };
+
+    console.log('=== DATA PROCESSING COMPLETE ===');
+    console.log('✅ Summary cards should now show:', {
+      totalRevenue: calculatedRevenue,
+      totalExpenses: calculatedExpenses,
+      netProfit: calculatedProfit,
+      transactionCount: filteredTransactions.length
+    });
+  }, [startDate, endDate]);
+
+  const fetchFinancialData = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      console.log('Testing API endpoints...');
+      
+      // Test endpoints one by one to identify which one is failing
+      let summaryData = null;
+      let recentTransactionsData = null;
+      let transactionsData = []; // Only using transactions data
+      
+      try {
+        console.log('Calling /api/finance/summary...');
+        const summaryResponse = await axios.get(`${API_BASE_URL}/api/finance/summary`);
+        summaryData = summaryResponse.data;
+        console.log('Summary response:', summaryData);
+      } catch (err) {
+        console.error('Summary endpoint failed:', err.response?.status, err.response?.data);
+      }
+      
+      try {
+        console.log('Calling /api/finance/recent-transactions...');
+        const recentResponse = await axios.get(`${API_BASE_URL}/api/finance/recent-transactions`);
+        recentTransactionsData = recentResponse.data;
+        console.log('Recent transactions response:', recentTransactionsData);
+        
+        // Use all transactions data without filtering
+        transactionsData = recentTransactionsData || [];
+        console.log('All transactions data:', transactionsData);
+      } catch (err) {
+        console.error('Recent transactions endpoint failed:', err.response?.status, err.response?.data);
+      }
+      
+      // Skip payments and payroll endpoints - using only transactions collection
+      console.log('Using only transactions collection to avoid data duplication');
+      
+      // Process the data from transactions collection only
+      processMultipleApiData({
+        summary: summaryData,
+        recentTransactions: recentTransactionsData,
+        payments: [], // Empty array - not using payments data
+        payroll: [], // Empty array - not using payroll data
+        transactions: transactionsData // Only use transactions data
+      });
+      
+    } catch (err) {
+      console.error('Error fetching financial data:', err);
+      setError(`Failed to connect to the server. Details: ${err.message}`);
+    } finally {
+      setLoading(false);
+    }
+  }, [processMultipleApiData]);
+  
+  useEffect(() => {
+    fetchFinancialData();
+  }, [fetchFinancialData, reportType, timeFrame]);
 
 
   const handleSaveTransaction = async () => {
@@ -256,68 +393,191 @@ const FinancialReports = () => {
     const { revenue, expenses } = financialData;
     let data = [];
 
+    console.log('Generating chart data for date range:', {
+      startDate: format(startDate, 'yyyy-MM-dd'),
+      endDate: format(endDate, 'yyyy-MM-dd'),
+      revenueCount: revenue.length,
+      expensesCount: expenses.length
+    });
+
+    // Data is already filtered by date range in processMultipleApiData
+    // Now we just need to group it by the selected time frame
+
     if (timeFrame === 'monthly') {
       // Group by month
       const months = {};
       
+      console.log('=== MONTHLY CHART DATA PROCESSING ===');
+      console.log('Processing revenue transactions:', revenue.length);
+      
       // Process revenue
-      revenue.forEach(item => {
-        const monthKey = format(item.date, 'yyyy-MM');
-        const monthLabel = format(item.date, 'MMM yyyy');
+      revenue.forEach((item, index) => {
+        if (!item.date) return; // Skip if no date
         
-        if (!months[monthKey]) {
-          months[monthKey] = { name: monthLabel, revenue: 0, expenses: 0 };
+        try {
+          const itemDate = new Date(item.date);
+          // Validate the date
+          if (isNaN(itemDate.getTime())) {
+            console.warn('Invalid revenue item date:', item.date);
+            return;
+          }
+          
+          const monthKey = format(itemDate, 'yyyy-MM');
+          const monthLabel = format(itemDate, 'MMM yyyy');
+          
+          if (!months[monthKey]) {
+            months[monthKey] = { 
+              name: monthLabel, 
+              revenue: 0, 
+              expenses: 0,
+              sortDate: itemDate
+            };
+            console.log(`Created new month entry: ${monthLabel} (${monthKey})`);
+          }
+          
+          const previousRevenue = months[monthKey].revenue;
+          months[monthKey].revenue += Number(item.amount || 0);
+          
+          console.log(`Revenue ${index + 1}: ${item.description} - LKR ${item.amount} added to ${monthLabel}`);
+          console.log(`  Previous total: LKR ${previousRevenue} -> New total: LKR ${months[monthKey].revenue}`);
+        } catch (err) {
+          console.error('Error processing revenue item:', item, err);
         }
-        months[monthKey].revenue += Number(item.amount);
       });
       
+      console.log('Processing expense transactions:', expenses.length);
+      
       // Process expenses
-      expenses.forEach(item => {
-        const monthKey = format(item.date, 'yyyy-MM');
-        const monthLabel = format(item.date, 'MMM yyyy');
+      expenses.forEach((item, index) => {
+        if (!item.date) return; // Skip if no date
         
-        if (!months[monthKey]) {
-          months[monthKey] = { name: monthLabel, revenue: 0, expenses: 0 };
+        try {
+          const itemDate = new Date(item.date);
+          // Validate the date
+          if (isNaN(itemDate.getTime())) {
+            console.warn('Invalid expense item date:', item.date);
+            return;
+          }
+          
+          const monthKey = format(itemDate, 'yyyy-MM');
+          const monthLabel = format(itemDate, 'MMM yyyy');
+          
+          if (!months[monthKey]) {
+            months[monthKey] = { 
+              name: monthLabel, 
+              revenue: 0, 
+              expenses: 0,
+              sortDate: itemDate
+            };
+            console.log(`Created new month entry: ${monthLabel} (${monthKey})`);
+          }
+          
+          const previousExpenses = months[monthKey].expenses;
+          months[monthKey].expenses += Number(item.amount || 0);
+          
+          console.log(`Expense ${index + 1}: ${item.description} - LKR ${item.amount} added to ${monthLabel}`);
+          console.log(`  Previous total: LKR ${previousExpenses} -> New total: LKR ${months[monthKey].expenses}`);
+        } catch (err) {
+          console.error('Error processing expense item:', item, err);
         }
-        months[monthKey].expenses += Number(item.amount);
+      });
+      
+      console.log('=== MONTHLY AGGREGATION SUMMARY ===');
+      Object.keys(months).forEach(monthKey => {
+        const month = months[monthKey];
+        console.log(`${month.name}: Revenue LKR ${month.revenue}, Expenses LKR ${month.expenses}`);
       });
       
       // Convert to array and sort by date
-      data = Object.values(months).sort((a, b) => 
-        new Date(a.name) - new Date(b.name)
-      );
+      data = Object.values(months).sort((a, b) => a.sortDate - b.sortDate);
     } else {
       // Daily view
       const days = {};
       
       // Process revenue
       revenue.forEach(item => {
-        const dayKey = format(item.date, 'yyyy-MM-dd');
-        const dayLabel = format(item.date, 'MMM dd');
+        if (!item.date) return; // Skip if no date
         
-        if (!days[dayKey]) {
-          days[dayKey] = { name: dayLabel, revenue: 0, expenses: 0 };
+        try {
+          const itemDate = new Date(item.date);
+          // Validate the date
+          if (isNaN(itemDate.getTime())) {
+            console.warn('Invalid daily revenue item date:', item.date);
+            return;
+          }
+          
+          const dayKey = format(itemDate, 'yyyy-MM-dd');
+          const dayLabel = format(itemDate, 'MMM dd');
+          
+          if (!days[dayKey]) {
+            days[dayKey] = { 
+              name: dayLabel, 
+              revenue: 0, 
+              expenses: 0,
+              sortDate: itemDate
+            };
+          }
+          days[dayKey].revenue += Number(item.amount || 0);
+        } catch (err) {
+          console.error('Error processing daily revenue item:', item, err);
         }
-        days[dayKey].revenue += Number(item.amount);
       });
       
       // Process expenses
       expenses.forEach(item => {
-        const dayKey = format(item.date, 'yyyy-MM-dd');
-        const dayLabel = format(item.date, 'MMM dd');
+        if (!item.date) return; // Skip if no date
         
-        if (!days[dayKey]) {
-          days[dayKey] = { name: dayLabel, revenue: 0, expenses: 0 };
+        try {
+          const itemDate = new Date(item.date);
+          // Validate the date
+          if (isNaN(itemDate.getTime())) {
+            console.warn('Invalid daily expense item date:', item.date);
+            return;
+          }
+          
+          const dayKey = format(itemDate, 'yyyy-MM-dd');
+          const dayLabel = format(itemDate, 'MMM dd');
+          
+          if (!days[dayKey]) {
+            days[dayKey] = { 
+              name: dayLabel, 
+              revenue: 0, 
+              expenses: 0,
+              sortDate: itemDate
+            };
+          }
+          days[dayKey].expenses += Number(item.amount || 0);
+        } catch (err) {
+          console.error('Error processing daily expense item:', item, err);
         }
-        days[dayKey].expenses += Number(item.amount);
       });
       
       // Convert to array and sort by date
-      data = Object.values(days).sort((a, b) => 
-        new Date(a.name) - new Date(b.name)
-      );
+      data = Object.values(days).sort((a, b) => a.sortDate - b.sortDate);
     }
 
+    // Clean up the data for chart display
+    data = data.map(item => ({
+      name: item.name,
+      revenue: Number(item.revenue.toFixed(2)),
+      expenses: Number(item.expenses.toFixed(2))
+    }));
+
+    // If no data from transactions within the date range, create placeholder
+    if (data.length === 0) {
+      console.log('No chart data found for selected date range, creating placeholder');
+      const placeholderLabel = timeFrame === 'monthly' 
+        ? format(startDate, 'MMM yyyy')
+        : format(startDate, 'MMM dd');
+      
+      data = [{
+        name: placeholderLabel,
+        revenue: 0,
+        expenses: 0
+      }];
+    }
+
+    console.log('Final chart data:', data);
     return data;
   };
 
@@ -348,51 +608,6 @@ const FinancialReports = () => {
     
     // Save file
     XLSX.writeFile(wb, fileName);
-  };
-
-  // Export data to PDF
-  const exportToPDF = () => {
-    const { transactions } = financialData;
-    const startDateStr = format(startDate, 'MMM dd, yyyy');
-    const endDateStr = format(endDate, 'MMM dd, yyyy');
-    
-    // Create PDF document
-    const doc = new jsPDF();
-    
-    // Add title
-    doc.setFontSize(18);
-    doc.text('Financial Transaction Report', 14, 22);
-    
-    // Add date range
-    doc.setFontSize(12);
-    doc.text(`Period: ${startDateStr} to ${endDateStr}`, 14, 32);
-    
-    // Add summary
-    doc.text(`Total Revenue: $${summary.totalRevenue.toFixed(2)}`, 14, 42);
-    doc.text(`Total Expenses: $${summary.totalExpenses.toFixed(2)}`, 14, 52);
-    doc.text(`Net Profit: $${summary.netProfit.toFixed(2)}`, 14, 62);
-    doc.text(`Total Transactions: ${summary.transactionCount}`, 14, 72);
-    
-    // Prepare data for table
-    const tableData = transactions.map(item => [
-      item.id,
-      item.formattedDate,
-      item.description,
-      item.type === 'income' ? 'Income' : 'Expense',
-      item.formattedAmount
-    ]);
-    
-    // Add table
-    doc.autoTable({
-      startY: 80,
-      head: [['ID', 'Date', 'Description', 'Type', 'Amount']],
-      body: tableData,
-      theme: 'striped',
-      headStyles: { fillColor: [66, 139, 202] }
-    });
-    
-    // Save PDF
-    doc.save(`Financial_Report_${format(startDate, 'yyyy-MM-dd')}_to_${format(endDate, 'yyyy-MM-dd')}.pdf`);
   };
 
   // Print report
@@ -502,7 +717,7 @@ const FinancialReports = () => {
                   Total Revenue
                 </Typography>
                 <Typography variant="h5" component="div">
-                  ${summary.totalRevenue.toFixed(2)}
+                  LKR   {summary.totalRevenue.toFixed(2)}
                 </Typography>
               </CardContent>
             </Card>
@@ -514,7 +729,7 @@ const FinancialReports = () => {
                   Total Expenses
                 </Typography>
                 <Typography variant="h5" component="div">
-                  ${summary.totalExpenses.toFixed(2)}
+                  LKR   {summary.totalExpenses.toFixed(2)}
                 </Typography>
               </CardContent>
             </Card>
@@ -526,7 +741,7 @@ const FinancialReports = () => {
                   Net Profit
                 </Typography>
                 <Typography variant="h5" component="div" color={summary.netProfit >= 0 ? 'success.main' : 'error.main'}>
-                  ${summary.netProfit.toFixed(2)}
+                  LKR   {summary.netProfit.toFixed(2)}
                 </Typography>
               </CardContent>
             </Card>
@@ -556,11 +771,6 @@ const FinancialReports = () => {
                 <Tooltip title="Export to Excel">
                   <IconButton onClick={exportToExcel}>
                     <FileDownloadIcon />
-                  </IconButton>
-                </Tooltip>
-                <Tooltip title="Export to PDF">
-                  <IconButton onClick={exportToPDF}>
-                    <PictureAsPdfIcon />
                   </IconButton>
                 </Tooltip>
                 <Tooltip title="Print">
@@ -606,11 +816,6 @@ const FinancialReports = () => {
               <Tooltip title="Export to Excel">
                 <IconButton onClick={exportToExcel}>
                   <FileDownloadIcon />
-                </IconButton>
-              </Tooltip>
-              <Tooltip title="Export to PDF">
-                <IconButton onClick={exportToPDF}>
-                  <PictureAsPdfIcon />
                 </IconButton>
               </Tooltip>
               <Tooltip title="Print">
@@ -721,7 +926,7 @@ const FinancialReports = () => {
                 value={transactionForm.amount}
                 onChange={(e) => handleFormChange('amount', e.target.value)}
                 InputProps={{
-                  startAdornment: <span>$</span>,
+                  startAdornment: <InputAdornment position="start">LKR</InputAdornment>,
                 }}
                 fullWidth
               />

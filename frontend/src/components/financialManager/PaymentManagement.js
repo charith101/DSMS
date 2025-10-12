@@ -33,11 +33,14 @@ const PaymentManagement = () => {
   const fetchPayments = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('/api/finance/payments');
-      setPayments(response.data);
+      const response = await axios.get('http://localhost:3005/api/finance/payments');
+      // Handle the API response structure where data is in response.data.data
+      const paymentsData = response.data?.data || response.data || [];
+      setPayments(Array.isArray(paymentsData) ? paymentsData : []);
       setLoading(false);
     } catch (error) {
       console.error('Error fetching payments:', error);
+      setPayments([]); // Set empty array on error
       setLoading(false);
     }
   };
@@ -88,13 +91,32 @@ const PaymentManagement = () => {
   };
 
   const sortedPayments = React.useMemo(() => {
+    // Ensure payments is an array before spreading
+    if (!Array.isArray(payments)) {
+      return [];
+    }
     let sortableItems = [...payments];
     if (sortConfig.key !== null) {
       sortableItems.sort((a, b) => {
-        if (a[sortConfig.key] < b[sortConfig.key]) {
+        let aVal = a[sortConfig.key];
+        let bVal = b[sortConfig.key];
+        
+        // Handle object values (like populated studentId)
+        if (typeof aVal === 'object' && aVal !== null) {
+          aVal = aVal.name || aVal.email || aVal._id || '';
+        }
+        if (typeof bVal === 'object' && bVal !== null) {
+          bVal = bVal.name || bVal.email || bVal._id || '';
+        }
+        
+        // Ensure we have strings for comparison
+        aVal = String(aVal || '').toLowerCase();
+        bVal = String(bVal || '').toLowerCase();
+        
+        if (aVal < bVal) {
           return sortConfig.direction === 'ascending' ? -1 : 1;
         }
-        if (a[sortConfig.key] > b[sortConfig.key]) {
+        if (aVal > bVal) {
           return sortConfig.direction === 'ascending' ? 1 : -1;
         }
         return 0;
@@ -118,10 +140,30 @@ const PaymentManagement = () => {
     }
   };
 
-  const filteredPayments = payments.filter(payment => 
-    payment.studentId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    payment.description.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredPayments = Array.isArray(payments) ? payments.filter(payment => {
+    try {
+      // Handle both string studentId and populated studentId object
+      let studentName = '';
+      if (payment.studentId) {
+        if (typeof payment.studentId === 'string') {
+          studentName = payment.studentId;
+        } else if (typeof payment.studentId === 'object') {
+          studentName = payment.studentId.name || payment.studentId.email || payment.studentId._id || '';
+        }
+      }
+      
+      const description = payment.description || '';
+      const searchTermLower = (searchTerm || '').toLowerCase();
+      
+      return (
+        studentName.toLowerCase().includes(searchTermLower) ||
+        description.toLowerCase().includes(searchTermLower)
+      );
+    } catch (error) {
+      console.error('Error filtering payment:', payment, error);
+      return false;
+    }
+  }) : [];
 
   return (
     <div className="dashboard-container">
@@ -160,7 +202,6 @@ const PaymentManagement = () => {
                 <Table striped bordered hover>
                   <thead>
                     <tr>
-                      <th>ID</th>
                       <th>Student ID</th>
                       <th onClick={() => requestSort('studentName')}>
                         Student Name {getSortIndicator('studentName')}
@@ -172,35 +213,38 @@ const PaymentManagement = () => {
                         Payment Amount {getSortIndicator('amount')}
                       </th>
                       <th>Payment Method</th>
+                      <th>Description</th>
                       <th>Transaction Status</th>
                       <th>Actions</th>
                     </tr>
                   </thead>
                   <tbody>
                     {filteredPayments.length > 0 ? (
-                      filteredPayments.map((payment) => (
-                        <tr key={payment._id}>
-                          <td>{payment._id.substring(0, 8)}</td>
-                          <td>{payment.studentId}</td>
-                          <td>{new Date(payment.date).toLocaleDateString()}</td>
-                          <td>LKR {payment.amount.toLocaleString()}</td>
-                          <td>{payment.paymentMethod}</td>
-                          <td>{payment.description}</td>
-                          <td>
-                            <span className={`badge ${payment.status === 'completed' ? 'bg-success' : payment.status === 'pending' ? 'bg-warning' : 'bg-danger'}`}>
-                              {payment.status}
-                            </span>
-                          </td>
-                          <td>
-                            <Button variant="primary" size="sm" onClick={() => handleModalShow(payment)}>
-                              <FaEdit /> Edit
-                            </Button>
-                          </td>
-                        </tr>
-                      ))
+                      filteredPayments.map((payment) => {
+                        return (
+                          <tr key={payment._id}>
+                            <td>{typeof payment.studentId === 'object' ? payment.studentId._id : payment.studentId}</td>
+                            <td>{typeof payment.studentId === 'object' ? payment.studentId.name : 'N/A'}</td>
+                            <td>{new Date(payment.paymentDate || payment.date).toLocaleDateString()}</td>
+                            <td>LKR {payment.amount.toLocaleString()}</td>
+                            <td>{payment.paymentMethod}</td>
+                            <td>{payment.description}</td>
+                            <td>
+                              <span className={`badge ${payment.status === 'Paid' || payment.status === 'completed' ? 'bg-success' : payment.status === 'Pending' || payment.status === 'pending' ? 'bg-warning' : 'bg-danger'}`}>
+                                {payment.status}
+                              </span>
+                            </td>
+                            <td>
+                              <Button variant="primary" size="sm" onClick={() => handleModalShow(payment)}>
+                                <FaEdit /> Edit
+                              </Button>
+                            </td>
+                          </tr>
+                        );
+                      })
                     ) : (
                       <tr>
-                        <td colSpan="8" className="text-center">No payments found</td>
+                        <td colSpan="7" className="text-center">No payments found</td>
                       </tr>
                     )}
                   </tbody>

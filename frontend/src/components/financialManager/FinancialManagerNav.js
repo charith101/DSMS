@@ -1,7 +1,7 @@
 import React from 'react';
 import { Navbar, Nav, Container, Button } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
-import { FaChartLine, FaMoneyBillWave, FaFileInvoiceDollar, FaChartBar, FaSignOutAlt, FaCar } from 'react-icons/fa';
+import { FaSignOutAlt, FaCar } from 'react-icons/fa';
 import './financialManagerNav.css';
 
 const FinancialManagerNav = () => {
@@ -29,8 +29,8 @@ const FinancialManagerNav = () => {
             <Nav.Link as={Link} to="/financial-manager/payments" className="px-3">
               Payments
             </Nav.Link>
-            <Nav.Link as={Link} to="/financial-manager/expenses" className="px-3">
-              Expenses
+            <Nav.Link as={Link} to="/financial-manager/salary" className="px-3">
+              Salary 
             </Nav.Link>
             <Nav.Link as={Link} to="/financial-manager/reports" className="px-3">
               Reports
