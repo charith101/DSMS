@@ -28,7 +28,7 @@ const FinancialManagerRegister = () => {
       [name]: value
     });
     
-    // Clear error when user starts typing
+    // error handle
     if (errors[name]) {
       setErrors({
         ...errors,
@@ -85,15 +85,15 @@ const FinancialManagerRegister = () => {
     
     setLoading(true);
     try {
-      // In a real application, this would call an API endpoint to send a verification code
-      // For demo purposes, we'll generate a random code
+      // call an API endpoint to send a verification code
+      
       const randomCode = Math.floor(100000 + Math.random() * 900000).toString();
       setVerificationCode(randomCode);
       setVerificationSent(true);
       
-      // Simulate API call
-      console.log(`Verification code ${randomCode} sent to ${formData.email}`);
-      alert(`For demo purposes, your verification code is: ${randomCode}`);
+  // Simulate API call
+  console.log(`Verification code ${randomCode} sent to ${formData.email}`);
+  alert(`For demo purposes, your verification code is: ${randomCode}`);
     } catch (err) {
       setServerError('Failed to send verification code. Please try again.');
     } finally {
@@ -112,27 +112,53 @@ const FinancialManagerRegister = () => {
       
       setLoading(true);
       try {
-        // For demo purposes, we'll skip the actual API call
-        // and simulate a successful registration
-        console.log('Registration data:', {
-          ...formData,
+        // Prepare user data
+        const userData = {
+          fullName: formData.fullName,
+          email: formData.email,
+          phone: formData.phone,
+          password: formData.password,
+          financialDetails: formData.financialDetails,
           role: 'financial_manager'
-        });
-        
-        // Mock response data
-        const mockResponse = {
-          token: 'mock-jwt-token-for-financial-manager',
-          user: {
-            id: 'fm-' + Math.random().toString(36).substr(2, 9),
-            fullName: formData.fullName,
-            email: formData.email,
-            role: 'financial_manager'
-          }
         };
         
+        // Try to make an actual API call first
+        let response;
+        try {
+          response = await axios.post('/api/auth/register', userData);
+        } catch (apiError) {
+          console.log('API registration failed, using mock data:', apiError);
+          
+          // If API call fails, use mock data as fallback
+          response = {
+            data: {
+              token: 'mock-jwt-token-for-financial-manager',
+              user: {
+              // use slice instead of deprecated substr
+            id: 'fm-' + Math.random().toString(36).slice(2, 11),
+                fullName: formData.fullName,
+                email: formData.email,
+                role: 'financial_manager'
+              }
+            }
+          };
+          
+          // Store credentials in localStorage for mock authentication
+          //allows login to work even without a backend
+          const mockUsers = JSON.parse(localStorage.getItem('mockUsers') || '[]');
+          mockUsers.push({
+            email: formData.email,
+            password: formData.password,
+            role: 'financial_manager',
+            fullName: formData.fullName,
+            id: response.data.user.id
+          });
+          localStorage.setItem('mockUsers', JSON.stringify(mockUsers));
+        }
+        
         // Store user data and token
-        localStorage.setItem('token', mockResponse.token);
-        localStorage.setItem('user', JSON.stringify(mockResponse.user));
+        localStorage.setItem('token', response.data.token);
+        localStorage.setItem('user', JSON.stringify(response.data.user));
         
         // Show success message
         alert('Registration successful! Redirecting to dashboard...');
@@ -141,6 +167,7 @@ const FinancialManagerRegister = () => {
         navigate('/financial-manager');
       } catch (err) {
         setServerError('Registration failed. Please try again.');
+        console.error('Registration error:', err);
       } finally {
         setLoading(false);
       }

@@ -2,14 +2,29 @@ const mongoose = require('mongoose');
 
 const PaymentSchema = new mongoose.Schema({
   studentId: {
-    type: mongoose.Schema.Types.ObjectId,
+    type: mongoose.Schema.Types.Mixed,
     ref: 'User',
-    required: true
+    required: false
   },
   amount: {
     type: Number,
     required: true,
     min: 0
+  },
+  currency: {
+    type: String,
+    required: true,
+    default: 'USD'
+  },
+  originalCurrency: {
+    type: String,
+    required: false,
+    default: 'LKR'
+  },
+  sessionId: {
+    type: String,
+    required: false,
+    index: true
   },
   paymentDate: {
     type: Date,

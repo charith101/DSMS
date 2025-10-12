@@ -129,8 +129,8 @@ router.post('/transactions', async (req, res) => {
   }
 });
 
-// @route   PUT api/finance/transactions/:id
-// @desc    Update a transaction
+//    PUT api/finance/transactions/:id
+//    Update a transaction
 router.put('/transactions/:id', async (req, res) => {
   try {
     let transaction = await Transaction.findById(req.params.id);
@@ -151,8 +151,8 @@ router.put('/transactions/:id', async (req, res) => {
   }
 });
 
-// @route   DELETE api/finance/transactions/:id
-// @desc    Delete a transaction
+//  DELETE api/finance/transactions/:id
+//  Delete a transaction
 router.delete('/transactions/:id', async (req, res) => {
   try {
     const transaction = await Transaction.findById(req.params.id);

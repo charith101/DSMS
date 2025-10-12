@@ -59,7 +59,7 @@ import * as XLSX from 'xlsx';
 // API Configuration
 // ======================================================================================
 const API_BASE_URL = 'http://localhost:3005';
-// ======================================================================================
+
 
 
 const FinancialReports = () => {
@@ -401,7 +401,7 @@ const FinancialReports = () => {
     });
 
     // Data is already filtered by date range in processMultipleApiData
-    // Now we just need to group it by the selected time frame
+    // group by the selected time frame
 
     if (timeFrame === 'monthly') {
       // Group by month

@@ -41,7 +41,7 @@ const SalaryManagement = () => {
     try {
       setLoading(true);
       const response = await axios.get('http://localhost:3005/api/finance/payroll');
-      console.log('Payroll response:', response.data); // Debug log
+      console.log('Payroll response:', response.data); 
       setSalaryPayments(Array.isArray(response.data.data) ? response.data.data : []);
       setLoading(false);
     } catch (error) {
@@ -54,7 +54,7 @@ const SalaryManagement = () => {
   const fetchEmployees = async () => {
     try {
       const response = await axios.get('http://localhost:3005/api/finance/employees');
-      console.log('Employees response:', response.data); // Debug log
+      console.log('Employees response:', response.data); 
       setEmployees(Array.isArray(response.data.data) ? response.data.data : []);
     } catch (error) {
       console.error('Error fetching employees:', error);

@@ -167,7 +167,7 @@ router.get('/recent-transactions', async (req, res) => {
       .populate('employeeId', 'name')
       .lean();
     
-    // Format transactions (already in correct format)
+    // Format transactions 
     const formattedTransactions = recentTransactions.map(transaction => ({
       _id: transaction._id,
       date: transaction.date,

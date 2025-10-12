@@ -1,8 +1,8 @@
 const Transaction = require('../../model/Transaction');
 
-// @desc    Get all transactions with filtering
-// @route   GET /api/finance/transactions
-// @access  Private
+// Get all transactions with filtering
+// GET /api/finance/transactions
+
 exports.getTransactions = async (req, res) => {
   try {
     const { startDate, endDate, type, category, sort, page = 1, limit = 10, search } = req.query;
@@ -69,9 +69,9 @@ exports.getTransactions = async (req, res) => {
   }
 };
 
-// @desc    Get single transaction
-// @route   GET /api/finance/transactions/:id
-// @access  Private
+//   Get single transaction
+//   GET /api/finance/transactions/:id
+//   Private
 exports.getTransaction = async (req, res) => {
   try {
     // Validate transaction ID
@@ -106,9 +106,9 @@ exports.getTransaction = async (req, res) => {
   }
 };
 
-// @desc    Create new transaction
-// @route   POST /api/finance/transactions
-// @access  Private
+//   Create new transaction
+//   POST /api/finance/transactions
+//   Private
 exports.createTransaction = async (req, res) => {
   try {
     // Validate required fields
@@ -162,9 +162,9 @@ exports.createTransaction = async (req, res) => {
   }
 };
 
-// @desc    Update transaction
-// @route   PUT /api/finance/transactions/:id
-// @access  Private
+//   Update transaction
+//   PUT /api/finance/transactions/:id
+//   Private
 exports.updateTransaction = async (req, res) => {
   try {
     // Validate transaction ID
@@ -241,9 +241,9 @@ exports.updateTransaction = async (req, res) => {
   }
 };
 
-// @desc    Delete transaction
-// @route   DELETE /api/finance/transactions/:id
-// @access  Private
+//   Delete transaction
+//   DELETE /api/finance/transactions/:id
+//   Private
 exports.deleteTransaction = async (req, res) => {
   try {
     // Validate transaction ID

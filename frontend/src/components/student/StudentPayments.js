@@ -4,6 +4,10 @@ import axios from 'axios';
 import { FaPlus, FaCreditCard, FaMoneyBillWave, FaUniversity, FaEye, FaCalendarAlt } from 'react-icons/fa';
 import StudentNav from './StudentNav';
 
+const API_BASE = process.env.REACT_APP_API_BASE || 'http://localhost:3005';
+// Minimum allowed amount on client-side (in entered currency)
+const MIN_AMOUNT = 0.01;
+
 function StudentPayments() {
   const [payments, setPayments] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -14,6 +18,7 @@ function StudentPayments() {
   const [paymentData, setPaymentData] = useState({
     amount: '',
     paymentMethod: 'Cash',
+    currency: 'LKR',
     description: '',
     status: 'Paid'
   });
@@ -26,6 +31,9 @@ function StudentPayments() {
 
   const statusOptions = ['Paid', 'Pending', 'Failed'];
 
+  // Local state to show amount to be charged in USD before redirecting
+  const [chargePreview, setChargePreview] = useState(null);
+
   useEffect(() => {
     // Check authentication and get student data
     const userId = localStorage.getItem('userId');
@@ -36,11 +44,11 @@ function StudentPayments() {
     
     const fetchStudentData = async () => {
       try {
-        // First fetch the student data for authentication
-        await axios.get(`http://localhost:3001/student/getUser/${userId}`);
-        
-        // Then fetch the payments
-        const paymentsResponse = await axios.get(`http://localhost:3001/student/getPayments/${userId}`);
+  // First fetch the student data for authentication
+  await axios.get(`${API_BASE}/student/getUser/${userId}`);
+
+  // Then fetch the payments
+  const paymentsResponse = await axios.get(`${API_BASE}/student/getPayments/${userId}`);
         setPayments(Array.isArray(paymentsResponse.data) ? paymentsResponse.data : []);
         setLoading(false);
       } catch (error) {
@@ -59,7 +67,7 @@ function StudentPayments() {
     if (userId) {
       try {
         setLoading(true);
-        const response = await axios.get(`http://localhost:3001/student/getPayments/${userId}`);
+  const response = await axios.get(`${API_BASE}/student/getPayments/${userId}`);
         setPayments(Array.isArray(response.data) ? response.data : []);
         setLoading(false);
       } catch (error) {
@@ -98,7 +106,7 @@ function StudentPayments() {
         paymentDate: new Date()
       };
 
-      const response = await axios.post('http://localhost:3001/student/addPayment', paymentPayload);
+  const response = await axios.post(`${API_BASE}/student/addPayment`, paymentPayload);
       
       if (response.status === 201 || response.status === 200) {
         showAlertMessage('Payment added successfully!', 'success');
@@ -117,6 +125,7 @@ function StudentPayments() {
     setPaymentData({
       amount: '',
       paymentMethod: 'Cash',
+      currency: 'LKR',
       description: '',
       status: 'Paid'
     });
@@ -294,7 +303,7 @@ function StudentPayments() {
                 <Form.Group className="mb-3">
                   <Form.Label className="fw-bold">
                     <FaMoneyBillWave className="me-2 text-success" />
-                    Amount (LKR) *
+                    Amount ({paymentData.currency || 'LKR'}) *
                   </Form.Label>
                   <Form.Control
                     type="number"
@@ -307,6 +316,7 @@ function StudentPayments() {
                     required
                     size="lg"
                   />
+                  <div className="form-text">Enter the amount in the selected currency.</div>
                 </Form.Group>
               </Col>
               <Col md={6}>
@@ -326,6 +336,25 @@ function StudentPayments() {
                     ))}
                   </Form.Select>
                 </Form.Group>
+              </Col>
+            </Row>
+            <Row className="mb-3">
+              <Col md={6}>
+                <Form.Group>
+                  <Form.Label className="fw-bold">Currency</Form.Label>
+                  <Form.Select name="currency" value={paymentData.currency} onChange={handleInputChange} size="lg">
+                    <option value="LKR">LKR</option>
+                    <option value="USD">USD</option>
+                  </Form.Select>
+                </Form.Group>
+              </Col>
+              <Col md={6} className="d-flex align-items-end">
+                {chargePreview && (
+                  <div className="text-end w-100">
+                    <small className="text-muted">Will be charged:</small>
+                    <div className="fw-bold">{chargePreview.currency} {Number(chargePreview.amountCharged).toFixed(2)}</div>
+                  </div>
+                )}
               </Col>
             </Row>
             
@@ -359,12 +388,56 @@ function StudentPayments() {
             {/* Card Payment Button */}
             {paymentData.paymentMethod === 'Card' && (
               <div className="my-3">
-                <Button variant="primary" size="lg" onClick={() => {
-                  setShowModal(false);
-                  window.location.href = '/Student/Payments/Card';
-                }}>
+                <Button
+                  variant="primary"
+                  size="lg"
+                  onClick={async() => {
+                    try {
+                      const userId = localStorage.getItem('userId');
+                      if (!userId) {
+                        showAlertMessage('Student information not found. Please login again.', 'danger');
+                        return;
+                      }
+
+                      setShowModal(false);
+
+                      // Call backend to create Stripe Checkout session
+                      const payload = {
+                        studentName: localStorage.getItem('studentName') || 'Student',
+                        studentId: userId,
+                        amount: parseFloat(paymentData.amount) || 200,
+                        currency: paymentData.currency || 'LKR'
+                      };
+
+                      // Basic client-side validation
+                      const rawAmt = Number(payload.amount || 0);
+                      if (isNaN(rawAmt) || rawAmt <= 0) {
+                        showAlertMessage('Please enter a valid amount greater than 0.', 'danger');
+                        return;
+                      }
+
+                      const sessionResponse = await axios.post(`${API_BASE}/api/create-checkout-session`, payload);
+
+                      // show preview of charged amount for confirmation before redirect
+                      if (sessionResponse.data && sessionResponse.data.amountCharged) {
+                        setChargePreview({ amountCharged: sessionResponse.data.amountCharged, currency: sessionResponse.data.currency || 'USD' });
+                      }
+
+                      // Redirect to Stripe Checkout
+                      window.location.href = sessionResponse.data.url;
+                    } catch (error) {
+                      console.error('Stripe Checkout error:', error);
+                      const serverMessage = error.response?.data?.message || error.response?.data?.error;
+                      if (serverMessage) {
+                        showAlertMessage(serverMessage, 'danger');
+                      } else {
+                        showAlertMessage('Unable to process card payment. Please try again.', 'danger');
+                      }
+                    }
+                  }}
+                >
                   <FaCreditCard className="me-2" />
-                  Pay with Card (Visa/MasterCard)
+                  Pay with Card
                 </Button>
               </div>
             )}
@@ -373,7 +446,7 @@ function StudentPayments() {
               <h6 className="text-muted mb-2">Payment Summary:</h6>
               <div className="d-flex justify-content-between">
                 <span>Amount:</span>
-                <strong>LKR {paymentData.amount ? parseFloat(paymentData.amount).toLocaleString() : '0'}</strong>
+                <strong>{paymentData.currency || 'LKR'} {paymentData.amount ? parseFloat(paymentData.amount).toLocaleString() : '0'}</strong>
               </div>
               <div className="d-flex justify-content-between">
                 <span>Method:</span>

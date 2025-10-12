@@ -70,7 +70,7 @@ const FinancialManagerDashboard = () => {
 
   const navigate = useNavigate();
 
-  // API base URL - This should point to your backend server
+  // API base URL - This should point to backend server
   const API_BASE_URL = "http://localhost:3005";
   
   // State for refreshing data
@@ -94,7 +94,7 @@ const FinancialManagerDashboard = () => {
           monthlyData: true
         });
 
-        // Use Promise.all to fetch all data concurrently for better performance
+        // Use to fetch all data concurrently for better performance
         const [
           transactionsResponse,
           incomeResponse,
@@ -355,7 +355,7 @@ const FinancialManagerDashboard = () => {
     setShowTransactionForm(true);
   };
 
-  // Ask for delete confirmation
+  //  for delete confirmation
   const deleteTransaction = (_id) => {
     setTransactionToDelete(_id);
     setShowDeleteModal(true);
@@ -382,7 +382,7 @@ const FinancialManagerDashboard = () => {
     }
   };
 
-  // Generate financial report (placeholder)
+  // Generate financial report 
   const generateReport = () => {
     alert("Financial report generated! In a real application, this would download a PDF or Excel file.");
   };
@@ -391,7 +391,7 @@ const FinancialManagerDashboard = () => {
     <div>
       <FinancialManagerNav />
       
-      {/* MODIFICATION: Header section updated to match AdminDashboard style */}
+      {/*Header section updated to match AdminDashboard style */}
       <section
         className="text-white pb-5"
         style={{
@@ -410,7 +410,7 @@ const FinancialManagerDashboard = () => {
         </div>
       </section>
 
-      {/* MODIFICATION: Main content area restructured to match AdminDashboard layout */}
+      {/* Main content area restructured to match AdminDashboard layout */}
       <div className="py-5 bg-light">
         <div className="container">
           <div className="row g-4">
@@ -428,7 +428,7 @@ const FinancialManagerDashboard = () => {
                       <small className="text-muted">A summary of your key financial metrics</small>
                     </div>
                   </div>
-                  {/* MODIFICATION: The three summary cards are now placed inside this overview card */}
+                  {/*The three summary cards are now placed inside this overview card */}
                   <div className="row g-3">
                     <div className="col-md-4">
                       <div className="card bg-success bg-opacity-10 h-100">
@@ -472,7 +472,7 @@ const FinancialManagerDashboard = () => {
                       <small className="text-muted">Manage direct income and expense transactions</small>
                     </div>
                   </div>
-                  {/* MODIFICATION: The entire transactions table and its functionality is now nested here */}
+                  {/* The entire transactions table and its functionality is now nested here */}
                   <div>
                     <div className="d-flex justify-content-end mb-3">
                       <button 

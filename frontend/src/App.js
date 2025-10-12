@@ -14,7 +14,9 @@ import TimeSlot from './components/student/TimeSlot';
 import MockExam from './components/student/MockExam';
 import StudentProfile from './components/student/StudentProfile';
 import StudentPayments from './components/student/StudentPayments';
-import StudentCardPayment from './components/student/StudentCardPayment';
+import PaymentSuccess from './components/student/PaymentSuccess';
+import PaymentCancel from './components/student/PaymentCancel';
+
 
 // Other dashboards
 import LandingPage from './components/landingPage';
@@ -90,7 +92,9 @@ function App() {
           <Route path='/Student/Mock-Exam' element={<MockExam />} />
           <Route path='/Student/Profile' element={<StudentProfile />} />
           <Route path='/Student/Payments' element={<StudentPayments />} />
-          <Route path='/Student/Payments/Card' element={<StudentCardPayment />} />
+          <Route path='/payments/success' element={<PaymentSuccess />} />
+          <Route path='/payments/cancel' element={<PaymentCancel />} />
+          
 
           {/* Instructor management routes */}
           <Route path='/instructor-schedule' element={<InstructorSchedule />} />
