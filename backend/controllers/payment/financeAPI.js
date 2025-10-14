@@ -5,6 +5,7 @@ const Payroll = require('../../models/Payroll');
 const Transaction = require('../../model/Transaction'); // Add Transaction model
 const mongoose = require('mongoose');
 
+
 // Get financial summary (total income, expenses, profit)
 router.get('/summary', async (req, res) => {
   try {
@@ -142,6 +143,8 @@ router.get('/monthly-data', async (req, res) => {
   }
 });
 
+//----------------------------------------------------------------------------------------------
+
 // Get recent transactions (from transactions collection, payments, and payroll)
 router.get('/recent-transactions', async (req, res) => {
   try {
@@ -241,6 +244,28 @@ router.get('/payments', async (req, res) => {
   }
 });
 
+// Delete a payment by id
+router.delete('/payments/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ success: false, error: 'Invalid payment ID' });
+    }
+
+    const deletedPayment = await Payment.findByIdAndDelete(id);
+
+    if (!deletedPayment) {
+      return res.status(404).json({ success: false, error: 'Payment not found' });
+    }
+
+    res.json({ success: true, message: 'Payment deleted successfully', data: deletedPayment });
+  } catch (error) {
+    console.error('Error deleting payment:', error);
+    res.status(500).json({ success: false, error: 'Failed to delete payment' });
+  }
+});
+
 // Get all payroll entries with pagination
 router.get('/payroll', async (req, res) => {
   try {
@@ -275,27 +300,27 @@ router.get('/payroll', async (req, res) => {
 // TRANSACTION CRUD OPERATIONS
 // ========================================
 
-// Create new transaction
-router.post('/transactions', async (req, res) => {
+// Create new transaction handler (exported so transactionController can delegate)
+async function createTransactionHandler(req, res) {
   try {
     const { date, description, amount, type, category } = req.body;
-    
+
     // Validate required fields
     if (!date || !description || !amount || !type || !category) {
-      return res.status(400).json({ 
+      return res.status(400).json({
         success: false,
-        error: 'All fields are required: date, description, amount, type, category' 
+        error: 'All fields are required: date, description, amount, type, category'
       });
     }
-    
+
     // Validate amount is positive
     if (isNaN(amount) || parseFloat(amount) <= 0) {
-      return res.status(400).json({ 
+      return res.status(400).json({
         success: false,
-        error: 'Amount must be a positive number' 
+        error: 'Amount must be a positive number'
       });
     }
-    
+
     // Create new transaction
     const transaction = new Transaction({
       date: new Date(date),
@@ -304,9 +329,9 @@ router.post('/transactions', async (req, res) => {
       type,
       category
     });
-    
+
     const savedTransaction = await transaction.save();
-    
+
     res.status(201).json({
       success: true,
       message: 'Transaction created successfully',
@@ -314,43 +339,45 @@ router.post('/transactions', async (req, res) => {
     });
   } catch (error) {
     console.error('Error creating transaction:', error);
-    res.status(500).json({ 
+    res.status(500).json({
       success: false,
-      error: 'Failed to create transaction' 
+      error: 'Failed to create transaction'
     });
   }
-});
+}
 
-// Update existing transaction
-router.put('/transactions/:id', async (req, res) => {
+router.post('/transactions', createTransactionHandler);
+
+// Update existing transaction handler (exported)
+async function updateTransactionHandler(req, res) {
   try {
     const { id } = req.params;
     const { date, description, amount, type, category } = req.body;
-    
+
     // Validate MongoDB ObjectId
     if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).json({ 
+      return res.status(400).json({
         success: false,
-        error: 'Invalid transaction ID' 
+        error: 'Invalid transaction ID'
       });
     }
-    
+
     // Validate required fields
     if (!date || !description || !amount || !type || !category) {
-      return res.status(400).json({ 
+      return res.status(400).json({
         success: false,
-        error: 'All fields are required: date, description, amount, type, category' 
+        error: 'All fields are required: date, description, amount, type, category'
       });
     }
-    
+
     // Validate amount is positive
     if (isNaN(amount) || parseFloat(amount) <= 0) {
-      return res.status(400).json({ 
+      return res.status(400).json({
         success: false,
-        error: 'Amount must be a positive number' 
+        error: 'Amount must be a positive number'
       });
     }
-    
+
     const updatedTransaction = await Transaction.findByIdAndUpdate(
       id,
       {
@@ -362,14 +389,14 @@ router.put('/transactions/:id', async (req, res) => {
       },
       { new: true, runValidators: true }
     );
-    
+
     if (!updatedTransaction) {
-      return res.status(404).json({ 
+      return res.status(404).json({
         success: false,
-        error: 'Transaction not found' 
+        error: 'Transaction not found'
       });
     }
-    
+
     res.json({
       success: true,
       message: 'Transaction updated successfully',
@@ -377,35 +404,37 @@ router.put('/transactions/:id', async (req, res) => {
     });
   } catch (error) {
     console.error('Error updating transaction:', error);
-    res.status(500).json({ 
+    res.status(500).json({
       success: false,
-      error: 'Failed to update transaction' 
+      error: 'Failed to update transaction'
     });
   }
-});
+}
 
-// Delete transaction
-router.delete('/transactions/:id', async (req, res) => {
+router.put('/transactions/:id', updateTransactionHandler);
+
+// Delete transaction handler (exported)
+async function deleteTransactionHandler(req, res) {
   try {
     const { id } = req.params;
-    
+
     // Validate MongoDB ObjectId
     if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).json({ 
+      return res.status(400).json({
         success: false,
-        error: 'Invalid transaction ID' 
+        error: 'Invalid transaction ID'
       });
     }
-    
+
     const deletedTransaction = await Transaction.findByIdAndDelete(id);
-    
+
     if (!deletedTransaction) {
-      return res.status(404).json({ 
+      return res.status(404).json({
         success: false,
-        error: 'Transaction not found' 
+        error: 'Transaction not found'
       });
     }
-    
+
     res.json({
       success: true,
       message: 'Transaction deleted successfully',
@@ -413,12 +442,14 @@ router.delete('/transactions/:id', async (req, res) => {
     });
   } catch (error) {
     console.error('Error deleting transaction:', error);
-    res.status(500).json({ 
+    res.status(500).json({
       success: false,
-      error: 'Failed to delete transaction' 
+      error: 'Failed to delete transaction'
     });
   }
-});
+}
+
+router.delete('/transactions/:id', deleteTransactionHandler);
 
 // ========================================
 // PAYROLL CRUD OPERATIONS
@@ -567,3 +598,8 @@ router.get('/employees', async (req, res) => {
 });
 
 module.exports = router;
+
+// Export handlers so other modules (transactionController) may delegate to these
+module.exports.createTransaction = createTransactionHandler;
+module.exports.updateTransaction = updateTransactionHandler;
+module.exports.deleteTransaction = deleteTransactionHandler;

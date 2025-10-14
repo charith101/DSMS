@@ -85,8 +85,10 @@ const FinancialManagerRegister = () => {
     
     setLoading(true);
     try {
-      // call an API endpoint to send a verification code
+
       
+      // call an API endpoint to send a verification code
+      //generate an OTP code and display it in an alert for demo purposes
       const randomCode = Math.floor(100000 + Math.random() * 900000).toString();
       setVerificationCode(randomCode);
       setVerificationSent(true);

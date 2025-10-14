@@ -37,6 +37,9 @@ const SalaryManagement = () => {
     fetchEmployees();
   }, []);
 
+  //--------------------------------------------------------------------------------
+  // fetch data from payroll table in database to financial salary management page
+  //--------------------------------------------------------------------------------
   const fetchSalaryPayments = async () => {
     try {
       setLoading(true);
@@ -98,6 +101,7 @@ const SalaryManagement = () => {
     };
 
     // Calculate salary automatically when hours or rate changes
+
     if (name === 'totalHours' || name === 'hourlyRate') {
       const hours = name === 'totalHours' ? parseFloat(value) || 0 : parseFloat(currentPayment.totalHours) || 0;
       const rate = name === 'hourlyRate' ? parseFloat(value) || 0 : parseFloat(currentPayment.hourlyRate) || 0;
@@ -107,6 +111,7 @@ const SalaryManagement = () => {
     setCurrentPayment(updatedPayment);
   };
 
+  // update the submit data in the payroll table in the database
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -132,6 +137,7 @@ const SalaryManagement = () => {
     }
   };
 
+  // delete the selected record data in the payroll table in the database
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this salary payment?')) {
       try {
@@ -144,6 +150,7 @@ const SalaryManagement = () => {
     }
   };
 
+  // Filter and search functionality
   const filteredPayments = salaryPayments.filter(payment => {
     const employeeName = payment.employeeId?.name || '';
     const employeeRole = payment.employeeId?.role || '';

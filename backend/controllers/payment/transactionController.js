@@ -106,179 +106,18 @@ exports.getTransaction = async (req, res) => {
   }
 };
 
-//   Create new transaction
-//   POST /api/finance/transactions
-//   Private
-exports.createTransaction = async (req, res) => {
-  try {
-    // Validate required fields
-    const { amount, description, category, type } = req.body;
-    
-    if (!amount || !description || !category || !type) {
-      return res.status(400).json({
-        success: false,
-        error: 'Please provide all required fields: amount, description, category, and type'
-      });
-    }
-    
-    // Validate amount is a positive number
-    if (isNaN(amount) || parseFloat(amount) <= 0) {
-      return res.status(400).json({
-        success: false,
-        error: 'Amount must be a positive number'
-      });
-    }
-    
-    // Add user to request body
-    if (req.user && req.user.id) {
-      req.body.createdBy = req.user.id;
-      req.body.updatedBy = req.user.id;
-    }
-    
-    // Create transaction in database
-    const transaction = await Transaction.create(req.body);
-    
-    // Return success response with created transaction
-    res.status(201).json({
-      success: true,
-      message: 'Transaction created successfully',
-      data: transaction
-    });
-  } catch (err) {
-    if (err.name === 'ValidationError') {
-      const messages = Object.values(err.errors).map(val => val.message);
-      
-      return res.status(400).json({
-        success: false,
-        error: messages
-      });
-    } else {
-      console.error('Error creating transaction:', err);
-      res.status(500).json({
-        success: false,
-        error: 'Server Error - Failed to create transaction'
-      });
-    }
-  }
+// Delegate create/update/delete to financeAPI handlers to avoid duplication
+const financeAPI = require('./financeAPI');
+
+exports.createTransaction = (req, res, next) => {
+  // financeAPI.createTransaction expects (req, res)
+  return financeAPI.createTransaction(req, res, next);
 };
 
-//   Update transaction
-//   PUT /api/finance/transactions/:id
-//   Private
-exports.updateTransaction = async (req, res) => {
-  try {
-    // Validate transaction ID
-    if (!req.params.id.match(/^[0-9a-fA-F]{24}$/)) {
-      return res.status(400).json({
-        success: false,
-        error: 'Invalid transaction ID format'
-      });
-    }
-    
-    // Validate required fields
-    const { amount, description, category, type } = req.body;
-    
-    if (!amount || !description || !category || !type) {
-      return res.status(400).json({
-        success: false,
-        error: 'Please provide all required fields: amount, description, category, and type'
-      });
-    }
-    
-    // Validate amount is a positive number
-    if (isNaN(amount) || parseFloat(amount) <= 0) {
-      return res.status(400).json({
-        success: false,
-        error: 'Amount must be a positive number'
-      });
-    }
-    
-    // Check if transaction exists
-    let transaction = await Transaction.findById(req.params.id);
-    
-    if (!transaction) {
-      return res.status(404).json({
-        success: false,
-        error: 'Transaction not found'
-      });
-    }
-    
-    // Add updatedBy field
-    if (req.user && req.user.id) {
-      req.body.updatedBy = req.user.id;
-    }
-    
-    // Update updatedAt timestamp
-    req.body.updatedAt = Date.now();
-    
-    // Update transaction in database
-    transaction = await Transaction.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-      runValidators: true
-    }).populate('createdBy', 'name').populate('updatedBy', 'name');
-    
-    // Return success response with updated transaction
-    res.status(200).json({
-      success: true,
-      message: 'Transaction updated successfully',
-      data: transaction
-    });
-  } catch (err) {
-    if (err.name === 'ValidationError') {
-      const messages = Object.values(err.errors).map(val => val.message);
-      
-      return res.status(400).json({
-        success: false,
-        error: messages
-      });
-    } else {
-      console.error('Error updating transaction:', err);
-      res.status(500).json({
-        success: false,
-        error: 'Server Error - Failed to update transaction'
-      });
-    }
-  }
+exports.updateTransaction = (req, res, next) => {
+  return financeAPI.updateTransaction(req, res, next);
 };
 
-//   Delete transaction
-//   DELETE /api/finance/transactions/:id
-//   Private
-exports.deleteTransaction = async (req, res) => {
-  try {
-    // Validate transaction ID
-    if (!req.params.id.match(/^[0-9a-fA-F]{24}$/)) {
-      return res.status(400).json({
-        success: false,
-        error: 'Invalid transaction ID format'
-      });
-    }
-    
-    // Find transaction by ID
-    const transaction = await Transaction.findById(req.params.id);
-    
-    // Check if transaction exists
-    if (!transaction) {
-      return res.status(404).json({
-        success: false,
-        error: 'Transaction not found'
-      });
-    }
-    
-    // Delete transaction from database
-    await Transaction.findByIdAndDelete(req.params.id);
-    
-    // Return success response
-    res.status(200).json({
-      success: true,
-      message: 'Transaction deleted successfully',
-      data: {}
-    });
-  } catch (err) {
-    console.error('Error deleting transaction:', err);
-    res.status(500).json({
-      success: false,
-      error: 'Server Error - Failed to delete transaction'
-    });
-  }
+exports.deleteTransaction = (req, res, next) => {
+  return financeAPI.deleteTransaction(req, res, next);
 };

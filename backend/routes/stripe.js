@@ -15,6 +15,11 @@ router.use((req, res, next) => {
 const DEFAULT_CURRENCY = (process.env.STRIPE_CURRENCY || 'usd').toLowerCase();
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
 
+
+
+//-----------------------------------------------------------
+// Create a Stripe Checkout Session for one-time payments
+//--------------------------------------------------------------
 // Create Stripe Checkout Session
 router.post('/create-checkout-session', async (req, res) => {
   try {
@@ -44,6 +49,7 @@ router.post('/create-checkout-session', async (req, res) => {
       return res.status(400).json({ error: 'Amount too small. Enter a larger amount.' });
     }
 
+    
     // Format a friendly label showing the original amount and currency (so Checkout shows what the user entered)
     const originalLabel = `${originalCurrency} ${rawAmount.toFixed ? rawAmount.toFixed(2) : Number(rawAmount).toFixed(2)}`;
 

@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Row, Col, Card, Form, Button, Table, Modal } from 'react-bootstrap';
+import { Container, Row, Col, Card, Form, Button, Table, Modal, Spinner } from 'react-bootstrap';
 import axios from 'axios';
 import FinancialManagerNav from './FinancialManagerNav';
-import { FaPlus, FaEdit, FaSearch } from 'react-icons/fa';
+import { FaPlus, FaEdit, FaSearch, FaTrash } from 'react-icons/fa';
 
 const PaymentManagement = () => {
   const [payments, setPayments] = useState([]);
@@ -18,6 +18,7 @@ const PaymentManagement = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isEditing, setIsEditing] = useState(false);
   const [sortConfig, setSortConfig] = useState({ key: 'date', direction: 'descending' });
+  const [deletingId, setDeletingId] = useState(null);
 
   useEffect(() => {
     // Check authentication
@@ -29,6 +30,10 @@ const PaymentManagement = () => {
 
     fetchPayments();
   }, []);
+
+  //--------------------------------------------------------------------------------
+  // fetch data from payment table in database to financial payment management page
+  //--------------------------------------------------------------------------------
 
   const fetchPayments = async () => {
     try {
@@ -140,6 +145,25 @@ const PaymentManagement = () => {
     }
   };
 
+  const handleDelete = async (paymentId) => {
+    if (!paymentId) return;
+    const ok = window.confirm('Are you sure you want to permanently delete this payment?');
+    if (!ok) return;
+
+    try {
+  setDeletingId(paymentId);
+  // Use the same backend base URL used for fetching payments
+  await axios.delete(`http://localhost:3005/api/finance/payments/${paymentId}`);
+      // Refresh list after deletion
+      await fetchPayments();
+    } catch (error) {
+      console.error('Error deleting payment:', error);
+      // Optionally show an alert to the user here
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
   const filteredPayments = Array.isArray(payments) ? payments.filter(payment => {
     try {
       // Handle both string studentId and populated studentId object
@@ -235,8 +259,30 @@ const PaymentManagement = () => {
                               </span>
                             </td>
                             <td>
-                              <Button variant="primary" size="sm" onClick={() => handleModalShow(payment)}>
-                                <FaEdit /> Edit
+                              <Button
+                                variant="primary"
+                                size="sm"
+                                className="me-2 p-1 d-inline-flex align-items-center justify-content-center"
+                                onClick={() => handleModalShow(payment)}
+                                aria-label="Edit payment"
+                                style={{ fontSize: '0.9rem' }}
+                              >
+                                <FaEdit />
+                              </Button>
+                              <Button
+                                variant="danger"
+                                size="sm"
+                                onClick={() => handleDelete(payment._id)}
+                                disabled={deletingId === payment._id}
+                                aria-label="Delete payment"
+                                className="p-1 d-inline-flex align-items-center justify-content-center"
+                                style={{ fontSize: '0.9rem' }}
+                              >
+                                {deletingId === payment._id ? (
+                                  <Spinner animation="border" size="sm" />
+                                ) : (
+                                  <FaTrash />
+                                )}
                               </Button>
                             </td>
                           </tr>

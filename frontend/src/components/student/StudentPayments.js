@@ -106,6 +106,10 @@ function StudentPayments() {
         paymentDate: new Date()
       };
 
+//-----------------------------------      
+//add student payment to the database 
+//-----------------------------------
+
   const response = await axios.post(`${API_BASE}/student/addPayment`, paymentPayload);
       
       if (response.status === 201 || response.status === 200) {
@@ -385,7 +389,9 @@ function StudentPayments() {
               </Form.Select>
             </Form.Group>
 
-            {/* Card Payment Button */}
+            {/*==========================================*/}
+            {/*          Card Payment Button             */}
+            {/*==========================================*/}
             {paymentData.paymentMethod === 'Card' && (
               <div className="my-3">
                 <Button

@@ -18,6 +18,8 @@ const app = express();
 // Configure CORS to allow frontend origin
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
 app.use(cors({ origin: FRONTEND_URL, credentials: true }));
+
+
 // Mount Stripe webhook route BEFORE the JSON body parser so we can verify Stripe signature using the raw body
 const stripeRoutes = require('./routes/stripe');
 const { webhookHandler } = stripeRoutes;
@@ -56,6 +58,8 @@ const dbURI = process.env.MONGODB_URI || 'mongodb+srv://admin:xXZWFcwvTQjrqdJv@c
 mongoose.connect(dbURI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => {
     console.log('Connected to MongoDB');
+
+    
     // Warn if Stripe secret key is not configured (helps debug payment failures)
     if (!process.env.STRIPE_SECRET_KEY) {
       console.warn('WARNING: STRIPE_SECRET_KEY is not set. Card payments will fail until this is configured.');

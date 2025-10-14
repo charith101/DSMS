@@ -111,6 +111,7 @@ const FinancialManagerDashboard = () => {
         const transactionsData = transactionsResponse.data || [];
         
         // Calculate totals from ALL transactions (including payroll/payments)
+        //total income and expences
         const totalIncome = transactionsData
           .filter(transaction => transaction.type === 'income')
           .reduce((sum, transaction) => sum + (Number(transaction.amount) || 0), 0);
@@ -118,9 +119,10 @@ const FinancialManagerDashboard = () => {
         const totalExpenses = transactionsData
           .filter(transaction => transaction.type === 'expense')
           .reduce((sum, transaction) => sum + (Number(transaction.amount) || 0), 0);
-        
+        //netprofit
         const netProfit = totalIncome - totalExpenses;
         
+        //transaction filter
         console.log('Financial Overview Calculation (All Transactions):', {
           transactionsCount: transactionsData.length,
           incomeTransactions: transactionsData.filter(t => t.type === 'income').length,
@@ -140,7 +142,7 @@ const FinancialManagerDashboard = () => {
         
         setIncomeByCategory(incomeResponse.data);
         setExpensesByCategory(expensesResponse.data);
-        
+
         // Format monthly data
         const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
         const formattedMonthlyData = monthlyResponse.data.map(item => ({
@@ -221,6 +223,7 @@ const FinancialManagerDashboard = () => {
     }));
   };
 
+
   // State for form validation
   const [validationErrors, setValidationErrors] = useState({});
 
@@ -298,7 +301,10 @@ const FinancialManagerDashboard = () => {
     }, 5000);
   };
 
+
+  //------------------------------------------
   // Create new transaction
+  //------------------------------------------
   const createTransaction = async (e) => {
     e.preventDefault();
     if (!validateTransactionForm()) return;
@@ -321,7 +327,11 @@ const FinancialManagerDashboard = () => {
     }
   };
 
+
+  //------------------------------------------
   // Update existing transaction
+  //------------------------------------------
+
   const updateTransaction = async (e) => {
     e.preventDefault();
     if (!validateTransactionForm()) return;
@@ -344,7 +354,10 @@ const FinancialManagerDashboard = () => {
     }
   };
 
+  //------------------------------------------
   // Set up transaction for editing
+  //------------------------------------------
+
   const editTransaction = (transaction) => {
     setCurrentTransaction({
       ...transaction,
@@ -354,8 +367,12 @@ const FinancialManagerDashboard = () => {
     setIsEditing(true);
     setShowTransactionForm(true);
   };
+  
 
+  //------------------------------------------
   //  for delete confirmation
+  //------------------------------------------
+
   const deleteTransaction = (_id) => {
     setTransactionToDelete(_id);
     setShowDeleteModal(true);
@@ -383,9 +400,9 @@ const FinancialManagerDashboard = () => {
   };
 
   // Generate financial report 
-  const generateReport = () => {
-    alert("Financial report generated! In a real application, this would download a PDF or Excel file.");
-  };
+  // const generateReport = () => {
+  //   alert("Financial report generated! In a real application, this would download a PDF or Excel file.");
+  // };
 
   return (
     <div>
@@ -463,6 +480,8 @@ const FinancialManagerDashboard = () => {
             <div className="col-12">
               <div className="card border-2 shadow-sm p-3">
                 <div className="card-body p-4">
+                  {/* Make the card content scrollable so the card itself can have a scrollbar */}
+                  <div style={{ maxHeight: '800px', overflowY: 'auto', paddingRight: '8px' }}>
                   <div className="d-flex align-items-center mb-3">
                     <div className="bg-primary bg-opacity-25 rounded-circle p-3 me-3">
                       <DollarSign size={64} className="text-primary" />
@@ -481,13 +500,13 @@ const FinancialManagerDashboard = () => {
                       >
                         Add Transaction
                       </button>
-                      <button 
+                      {/* <button 
                         className="btn btn-outline-secondary"
                         onClick={generateReport}
                       >
                         <Download size={16} className="me-1" />
                         Export
-                      </button>
+                      </button> */}
                     </div>
                     <div className="row mb-3 g-2">
                       <div className="col-md-3">
@@ -512,8 +531,8 @@ const FinancialManagerDashboard = () => {
                     </div>
                     
                     {filteredTransactions.length > 0 ? (
-                      <div className="table-responsive">
-                        <table className="table table-hover">
+                      <div className="table-responsive" style={{ maxHeight: '1000px', overflowY: 'auto' }}>
+                        <table className="table table-hover" style={{ minWidth: '750px' }}>
                           <thead className="table-light">
                             <tr>
                               <th>Date</th>
@@ -549,6 +568,7 @@ const FinancialManagerDashboard = () => {
                       <div className="text-center py-4"><p className="text-muted mb-0">No transactions found.</p></div>
                     )}
                   </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -568,8 +588,8 @@ const FinancialManagerDashboard = () => {
                   </div>
                   
                   {paymentPayrollData.length > 0 ? (
-                    <div className="table-responsive">
-                      <table className="table table-hover">
+                    <div className="table-responsive" style={{ maxHeight: '300px', overflowY: 'auto' }}>
+                      <table className="table table-hover" style={{ minWidth: '700px' }}>
                         <thead className="table-light">
                           <tr>
                             <th>Date</th>
